@@ -5,19 +5,23 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "condicion_iva")
-public class CondicionIva extends AuditoriaApp {
+@Table(name = "tipo_moneda")
+public class TipoMoneda extends AuditoriaApp {
     @Column(nullable = false)
-    private int codigoAfip;
+    private String codigoAfip;
 
     @Column(nullable = false)
     private String denominacion;
 
-    protected CondicionIva() {
+    @Column(nullable = false)
+    private String simbolo;
+
+    protected TipoMoneda() {
     }
 
-    public CondicionIva(int codigoAfip, String denominacion) {
+    public TipoMoneda(String codigoAfip, String denominacion, String simbolo) {
         this.codigoAfip = codigoAfip;
         this.denominacion = denominacion;
+        this.simbolo = simbolo;
     }
 }

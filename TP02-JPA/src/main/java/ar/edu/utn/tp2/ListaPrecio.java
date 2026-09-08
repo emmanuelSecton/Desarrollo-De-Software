@@ -4,12 +4,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
-/**
- * ListaPrecio
- */
-
 @Entity
-@Table
+@Table(name = "lista_precio")
 public class ListaPrecio extends AuditoriaApp {
 
     @Column(nullable = false)
@@ -17,4 +13,12 @@ public class ListaPrecio extends AuditoriaApp {
 
     @Column(nullable = false)
     private String denominacion;
+
+    protected ListaPrecio() {
+    }
+
+    public ListaPrecio(String codigo, String denominacion) {
+        this.codigo = codigo;
+        this.denominacion = denominacion;
+    }
 }

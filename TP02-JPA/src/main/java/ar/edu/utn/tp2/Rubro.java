@@ -5,11 +5,19 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
 @Entity
-@Table
+@Table(name = "rubro")
 public class Rubro extends AuditoriaApp {
     @Column(nullable = false)
     private String denominacion;
 
     @Column(nullable = false)
     private Integer codigo;
+
+    protected Rubro() {
+    }
+
+    public Rubro(String denominacion, Integer codigo) {
+        this.denominacion = denominacion;
+        this.codigo = codigo;
+    }
 }

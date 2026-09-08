@@ -4,14 +4,16 @@ import java.util.Date;
 import jakarta.persistence.Column;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MappedSuperclass;
 
+@MappedSuperclass
 public abstract class AuditoriaApp extends EntityId {
-    @Column(nullable = false) // y formato de fecha
+    @Column(nullable = false)
     protected Date fechaAlta;
 
     protected Date fechaBaja;
 
-    @Column(nullable = false) // y formato de fecha
+    @Column(nullable = false)
     protected Date fechaModificacion;
 
     @ManyToOne

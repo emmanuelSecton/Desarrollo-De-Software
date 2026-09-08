@@ -2,9 +2,6 @@ package ar.edu.utn.tp2;
 
 import java.sql.Date;
 import java.util.List;
-
-import org.hibernate.annotations.ManyToAny;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -49,5 +46,26 @@ public class FacturaVenta extends AuditoriaApp {
 
     @OneToMany(mappedBy = "factura", cascade = CascadeType.ALL)
     private List<FacturaVentaDetalle> detalles;
+
+    protected FacturaVenta() {
+    }
+
+    public FacturaVenta(Date fechaEmision, PuntoVenta puntoVenta, double importeCobrado, double importeSaldo,
+            double importeTotal, String cae, Date caeFechaVencimiento, String resultadoAfip, String motivoRechazo,
+            String estado, Date fechaAnulacion, String observaciones, List<FacturaVentaDetalle> detalles) {
+        this.fechaEmision = fechaEmision;
+        this.puntoVenta = puntoVenta;
+        this.importeCobrado = importeCobrado;
+        this.importeSaldo = importeSaldo;
+        this.importeTotal = importeTotal;
+        this.cae = cae;
+        this.caeFechaVencimiento = caeFechaVencimiento;
+        this.resultadoAfip = resultadoAfip;
+        this.motivoRechazo = motivoRechazo;
+        this.estado = estado;
+        this.fechaAnulacion = fechaAnulacion;
+        this.observaciones = observaciones;
+        this.detalles = detalles;
+    }
 
 }

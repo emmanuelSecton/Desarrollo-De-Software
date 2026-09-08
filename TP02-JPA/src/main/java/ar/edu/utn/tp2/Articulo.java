@@ -6,7 +6,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table
+@Table(name = "articulo")
 public class Articulo extends AuditoriaApp {
 
     @ManyToOne
@@ -20,4 +20,14 @@ public class Articulo extends AuditoriaApp {
 
     @ManyToOne
     private Marca marca;
+
+    protected Articulo() {
+    }
+
+    public Articulo(Rubro rubro, String codigo, String denominacion, Marca marca) {
+        this.rubro = rubro;
+        this.codigo = codigo;
+        this.denominacion = denominacion;
+        this.marca = marca;
+    }
 }
