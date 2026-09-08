@@ -24,22 +24,32 @@ public class Main {
             Marca marca = new Marca("Marca 1", null);
             Articulo articulo = new Articulo(rubro, "ART001", "Articulo 1", marca);
             ListaPrecio listaPrecio = new ListaPrecio("LP001", "Lista de Precios 1");
+
             ListaPrecioArticulo listaPrecioArticulo = new ListaPrecioArticulo(listaPrecio, 100.0, articulo);
-            FacturaVenta facturaVenta = new FacturaVenta(Date.valueOf(LocalDate.now()), puntoVenta, 0.0, 0.0, 0.0,
+
+            FacturaVenta facturaVenta1 = new FacturaVenta(Date.valueOf(LocalDate.now()), puntoVenta, 0.0, 0.0, 0.0,
                     null, null, null, null, "PENDIENTE", null, null, null);
-            FacturaVentaDetalle facturaVentaDetalle = new FacturaVentaDetalle(facturaVenta, listaPrecioArticulo,
+
+            FacturaVentaDetalle ArticuloFacturado1 = new FacturaVentaDetalle(facturaVenta1, listaPrecioArticulo,
                     "Articulo 1", 2.0, 50.0, 0.0, 100.0, 21.0, 121.0);
+
+            facturaVenta1.setDetalles(java.util.Arrays.asList(ArticuloFacturado1));
 
             // ?? Pregunta: Estos persist son necesarios para que se generen los IDs y se
             // puedan usar en las relaciones????
             // Dónde se colocan? Luego de cada instancia de cada objeto? O al final, como
             // está ahora?
-            entityManager.persist(usuario);
-            entityManager.persist(puntoVenta);
-            entityManager.persist(cliente);
-            entityManager.persist(rubro);
-            entityManager.persist(marca);
-            entityManager.persist(articulo);
+            // entityManager.persist(usuario);
+            // entityManager.persist(puntoVenta);
+            // entityManager.persist(cliente);
+            // entityManager.persist(rubro);
+            // entityManager.persist(marca);
+            // entityManager.persist(articulo);
+            // entityManager.persist(listaPrecio);
+            // entityManager.persist(listaPrecioArticulo);
+            // entityManager.persist(ArticuloFacturado1);
+
+            entityManager.persist(facturaVenta1);
 
             entityManager.getTransaction().commit();
 
