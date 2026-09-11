@@ -4,23 +4,27 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
-@Entity
-@Table(name = "usuario")
-public class Usuario extends EntityId {
-    @Column(nullable = false) // en los 4 atributos
-    private String usuario;
+// TODO: Agregar @Entity y @Table 
+    @Entity 
+    @Table(name = "usuario")
+
+public class Usuario extends EntityId { 
+
+// TODO: Configurar @Column(nullable = false) en los 4 atributos 
 
     @Column(nullable = false)
-    private String clave;
+private String usuario; 
 
     @Column(nullable = false)
-    private String nombre;
+private String clave; 
 
     @Column(nullable = false)
-    private String apellido;
+private String nombre; 
 
-    protected Usuario() {
-    }
+    @Column(nullable = false)
+private String apellido; 
+
+//constructores --------------------------------------------------------------------
 
     public Usuario(String usuario, String clave, String nombre, String apellido) {
         this.usuario = usuario;
@@ -28,4 +32,41 @@ public class Usuario extends EntityId {
         this.nombre = nombre;
         this.apellido = apellido;
     }
-}
+
+    public Usuario() {
+    }
+
+    //getters y setters --------------------------------------------------------------
+
+    public String getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(String usuario) {
+        this.usuario = usuario;
+    }
+
+    public String getClave() {
+        return clave;
+    }
+
+    public void setClave(String clave) {
+        this.clave = clave;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getApellido() {
+        return apellido;
+    }
+
+    public void setApellido(String apellido) {
+        this.apellido = apellido;
+    }
+} 
