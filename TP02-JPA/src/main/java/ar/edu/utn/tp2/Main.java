@@ -21,7 +21,7 @@ public class Main {
             Contacto contacto = new Contacto("juanperez@email.com", "123456789", "987654321");
             Cliente cliente = new Cliente("20-12345678-9", "Cliente S.A.", contacto, domicilio);
 
-            
+            // SETTERS DE AUDITORÍA PARA EL CLIENTE -------------------------------------------------------
             cliente.setFechaAlta(new java.util.Date());
             cliente.setFechaModificacion(new java.util.Date());
             cliente.setUsuarioCarga(usuario);
@@ -58,7 +58,7 @@ public class Main {
             articulo.setFechaModificacion(new java.util.Date());
             articulo.setUsuarioCarga(usuario);
             articulo.setUsuarioModificac(usuario);
-
+                
             //  SETTERS DE AUDITORÍA PARA LISTA DE PRECIO -----------------------------------------------------
             listaPrecio.setFechaAlta(new java.util.Date());
             listaPrecio.setFechaModificacion(new java.util.Date());
@@ -71,8 +71,39 @@ public class Main {
             listaPrecioArticulo.setUsuarioCarga(usuario);
             listaPrecioArticulo.setUsuarioModificac(usuario);
 
-           FacturaVenta facturaVenta = new FacturaVenta(Date.valueOf(LocalDate.now()), puntoVenta, 0.0, 0.0, 0.0, null, null, null, null, "PENDIENTE", null, null, new java.util.ArrayList<>());
+            // SETTERS DE AUDITORÍA Y CREACIÓN PARA CONDICION IVA ----------------------------------
+            CondicionIva condicionIva = new CondicionIva(1, "Responsable Inscripto"); 
+            condicionIva.setFechaAlta(new java.util.Date());
+            condicionIva.setFechaModificacion(new java.util.Date());
+            condicionIva.setUsuarioCarga(usuario);
+            condicionIva.setUsuarioModificac(usuario);
 
+            // SETTERS DE AUDITORÍA Y CREACIÓN PARA TIPO MONEDA ------------------------------------
+            TipoMoneda tipoMoneda = new TipoMoneda("011", "Pesos Argentinos", "$"); 
+            tipoMoneda.setFechaAlta(new java.util.Date());
+            tipoMoneda.setFechaModificacion(new java.util.Date());
+            tipoMoneda.setUsuarioCarga(usuario);
+            tipoMoneda.setUsuarioModificac(usuario);
+
+          FacturaVenta facturaVenta = new FacturaVenta(
+                1L,                                        // numero
+                Date.valueOf(LocalDate.now()),                            // fechaEmision
+                cliente,                                                  // cliente 
+                condicionIva,                                             // condicionIva 
+                tipoMoneda,                                               // tipoMoneda 
+                puntoVenta,                                               // puntoVenta 
+                0.0,                       // importeCobrado
+                0.0,                           // importeSaldo
+                121.0,                         // importeTotal 
+                null,                                            // cae
+                null,            // caeFechaVencimiento
+                null,                        // resultadoAfip
+                null,                        // motivoRechazo
+                "PENDIENTE",                               // estado
+                null,                      // fechaAnulacion
+                null,                        // observaciones
+                new java.util.ArrayList<>()                               // detalles
+            );
                 // Seteamos las fechas requeridas con la fecha y hora actual --------------------------------------------------
             facturaVenta.setFechaAlta(new java.util.Date());
             facturaVenta.setFechaModificacion(new java.util.Date());
@@ -97,13 +128,49 @@ public class Main {
             entityManager.persist(articulo);
             entityManager.persist(listaPrecio);
             entityManager.persist(listaPrecioArticulo);
-
-// ACÁ ESTÁ LA MAGIA DEL TP:
-// Persistimos solo la factura. Gracias al CascadeType.ALL configurado en FacturaVenta,
-// Hibernate va a guardar automáticamente también el FacturaVentaDetalle.
+            entityManager.persist(condicionIva);
+            entityManager.persist(tipoMoneda);
             entityManager.persist(facturaVenta);
 
+        
+                GeneradorDatos.cargarDatos(entityManager, usuario, condicionIva, tipoMoneda);
+
             entityManager.getTransaction().commit();
+
+            // Consultas JPQL   ----------------------------------------------------------------------------------
+                //Nivel 1
+            //1  ConsultasJPQL.obtenerTodasLasFacturas(entityManager);
+            //2  ConsultasJPQL.proyeccionFacturas(entityManager);
+            //3  ConsultasJPQL.articulosPorRubro(entityManager, "Electrónica");
+            /*4  java.sql.Date inicio = java.sql.Date.valueOf(java.time.LocalDate.now().minusDays(15));
+                 java.sql.Date fin = java.sql.Date.valueOf(java.time.LocalDate.now());
+                 ConsultasJPQL.facturasPorRangoDeFechas(entityManager, inicio, fin); */
+        
+                 //Nivel 2
+            //5  ConsultasJPQL.facturasEmitidasConImporteMinimo(entityManager, "EMITIDA", 10000.0);
+            //6  ConsultasJPQL.buscarClientesPorTexto(entityManager, "mundo", "20-");
+            //7  ConsultasJPQL.estadosFacturasSinDuplicados(entityManager);
+            //8  ConsultasJPQL.estadisticasFacturasPorEstado(entityManager, "EMITIDA");
+            /*9  java.util.List<Integer> numeros = java.util.Arrays.asList(1, 2, 5);
+                 ConsultasJPQL.puntosDeVentaPorNumeros(entityManager, numeros);*/
+
+                 //Nivel 3
+            //10 ConsultasJPQL.facturasPorUsuarioCarga(entityManager, "usuario1");
+            //11 ConsultasJPQL.detallesPorPuntoDeVenta(entityManager, 2);
+            //12 ConsultasJPQL.articulosConSusMarcas(entityManager);
+            //13 ConsultasJPQL.facturasPorMarcaDeArticulo(entityManager, "Samsung");
+            //14 ConsultasJPQL.facturasMayorAlPromedio(entityManager);
+
+                //Nivel 4
+            //15 ConsultasJPQL.totalesPorPuntoDeVenta(entityManager);
+            //16 ConsultasJPQL.usuariosConMasDeCincoFacturas(entityManager);
+            //17 ConsultasJPQL.totalesVendidosPorMarca(entityManager);
+
+                //Nivel 5
+            //18 ConsultasJPQL.articulosConVentasRegistradas(entityManager);
+            //19 ConsultasJPQL.facturasMayorATodasLasDeEstado(entityManager, "ANULADA");
+            //20 ConsultasJPQL.actualizarEstadoFacturas(entityManager, "EMITIDA", "COBRADA");
+
 
         } catch (Exception e) {
             if (entityManager != null && entityManager.getTransaction().isActive()) {

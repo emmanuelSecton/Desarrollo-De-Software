@@ -70,10 +70,17 @@ public class FacturaVenta extends AuditoriaApp {
     protected FacturaVenta() {
     }
 
-    public FacturaVenta(Date fechaEmision, PuntoVenta puntoVenta, double importeCobrado, double importeSaldo,
+    
+
+    public FacturaVenta(Long numero, Date fechaEmision, Cliente cliente, CondicionIva condicionIva,
+            TipoMoneda tipoMoneda, PuntoVenta puntoVenta, double importeCobrado, double importeSaldo,
             double importeTotal, String cae, Date caeFechaVencimiento, String resultadoAfip, String motivoRechazo,
             String estado, Date fechaAnulacion, String observaciones, List<FacturaVentaDetalle> detalles) {
+        this.numero = numero;
         this.fechaEmision = fechaEmision;
+        this.cliente = cliente;
+        this.condicionIva = condicionIva;
+        this.tipoMoneda = tipoMoneda;
         this.puntoVenta = puntoVenta;
         this.importeCobrado = importeCobrado;
         this.importeSaldo = importeSaldo;
@@ -88,8 +95,35 @@ public class FacturaVenta extends AuditoriaApp {
         this.detalles = detalles;
     }
 
-    //getters y setters ---------------------------------------------------------------------------------
+    public FacturaVenta(Date fechaAlta, Date fechaBaja, Date fechaModificacion, Usuario usuarioCarga,
+            Usuario usuarioBaja, Usuario usuarioModificac, Long numero, Date fechaEmision, Cliente cliente,
+            CondicionIva condicionIva, TipoMoneda tipoMoneda, PuntoVenta puntoVenta, double importeCobrado,
+            double importeSaldo, double importeTotal, String cae, Date caeFechaVencimiento, String resultadoAfip,
+            String motivoRechazo, String estado, Date fechaAnulacion, String observaciones,
+            List<FacturaVentaDetalle> detalles) {
+        super(fechaAlta, fechaBaja, fechaModificacion, usuarioCarga, usuarioBaja, usuarioModificac);
+        this.numero = numero;
+        this.fechaEmision = fechaEmision;
+        this.cliente = cliente;
+        this.condicionIva = condicionIva;
+        this.tipoMoneda = tipoMoneda;
+        this.puntoVenta = puntoVenta;
+        this.importeCobrado = importeCobrado;
+        this.importeSaldo = importeSaldo;
+        this.importeTotal = importeTotal;
+        this.cae = cae;
+        this.caeFechaVencimiento = caeFechaVencimiento;
+        this.resultadoAfip = resultadoAfip;
+        this.motivoRechazo = motivoRechazo;
+        this.estado = estado;
+        this.fechaAnulacion = fechaAnulacion;
+        this.observaciones = observaciones;
+        this.detalles = detalles;
+    }
 
+
+
+    //getters y setters ---------------------------------------------------------------------------------
     public Long getNumero() {
         return numero;
     }
@@ -104,6 +138,30 @@ public class FacturaVenta extends AuditoriaApp {
 
     public void setFechaEmision(Date fechaEmision) {
         this.fechaEmision = fechaEmision;
+    }
+
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+
+    public CondicionIva getCondicionIva() {
+        return condicionIva;
+    }
+
+    public void setCondicionIva(CondicionIva condicionIva) {
+        this.condicionIva = condicionIva;
+    }
+
+    public TipoMoneda getTipoMoneda() {
+        return tipoMoneda;
+    }
+
+    public void setTipoMoneda(TipoMoneda tipoMoneda) {
+        this.tipoMoneda = tipoMoneda;
     }
 
     public PuntoVenta getPuntoVenta() {
@@ -201,6 +259,10 @@ public class FacturaVenta extends AuditoriaApp {
     public void setDetalles(List<FacturaVentaDetalle> detalles) {
         this.detalles = detalles;
     }
+
+    
+
+    
     
 
 
