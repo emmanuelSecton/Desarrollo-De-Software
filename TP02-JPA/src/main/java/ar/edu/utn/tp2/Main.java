@@ -168,8 +168,8 @@ public class Main {
 
                 //Nivel 5
             //18 ConsultasJPQL.articulosConVentasRegistradas(entityManager);
-            //19 ConsultasJPQL.facturasMayorATodasLasDeEstado(entityManager, "ANULADA");
-            //20 ConsultasJPQL.actualizarEstadoFacturas(entityManager, "EMITIDA", "COBRADA");
+            //19 ConsultasJPQL.articulosSinVentasRegistradas(entityManager);
+            //20 ConsultasJPQL.clasificarFacturasPorValor(entityManager);
 
 
         } catch (Exception e) {

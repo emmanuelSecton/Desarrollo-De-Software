@@ -42,7 +42,7 @@ public class ConsultasJPQL {
                                      .setParameter("nombreRubro", denominacionRubro)
                                      .getResultList();
         
-        System.out.println("\nConsulta 3. \nFiltrado por Igualdad: " + denominacionRubro.toUpperCase() + " ---");
+        System.out.println("\nConsulta 3. \nFiltrado por Igualdad: " + denominacionRubro.toUpperCase());
         
         if (articulos.isEmpty()) {
             System.out.println("No se encontraron artículos para este rubro.");
@@ -129,7 +129,7 @@ public class ConsultasJPQL {
             System.out.println("No hay estados registrados.");
         } else {
             for (String estado : estados) {
-                System.out.println("- " + estado);
+                System.out.println(estado);
             }
         }
     }
@@ -415,61 +415,60 @@ public class ConsultasJPQL {
     }
 
     //Consulta 19 --------------------
-    public static void facturasMayorATodasLasDeEstado(EntityManager em, String estadoReferencia) {
+    public static void articulosSinVentasRegistradas(EntityManager em) {
         
         String jpql = """
-                      SELECT f 
-                      FROM FacturaVenta f 
-                      WHERE f.importeTotal > ALL (
-                          SELECT f2.importeTotal 
-                          FROM FacturaVenta f2 
-                          WHERE f2.estado = :estadoRef
+                      SELECT a 
+                      FROM Articulo a 
+                      WHERE NOT EXISTS (
+                          SELECT d 
+                          FROM FacturaVentaDetalle d 
+                          WHERE d.listaPrecioArticulo.articulo = a
                       )
                       """;
         
-        List<FacturaVenta> facturas = em.createQuery(jpql, FacturaVenta.class)
-                                        .setParameter("estadoRef", estadoReferencia)
-                                        .getResultList();
+        List<Articulo> articulos = em.createQuery(jpql, Articulo.class).getResultList();
         
-        System.out.println("\nConsulta 19. \nSubconsulta con Operador ALL:  '" + estadoReferencia);
+        System.out.println("\nConsulta 19.\n Subconsulta Correlacionada con NOT EXISTS:");
         
-        if (facturas.isEmpty()) {
-            System.out.println("No se encontraron facturas que cumplan la condición.");
+        if (articulos.isEmpty()) {
+            System.out.println("Todos los artículos han sido incluidos en al menos una factura.");
         } else {
-            for (FacturaVenta f : facturas) {
-                System.out.println("Factura Nro: " + f.getNumero() + " | Estado: " + f.getEstado() + " | Total: $" + f.getImporteTotal());
+            for (Articulo a : articulos) {
+                System.out.println("Código: " + a.getCodigo() + " | Artículo: " + a.getDenominacion());
             }
         }
     }
 
-    //Consulta 20
-    public static void actualizarEstadoFacturas(EntityManager em, String estadoActual, String nuevoEstado) {
+    //Consulta 20 --------------------------
+    public static void clasificarFacturasPorValor(EntityManager em) {
         
         String jpql = """
-                      UPDATE FacturaVenta f 
-                      SET f.estado = :nuevo 
-                      WHERE f.estado = :actual
+                      SELECT f.numero, f.importeTotal, 
+                             CASE 
+                                 WHEN f.importeTotal > 50000 THEN 'ALTO VALOR' 
+                                 WHEN f.importeTotal BETWEEN 10000 AND 50000 THEN 'MEDIO VALOR' 
+                                 WHEN f.importeTotal < 10000 THEN 'BAJO VALOR' 
+                             END 
+                      FROM FacturaVenta f 
+                      ORDER BY f.importeTotal DESC
                       """;
         
-        em.getTransaction().begin();
+        List<Object[]> resultados = em.createQuery(jpql, Object[].class).getResultList();
         
-        int filasModificadas = em.createQuery(jpql)
-                                 .setParameter("nuevo", nuevoEstado)
-                                 .setParameter("actual", estadoActual)
-                                 .executeUpdate();
-                                 
-        em.getTransaction().commit(); 
+        System.out.println("\nConsulta 20.\nProyección Condicional (CASE WHEN):");
         
-        System.out.println("\nConsulta 20. \nActualización Masiva de Registros (UPDATE):");
-        System.out.println("Se actualizaron " + filasModificadas + " facturas del estado '" + estadoActual + "' al estado '" + nuevoEstado + "'.");
+        if (resultados.isEmpty()) {
+            System.out.println("No hay facturas registradas para clasificar.");
+        } else {
+            for (Object[] fila : resultados) {
+                Integer numero = (Integer) fila[0]; 
+                Double importe = (Double) fila[1];  
+                String categoria = (String) fila[2];
+                
+                System.out.println("Factura Nro: " + numero + " | Total: $" + importe + " | Categoría: " + categoria);
+            }
+        }
     }
-
-
-
-
-
-
-
-
 
 }
