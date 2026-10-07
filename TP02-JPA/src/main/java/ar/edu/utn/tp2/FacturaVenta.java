@@ -9,12 +9,25 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 // TODO: Agregar @Entity y @Table -----------------------------------------------------------
     @Entity
     @Table(name = "factura_venta")
-
-
+    @Getter 
+    @Setter 
+    @NoArgsConstructor 
+    @AllArgsConstructor 
+    @Builder 
+    @EqualsAndHashCode(callSuper = true, exclude = {"detalles"})
+    @ToString(exclude = {"detalles"}) 
+   
 public class FacturaVenta extends AuditoriaApp { 
 
     private Long numero; 
@@ -62,208 +75,7 @@ public class FacturaVenta extends AuditoriaApp {
     private String observaciones; 
 
 //TODO: Configurar @OneToMany(mappedBy = "facturaVenta", cascade = CascadeType.ALL) --------------------
-    @OneToMany(mappedBy = "factura", cascade = CascadeType.ALL)
-    private List<FacturaVentaDetalle> detalles = new java.util.ArrayList<>();
-
-    //Constructores --------------------------------------------------------------------------------------
-
-    protected FacturaVenta() {
-    }
-
-    
-
-    public FacturaVenta(Long numero, Date fechaEmision, Cliente cliente, CondicionIva condicionIva,
-            TipoMoneda tipoMoneda, PuntoVenta puntoVenta, double importeCobrado, double importeSaldo,
-            double importeTotal, String cae, Date caeFechaVencimiento, String resultadoAfip, String motivoRechazo,
-            String estado, Date fechaAnulacion, String observaciones, List<FacturaVentaDetalle> detalles) {
-        this.numero = numero;
-        this.fechaEmision = fechaEmision;
-        this.cliente = cliente;
-        this.condicionIva = condicionIva;
-        this.tipoMoneda = tipoMoneda;
-        this.puntoVenta = puntoVenta;
-        this.importeCobrado = importeCobrado;
-        this.importeSaldo = importeSaldo;
-        this.importeTotal = importeTotal;
-        this.cae = cae;
-        this.caeFechaVencimiento = caeFechaVencimiento;
-        this.resultadoAfip = resultadoAfip;
-        this.motivoRechazo = motivoRechazo;
-        this.estado = estado;
-        this.fechaAnulacion = fechaAnulacion;
-        this.observaciones = observaciones;
-        this.detalles = detalles;
-    }
-
-    public FacturaVenta(Date fechaAlta, Date fechaBaja, Date fechaModificacion, Usuario usuarioCarga,
-            Usuario usuarioBaja, Usuario usuarioModificac, Long numero, Date fechaEmision, Cliente cliente,
-            CondicionIva condicionIva, TipoMoneda tipoMoneda, PuntoVenta puntoVenta, double importeCobrado,
-            double importeSaldo, double importeTotal, String cae, Date caeFechaVencimiento, String resultadoAfip,
-            String motivoRechazo, String estado, Date fechaAnulacion, String observaciones,
-            List<FacturaVentaDetalle> detalles) {
-        super(fechaAlta, fechaBaja, fechaModificacion, usuarioCarga, usuarioBaja, usuarioModificac);
-        this.numero = numero;
-        this.fechaEmision = fechaEmision;
-        this.cliente = cliente;
-        this.condicionIva = condicionIva;
-        this.tipoMoneda = tipoMoneda;
-        this.puntoVenta = puntoVenta;
-        this.importeCobrado = importeCobrado;
-        this.importeSaldo = importeSaldo;
-        this.importeTotal = importeTotal;
-        this.cae = cae;
-        this.caeFechaVencimiento = caeFechaVencimiento;
-        this.resultadoAfip = resultadoAfip;
-        this.motivoRechazo = motivoRechazo;
-        this.estado = estado;
-        this.fechaAnulacion = fechaAnulacion;
-        this.observaciones = observaciones;
-        this.detalles = detalles;
-    }
-
-
-
-    //getters y setters ---------------------------------------------------------------------------------
-    public Long getNumero() {
-        return numero;
-    }
-
-    public void setNumero(Long numero) {
-        this.numero = numero;
-    }
-
-    public Date getFechaEmision() {
-        return fechaEmision;
-    }
-
-    public void setFechaEmision(Date fechaEmision) {
-        this.fechaEmision = fechaEmision;
-    }
-
-    public Cliente getCliente() {
-        return cliente;
-    }
-
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
-    }
-
-    public CondicionIva getCondicionIva() {
-        return condicionIva;
-    }
-
-    public void setCondicionIva(CondicionIva condicionIva) {
-        this.condicionIva = condicionIva;
-    }
-
-    public TipoMoneda getTipoMoneda() {
-        return tipoMoneda;
-    }
-
-    public void setTipoMoneda(TipoMoneda tipoMoneda) {
-        this.tipoMoneda = tipoMoneda;
-    }
-
-    public PuntoVenta getPuntoVenta() {
-        return puntoVenta;
-    }
-
-    public void setPuntoVenta(PuntoVenta puntoVenta) {
-        this.puntoVenta = puntoVenta;
-    }
-
-    public double getImporteCobrado() {
-        return importeCobrado;
-    }
-
-    public void setImporteCobrado(double importeCobrado) {
-        this.importeCobrado = importeCobrado;
-    }
-
-    public double getImporteSaldo() {
-        return importeSaldo;
-    }
-
-    public void setImporteSaldo(double importeSaldo) {
-        this.importeSaldo = importeSaldo;
-    }
-
-    public double getImporteTotal() {
-        return importeTotal;
-    }
-
-    public void setImporteTotal(double importeTotal) {
-        this.importeTotal = importeTotal;
-    }
-
-    public String getCae() {
-        return cae;
-    }
-
-    public void setCae(String cae) {
-        this.cae = cae;
-    }
-
-    public Date getCaeFechaVencimiento() {
-        return caeFechaVencimiento;
-    }
-
-    public void setCaeFechaVencimiento(Date caeFechaVencimiento) {
-        this.caeFechaVencimiento = caeFechaVencimiento;
-    }
-
-    public String getResultadoAfip() {
-        return resultadoAfip;
-    }
-
-    public void setResultadoAfip(String resultadoAfip) {
-        this.resultadoAfip = resultadoAfip;
-    }
-
-    public String getMotivoRechazo() {
-        return motivoRechazo;
-    }
-
-    public void setMotivoRechazo(String motivoRechazo) {
-        this.motivoRechazo = motivoRechazo;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-
-    public Date getFechaAnulacion() {
-        return fechaAnulacion;
-    }
-
-    public void setFechaAnulacion(Date fechaAnulacion) {
-        this.fechaAnulacion = fechaAnulacion;
-    }
-
-    public String getObservaciones() {
-        return observaciones;
-    }
-
-    public void setObservaciones(String observaciones) {
-        this.observaciones = observaciones;
-    }
-
-    public List<FacturaVentaDetalle> getDetalles() {
-        return detalles;
-    }
-
-    public void setDetalles(List<FacturaVentaDetalle> detalles) {
-        this.detalles = detalles;
-    }
-
-    
-
-    
-    
-
+   @OneToMany(mappedBy = "factura", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FacturaVentaDetalle> detalles;  
 
 }

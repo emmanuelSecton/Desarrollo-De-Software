@@ -5,10 +5,22 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 // TODO: Agregar @Entity y @Table 
     @Entity 
     @Table(name = "lista_precio_articulo")
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @EqualsAndHashCode(callSuper = true, exclude = {"articulo"}) 
+    @ToString(exclude = {"articulo"})
 
 public class ListaPrecioArticulo extends AuditoriaApp { 
 
@@ -26,41 +38,5 @@ private double precioVenta;
     @JoinColumn (nullable = false)  
 private Articulo articulo; 
 
-//Constructor ----------------------------------------------------------------------------------
-
-    public ListaPrecioArticulo(ListaPrecio listaPrecio, double precioVenta, Articulo articulo) {
-        this.listaPrecio = listaPrecio;
-        this.precioVenta = precioVenta;
-        this.articulo = articulo;
-    } 
-
-    public ListaPrecioArticulo() {
-    }
-
-    //getters y setters -----------------------------------------------------------------------
-
-    public ListaPrecio getListaPrecio() {
-        return listaPrecio;
-    }
-
-    public void setListaPrecio(ListaPrecio listaPrecio) {
-        this.listaPrecio = listaPrecio;
-    }
-
-    public double getPrecioVenta() {
-        return precioVenta;
-    }
-
-    public void setPrecioVenta(double precioVenta) {
-        this.precioVenta = precioVenta;
-    }
-
-    public Articulo getArticulo() {
-        return articulo;
-    }
-
-    public void setArticulo(Articulo articulo) {
-        this.articulo = articulo;
-    }
 
 } 

@@ -5,9 +5,20 @@ import jakarta.persistence.Column;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 
     @MappedSuperclass
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @EqualsAndHashCode(callSuper = true)
+    
 public abstract class AuditoriaApp extends EntityId {
 
     // TODO: Configurar @Column(nullable = false) y formato de fecha -----------------------------------
@@ -33,56 +44,5 @@ public abstract class AuditoriaApp extends EntityId {
     @JoinColumn(nullable = false)
  protected Usuario usuarioModificac;
 
-    //Constructor ----------------------------------------------------------------------------------------
-    public AuditoriaApp() {
-    }
-    public AuditoriaApp(Date fechaAlta, Date fechaBaja, Date fechaModificacion, Usuario usuarioCarga,
-            Usuario usuarioBaja, Usuario usuarioModificac) {
-        this.fechaAlta = fechaAlta;
-        this.fechaBaja = fechaBaja;
-        this.fechaModificacion = fechaModificacion;
-        this.usuarioCarga = usuarioCarga;
-        this.usuarioBaja = usuarioBaja;
-        this.usuarioModificac = usuarioModificac;
-    }
-
-    //getters y setters ---------------------------------------------------------------------------------
-    public Date getFechaAlta() {
-        return fechaAlta;
-    }
-    public void setFechaAlta(Date fechaAlta) {
-        this.fechaAlta = fechaAlta;
-    }
-    public Date getFechaBaja() {
-        return fechaBaja;
-    }
-    public void setFechaBaja(Date fechaBaja) {
-        this.fechaBaja = fechaBaja;
-    }
-    public Date getFechaModificacion() {
-        return fechaModificacion;
-    }
-    public void setFechaModificacion(Date fechaModificacion) {
-        this.fechaModificacion = fechaModificacion;
-    }
-    public Usuario getUsuarioCarga() {
-        return usuarioCarga;
-    }
-    public void setUsuarioCarga(Usuario usuarioCarga) {
-        this.usuarioCarga = usuarioCarga;
-    }
-    public Usuario getUsuarioBaja() {
-        return usuarioBaja;
-    }
-    public void setUsuarioBaja(Usuario usuarioBaja) {
-        this.usuarioBaja = usuarioBaja;
-    }
-    public Usuario getUsuarioModificac() {
-        return usuarioModificac;
-    }
-    public void setUsuarioModificac(Usuario usuarioModificac) {
-        this.usuarioModificac = usuarioModificac;
-    }
-
-   
+      
 }

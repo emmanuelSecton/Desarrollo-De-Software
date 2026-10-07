@@ -5,10 +5,24 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 // TODO: Agregar @Entity y @Table ---------------------------------------------------------------------------
     @Entity 
     @Table(name = "factura_venta_detalle")
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder 
+    @EqualsAndHashCode(callSuper = true, exclude = {"factura"}) 
+    @ToString(exclude = {"factura"})
 
 public class FacturaVentaDetalle extends EntityId { 
 
@@ -16,6 +30,7 @@ public class FacturaVentaDetalle extends EntityId {
 // TODO: Configurar @ManyToOne y @JoinColumn(nullable = false) ----------------------------------------------
     @ManyToOne 
     @JoinColumn(nullable = false) 
+    
 private FacturaVenta factura; 
 
 
@@ -40,98 +55,5 @@ private double importeIva;
 
     @Column(nullable = false)
 private double importeSubtotal; 
-
-// Constructores ------------------------------------------------------------------------------------------
-
-    protected FacturaVentaDetalle() {
-    }
-
-    public FacturaVentaDetalle(FacturaVenta factura, ListaPrecioArticulo listaPrecioArticulo, String descripcion,
-            double cantidad, double precioUnitario, double porcentajeBonificacion, double importeNeto,
-            double importeIva, double importeSubtotal) {
-        this.factura = factura;
-        this.listaPrecioArticulo = listaPrecioArticulo;
-        this.descripcion = descripcion;
-        this.cantidad = cantidad;
-        this.precioUnitario = precioUnitario;
-        this.porcentajeBonificacion = porcentajeBonificacion;
-        this.importeNeto = importeNeto;
-        this.importeIva = importeIva;
-        this.importeSubtotal = importeSubtotal;
-    }
-
-    //getters y setters ---------------------------------------------------------------------------------------
-
-    public FacturaVenta getFactura() {
-        return factura;
-    }
-
-    public void setFactura(FacturaVenta factura) {
-        this.factura = factura;
-    }
-
-    public ListaPrecioArticulo getListaPrecioArticulo() {
-        return listaPrecioArticulo;
-    }
-
-    public void setListaPrecioArticulo(ListaPrecioArticulo listaPrecioArticulo) {
-        this.listaPrecioArticulo = listaPrecioArticulo;
-    }
-
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-
-    public double getCantidad() {
-        return cantidad;
-    }
-
-    public void setCantidad(double cantidad) {
-        this.cantidad = cantidad;
-    }
-
-    public double getPrecioUnitario() {
-        return precioUnitario;
-    }
-
-    public void setPrecioUnitario(double precioUnitario) {
-        this.precioUnitario = precioUnitario;
-    }
-
-    public double getPorcentajeBonificacion() {
-        return porcentajeBonificacion;
-    }
-
-    public void setPorcentajeBonificacion(double porcentajeBonificacion) {
-        this.porcentajeBonificacion = porcentajeBonificacion;
-    }
-
-    public double getImporteNeto() {
-        return importeNeto;
-    }
-
-    public void setImporteNeto(double importeNeto) {
-        this.importeNeto = importeNeto;
-    }
-
-    public double getImporteIva() {
-        return importeIva;
-    }
-
-    public void setImporteIva(double importeIva) {
-        this.importeIva = importeIva;
-    }
-
-    public double getImporteSubtotal() {
-        return importeSubtotal;
-    }
-
-    public void setImporteSubtotal(double importeSubtotal) {
-        this.importeSubtotal = importeSubtotal;
-    }
     
 } 

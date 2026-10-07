@@ -3,11 +3,21 @@ package ar.edu.utn.tp2;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 // TODO: Agregar @Entity y @Table -------------------------------------------------
 
     @Entity 
     @Table(name = "tipo_moneda")
+    @Getter 
+    @Setter 
+    @NoArgsConstructor 
+    @AllArgsConstructor 
+    @EqualsAndHashCode(callSuper = true)
 public class TipoMoneda extends AuditoriaApp { 
 
 // TODO: Configurar @Column(nullable = false) en los 3 atributos ------------------
@@ -20,39 +30,6 @@ private String denominacion;
 
     @Column(nullable = false)
 private String simbolo; 
-//constructores --------------------------------------------------------------------
 
-    public TipoMoneda(String codigoAfip, String denominacion, String simbolo) {
-        this.codigoAfip = codigoAfip;
-        this.denominacion = denominacion;
-        this.simbolo = simbolo;
-    }
-
-    public TipoMoneda() {
-    }
-    //getters y setters -----------------------------------------------------------------
-    public String getCodigoAfip() {
-        return codigoAfip;
-    }
-
-    public void setCodigoAfip(String codigoAfip) {
-        this.codigoAfip = codigoAfip;
-    }
-
-    public String getDenominacion() {
-        return denominacion;
-    }
-
-    public void setDenominacion(String denominacion) {
-        this.denominacion = denominacion;
-    }
-
-    public String getSimbolo() {
-        return simbolo;
-    }
-
-    public void setSimbolo(String simbolo) {
-        this.simbolo = simbolo;
-    }
 } 
 
