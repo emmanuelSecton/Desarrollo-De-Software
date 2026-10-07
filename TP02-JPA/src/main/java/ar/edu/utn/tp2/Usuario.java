@@ -3,10 +3,20 @@ package ar.edu.utn.tp2;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 // TODO: Agregar @Entity y @Table 
     @Entity 
     @Table(name = "usuario")
+    @Getter 
+    @Setter 
+    @NoArgsConstructor 
+    @AllArgsConstructor 
+    @EqualsAndHashCode(callSuper = true)
 
 public class Usuario extends EntityId { 
 
@@ -24,49 +34,4 @@ private String nombre;
     @Column(nullable = false)
 private String apellido; 
 
-//constructores --------------------------------------------------------------------
-
-    public Usuario(String usuario, String clave, String nombre, String apellido) {
-        this.usuario = usuario;
-        this.clave = clave;
-        this.nombre = nombre;
-        this.apellido = apellido;
-    }
-
-    public Usuario() {
-    }
-
-    //getters y setters --------------------------------------------------------------
-
-    public String getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(String usuario) {
-        this.usuario = usuario;
-    }
-
-    public String getClave() {
-        return clave;
-    }
-
-    public void setClave(String clave) {
-        this.clave = clave;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getApellido() {
-        return apellido;
-    }
-
-    public void setApellido(String apellido) {
-        this.apellido = apellido;
-    }
 } 

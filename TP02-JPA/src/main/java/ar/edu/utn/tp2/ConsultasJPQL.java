@@ -1,7 +1,16 @@
 package ar.edu.utn.tp2;
 
 import jakarta.persistence.EntityManager;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.List;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+
+import ar.edu.utn.tp2.dto.FacturaReporteDTO;
 
 public class ConsultasJPQL {
 
@@ -468,6 +477,115 @@ public class ConsultasJPQL {
                 
                 System.out.println("Factura Nro: " + numero + " | Total: $" + importe + " | Categoría: " + categoria);
             }
+        }
+    }
+
+    // Consulta DTO --------------------------------------------------------------------------------------------------------
+    public static void generarReporteDTO(EntityManager em) {
+        
+        String jpql = """
+                      SELECT new ar.edu.utn.tp2.dto.FacturaReporteDTO(
+                          f.numero, 
+                          f.fechaEmision, 
+                          COALESCE(c.denominacion, 'Consumidor Final'), 
+                          ci.denominacion, 
+                          pv.descripcion, 
+                          f.importeTotal, 
+                          COUNT(d)
+                      ) 
+                      FROM FacturaVenta f 
+                      LEFT JOIN f.cliente c 
+                      JOIN f.condicionIva ci 
+                      JOIN f.puntoVenta pv 
+                      JOIN f.detalles d 
+                      GROUP BY f.id, f.numero, f.fechaEmision, c.denominacion, ci.denominacion, pv.descripcion, f.importeTotal
+                      """;
+        
+        List<FacturaReporteDTO> reporte = em.createQuery(jpql, FacturaReporteDTO.class).getResultList(); //[cite: 8]
+        
+        System.out.println("\nreporte de facturas");
+        
+        if (reporte.isEmpty()) {
+            System.out.println("No hay facturas para generar el reporte.");
+        } else {
+            for (FacturaReporteDTO dto : reporte) {
+                System.out.println("\nFactura Nro: " + dto.getNumeroFactura() +
+                                   "\nFecha: " + dto.getFechaEmision() +
+                                   "\nPunto Venta: " + dto.getPuntoVentaDescripcion() +
+                                   "\nCliente: " + dto.getClienteDenominacion() +
+                                   "\nCondición IVA: " + dto.getCondicionIva() +
+                                   "\nItems: " + dto.getCantidadItems() +
+                                   "\nTotal: $" + dto.getImporteTotal());
+            }
+                if (!reporte.isEmpty()) {
+                exportarAExcelTxt(reporte);
+                exportarAPdf(reporte);
+                }   
+        }
+    }
+    //generar txt -------------------------------------------------------------------------------------------------------------
+    public static void exportarAExcelTxt(List<FacturaReporteDTO> reporte) {
+        String nombreArchivo = "Reporte_Facturas.txt";
+        
+        try (PrintWriter writer = new PrintWriter(new FileWriter(nombreArchivo))) {
+            
+            writer.println("Número\tFecha\tPunto de Venta\tCliente\tCondición IVA\tÍtems\tTotal");
+            
+            for (FacturaReporteDTO dto : reporte) {
+                writer.println(dto.getNumeroFactura() + "\t" +
+                               dto.getFechaEmision() + "\t" +
+                               dto.getPuntoVentaDescripcion() + "\t" +
+                               dto.getClienteDenominacion() + "\t" +
+                               dto.getCondicionIva() + "\t" +
+                               dto.getCantidadItems() + "\t" +
+                               dto.getImporteTotal());
+            }
+            System.out.println("Archivo Excel/TXT generado correctamente: " + nombreArchivo);
+            
+        } catch (Exception e) {
+            System.err.println("Error al generar el archivo TXT: " + e.getMessage());
+        }
+    }
+
+    // generar PDF ------------------------------------------------------------------------------------------
+    public static void exportarAPdf(List<FacturaReporteDTO> reporte) {
+        String nombreArchivo = "Reporte_Facturas.pdf";
+        
+        try {
+            Document documento = new Document();
+            PdfWriter.getInstance(documento, new FileOutputStream(nombreArchivo));
+            documento.open();
+
+            documento.add(new Paragraph("Reporte Ejecutivo de Facturas"));
+            documento.add(new Paragraph(" ")); 
+
+            PdfPTable tabla = new PdfPTable(7);
+            tabla.setWidthPercentage(100);
+
+            tabla.addCell("Número");
+            tabla.addCell("Fecha");
+            tabla.addCell("Pto. Venta");
+            tabla.addCell("Cliente");
+            tabla.addCell("IVA");
+            tabla.addCell("Ítems");
+            tabla.addCell("Total");
+
+            for (FacturaReporteDTO dto : reporte) {
+                tabla.addCell(String.valueOf(dto.getNumeroFactura()));
+                tabla.addCell(dto.getFechaEmision() != null ? dto.getFechaEmision().toString() : "");
+                tabla.addCell(dto.getPuntoVentaDescripcion());
+                tabla.addCell(dto.getClienteDenominacion());
+                tabla.addCell(dto.getCondicionIva());
+                tabla.addCell(String.valueOf(dto.getCantidadItems()));
+                tabla.addCell(String.valueOf(dto.getImporteTotal()));
+            }
+
+            documento.add(tabla);
+            documento.close();
+            System.out.println("Archivo PDF generado correctamente: " + nombreArchivo);
+            
+        } catch (Exception e) {
+            System.err.println("Error al generar el PDF: " + e.getMessage());
         }
     }
 

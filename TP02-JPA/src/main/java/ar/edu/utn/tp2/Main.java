@@ -171,7 +171,9 @@ public class Main {
             //19 ConsultasJPQL.articulosSinVentasRegistradas(entityManager);
             //20 ConsultasJPQL.clasificarFacturasPorValor(entityManager);
 
-
+                //TP DTO
+           ConsultasJPQL.generarReporteDTO(entityManager);
+           
         } catch (Exception e) {
             if (entityManager != null && entityManager.getTransaction().isActive()) {
                 entityManager.getTransaction().rollback();
