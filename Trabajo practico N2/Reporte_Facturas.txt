@@ -1,0 +1,25 @@
+Número	Fecha	Punto de Venta	Cliente	Condición IVA	Ítems	Total
+1	2026-09-22 00:00:00.0	Punto de Venta 1	Cliente S.A.	Responsable Inscripto	1	121.0
+2	2026-09-12 00:00:00.0	Sucursal Centro	Mundo Informático	Responsable Inscripto	1	150000.0
+3	2026-09-22 00:00:00.0	Sucursal Norte	Mundo Informático	Responsable Inscripto	1	8000.0
+1	2026-09-23 00:00:00.0	Punto de Venta 1	Cliente S.A.	Responsable Inscripto	1	121.0
+2	2026-09-13 00:00:00.0	Sucursal Centro	Mundo Informático	Responsable Inscripto	1	150000.0
+3	2026-09-23 00:00:00.0	Sucursal Norte	Mundo Informático	Responsable Inscripto	1	8000.0
+1	2026-09-23 00:00:00.0	Punto de Venta 1	Cliente S.A.	Responsable Inscripto	1	121.0
+2	2026-09-13 00:00:00.0	Sucursal Centro	Mundo Informático	Responsable Inscripto	1	150000.0
+3	2026-09-23 00:00:00.0	Sucursal Norte	Mundo Informático	Responsable Inscripto	1	8000.0
+1	2026-09-23 00:00:00.0	Punto de Venta 1	Cliente S.A.	Responsable Inscripto	1	121.0
+2	2026-09-13 00:00:00.0	Sucursal Centro	Mundo Informático	Responsable Inscripto	1	150000.0
+3	2026-09-23 00:00:00.0	Sucursal Norte	Mundo Informático	Responsable Inscripto	1	8000.0
+1	2026-09-23 00:00:00.0	Punto de Venta 1	Cliente S.A.	Responsable Inscripto	1	121.0
+2	2026-09-13 00:00:00.0	Sucursal Centro	Mundo Informático	Responsable Inscripto	1	150000.0
+3	2026-09-23 00:00:00.0	Sucursal Norte	Mundo Informático	Responsable Inscripto	1	8000.0
+1	2026-10-07 00:00:00.0	Punto de Venta 1	Cliente S.A.	Responsable Inscripto	1	121.0
+2	2026-09-27 00:00:00.0	Sucursal Centro	Mundo Informático	Responsable Inscripto	1	150000.0
+3	2026-10-07 00:00:00.0	Sucursal Norte	Mundo Informático	Responsable Inscripto	1	8000.0
+1	2026-10-07 00:00:00.0	Punto de Venta 1	Cliente S.A.	Responsable Inscripto	1	121.0
+2	2026-09-27 00:00:00.0	Sucursal Centro	Mundo Informático	Responsable Inscripto	1	150000.0
+3	2026-10-07 00:00:00.0	Sucursal Norte	Mundo Informático	Responsable Inscripto	1	8000.0
+1	2026-10-07 00:00:00.0	Punto de Venta 1	Cliente S.A.	Responsable Inscripto	1	121.0
+2	2026-09-27 00:00:00.0	Sucursal Centro	Mundo Informático	Responsable Inscripto	1	150000.0
+3	2026-10-07 00:00:00.0	Sucursal Norte	Mundo Informático	Responsable Inscripto	1	8000.0
