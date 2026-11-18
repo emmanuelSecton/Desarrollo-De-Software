@@ -5,7 +5,7 @@ public class Main {
         try {
             String keyPath = "privada_test.key";
             String certPath = "certificado_test.crt";
-            long cuit = 20449853564L; // Tu CUIT sin guiones
+            long cuit = 20449853564L; //  CUIT sin guiones
             int puntoDeVenta = 1;     // Punto de venta de prueba
             int tipoComprobante = 11; // 11 = Factura C (como en la pág. 8 de la guía)
 
