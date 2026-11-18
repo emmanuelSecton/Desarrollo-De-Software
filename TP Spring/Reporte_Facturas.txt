@@ -1,0 +1,3 @@
+Número	Fecha	Punto de Venta	Cliente	Condición IVA	Ítems	Total
+2	2026-10-11 00:00:00.0	Sucursal Centro	Mundo Informático	Responsable Inscripto	1	150000.0
+3	2026-10-21 00:00:00.0	Sucursal Norte	Mundo Informático	Responsable Inscripto	1	8000.0
