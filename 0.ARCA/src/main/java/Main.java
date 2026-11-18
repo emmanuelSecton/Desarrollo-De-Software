@@ -1,3 +1,5 @@
+import java.nio.file.Path;
+
 public class Main {
     public static void main(String[] args) {
         try {
@@ -7,11 +9,13 @@ public class Main {
             int puntoDeVenta = 1;     // Punto de venta de prueba
             int tipoComprobante = 11; // 11 = Factura C (como en la pág. 8 de la guía)
 
-            System.out.println("1. Solicitando Token y Sign a WSAA...");
-            String[] auth = AfipWsaaClient.obtenerTokenYSign(keyPath, certPath);
-            String token = auth[0];
-            String sign = auth[1];
-            System.out.println("Autenticado OK. Token activo.");
+            Path cacheTa = Path.of("ta_wsfe.properties"); // TA guardado para reutilizar (ignorado por git)
+
+            System.out.println("1. Obteniendo Ticket de Acceso de WSAA...");
+            TicketAcceso ta = AfipWsaaClient.obtenerTicket(keyPath, certPath, cacheTa);
+            String token = ta.token();
+            String sign = ta.sign();
+            System.out.println("Autenticado OK. TA vigente hasta " + ta.expiracion() + ".");
 
             System.out.println("\n2. Consultando último comprobante autorizado en WSFEv1...");
             int ultimoNro = AfipWsfeClient.obtenerUltimoComprobante(token, sign, cuit, puntoDeVenta, tipoComprobante);
@@ -24,8 +28,13 @@ public class Main {
             System.out.println("\n--- Respuesta WSFEv1 ---");
             System.out.println(respuestaCae);
 
+        } catch (AfipAuthException e) {
+            System.err.println("Falló la autenticación con WSAA [" + e.getCodigo() + "]: " + e.getMessage());
+            System.exit(1);
         } catch (Exception e) {
+            System.err.println("Error inesperado: " + e.getMessage());
             e.printStackTrace();
+            System.exit(2);
         }
     }
 }
