@@ -493,14 +493,17 @@ public class ConsultasJPQL {
                           pv.descripcion, 
                           f.importeTotal, 
                           COUNT(d),
-                          f.estado
+                          f.estado,
+                          f.cae,
+                          f.caeFechaVencimiento,
+                          f.resultadoAfip
                       ) 
                       FROM FacturaVenta f 
                       LEFT JOIN f.cliente c 
                       JOIN f.condicionIva ci 
                       JOIN f.puntoVenta pv 
                       JOIN f.detalles d 
-                      GROUP BY f.id, f.numero, f.fechaEmision, c.denominacion, ci.denominacion, pv.descripcion, f.importeTotal, f.estado
+                      GROUP BY f.id, f.numero, f.fechaEmision, c.denominacion, ci.denominacion, pv.descripcion, f.importeTotal, f.estado, f.cae, f.caeFechaVencimiento, f.resultadoAfip
                       """;
         
         List<FacturaReporteDTO> reporte = em.createQuery(jpql, FacturaReporteDTO.class).getResultList(); //[cite: 8]

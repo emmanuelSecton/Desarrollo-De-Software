@@ -3,66 +3,88 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CRUD de Facturas de Venta</title>
+    <title>Facturación Electrónica ARCA - CRUD</title>
     <style>
-        body { font-family: system-ui, -apple-system, sans-serif; max-width: 1100px; margin: 24px auto; padding: 0 16px; background: #f6f8fa; color: #222; }
+        body { font-family: system-ui, -apple-system, sans-serif; max-width: 1200px; margin: 24px auto; padding: 0 16px; background: #f6f8fa; color: #222; }
         h1 { margin-bottom: 16px; }
         section { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 20px; }
         h2 { margin-top: 0; font-size: 1.15rem; border-bottom: 1px solid #eee; padding-bottom: 8px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 12px; }
         label { display: flex; flex-direction: column; font-size: 0.85rem; font-weight: 600; gap: 4px; }
-        input, select, button { padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.9rem; }
+        .input-group { display: flex; gap: 6px; width: 100%; }
+        .input-group input { flex: 1; min-width: 0; }
+        input, select, button { padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.88rem; }
         button { cursor: pointer; border: none; background: #2563eb; color: #fff; font-weight: 600; }
-        button:hover { background: #1d4ed8; }
+        button:hover:not(:disabled) { background: #1d4ed8; }
+        button:disabled { opacity: 0.45; cursor: not-allowed; }
         button.sec { background: #64748b; }
-        button.sec:hover { background: #475569; }
+        button.sec:hover:not(:disabled) { background: #475569; }
+        button.ok-btn { background: #15803d; }
+        button.ok-btn:hover:not(:disabled) { background: #166534; }
         button.warn { background: #d97706; }
-        button.warn:hover { background: #b45309; }
+        button.warn:hover:not(:disabled) { background: #b45309; }
         button.danger { background: #dc2626; }
-        button.danger:hover { background: #b91c1c; }
-        table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.9rem; }
-        th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; }
+        button.danger:hover:not(:disabled) { background: #b91c1c; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.86rem; }
+        th, td { border: 1px solid #e2e8f0; padding: 7px; text-align: left; }
         th { background: #f1f5f9; }
-        .acciones { display: flex; gap: 6px; }
+        .acciones { display: flex; flex-wrap: wrap; gap: 5px; }
+        .paginacion { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; }
+        .badge-ok { background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.78rem; }
+        .badge-pend { background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.78rem; }
         #mensaje { margin-bottom: 12px; font-weight: 600; }
         .ok { color: #15803d; }
         .err { color: #b91c1c; }
+
+        /* Modales Explorer */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-overlay.abierto { display: flex; }
+        .modal-box { background: #fff; width: 90%; max-width: 650px; max-height: 80vh; overflow-y: auto; border-radius: 8px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 12px; }
+        .modal-header h3 { margin: 0; }
     </style>
 </head>
 <body>
-    <h1>Gestión de Facturas de Venta</h1>
+    <h1>Gestión de Facturas de Venta + ARCA / AFIP</h1>
     <div id="mensaje"></div>
 
-    <!-- SECCIÓN 1: Búsqueda con filtros -->
+    <!-- SECCIÓN 1: Filtros -->
     <section>
         <h2>1. Buscar y Filtrar Facturas</h2>
         <form id="formFiltros">
             <div class="grid">
+                <label>Nro. Factura <input type="number" id="filtroNumero" placeholder="Ej: 1" /></label>
                 <label>Fecha Desde <input type="date" id="filtroFechaDesde" /></label>
                 <label>Fecha Hasta <input type="date" id="filtroFechaHasta" /></label>
-                <label>Estado
-                    <select id="filtroEstado">
-                        <option value="">Todos</option>
-                        <option value="EMITIDA">EMITIDA</option>
-                        <option value="ANULADA">ANULADA</option>
-                        <option value="PENDIENTE">PENDIENTE</option>
+                <label>Cliente <input type="text" id="filtroCliente" placeholder="Nombre o Consumidor Final" /></label>
+                <label>Informada a ARCA
+                    <select id="filtroInformadaArca">
+                        <option value="">Todas</option>
+                        <option value="true">Sí (Con CAE)</option>
+                        <option value="false">No (Pendientes)</option>
                     </select>
                 </label>
-                <label>Monto Mínimo <input type="number" step="0.01" id="filtroMontoMinimo" placeholder="Ej: 10000" /></label>
             </div>
             <button type="submit">Buscar</button>
             <button type="button" id="btnLimpiarFiltros" class="sec">Limpiar</button>
         </form>
     </section>
 
-    <!-- SECCIÓN 2: Alta de factura con tabla dinámica de ítems -->
+    <!-- SECCIÓN 2: Alta de factura con Modales Explorer -->
     <section>
         <h2>2. Nueva Factura</h2>
         <form id="formFactura">
             <div class="grid">
                 <label>Número * <input type="number" id="numero" required /></label>
                 <label>Fecha Emisión * <input type="date" id="fechaEmision" required /></label>
-                <label>Cliente ID (vacío = Cons. Final) <input type="number" id="clienteId" placeholder="Ej: 1" /></label>
+                <label style="grid-column: span 2;">Cliente (Modal Explorer)
+                    <div class="input-group">
+                        <input type="hidden" id="clienteId" />
+                        <input type="text" id="clienteNombre" value="Consumidor Final" readonly />
+                        <button type="button" id="btnAbrirModalCliente" class="sec">Buscar</button>
+                        <button type="button" id="btnLimpiarCliente" class="sec" title="Consumidor Final">X</button>
+                    </div>
+                </label>
                 <label>Condición IVA ID * <input type="number" id="condicionIvaId" value="1" required /></label>
                 <label>Punto de Venta ID * <input type="number" id="puntoVentaId" value="1" required /></label>
                 <label>Tipo Moneda ID * <input type="number" id="tipoMonedaId" value="1" required /></label>
@@ -71,10 +93,15 @@
 
             <h3>Ítems / Detalles de la Factura</h3>
             <div class="grid">
-                <label>Artículo ID * <input type="number" id="itemArticuloId" value="1" /></label>
-                <label>Descripción <input type="text" id="itemDescripcion" placeholder="Opcional" /></label>
+                <label>Artículo / Lista Precio (Modal)
+                    <div class="input-group">
+                        <input type="hidden" id="itemArticuloId" />
+                        <input type="text" id="itemDescripcion" placeholder="Seleccioná un artículo..." readonly />
+                        <button type="button" id="btnAbrirModalArticulo" class="sec">Buscar</button>
+                    </div>
+                </label>
                 <label>Cantidad * <input type="number" step="0.01" id="itemCantidad" value="1" /></label>
-                <label>Precio Unit. (opcional) <input type="number" step="0.01" id="itemPrecio" placeholder="Usa lista si vacío" /></label>
+                <label>Precio Unit. <input type="number" step="0.01" id="itemPrecio" placeholder="Automático" /></label>
                 <label>% Bonificación <input type="number" step="0.01" id="itemBonificacion" value="0" /></label>
             </div>
             <button type="button" id="btnAgregarItem" class="sec">+ Agregar Ítem</button>
@@ -82,7 +109,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Artículo ID</th>
+                        <th>Art. ID</th>
                         <th>Descripción</th>
                         <th>Cantidad</th>
                         <th>Precio Unit.</th>
@@ -98,27 +125,72 @@
         </form>
     </section>
 
-    <!-- SECCIÓN 3: Listado de comprobantes -->
+    <!-- SECCIÓN 3: Grilla Paginada -->
     <section>
         <h2>3. Listado de Facturas Registradas</h2>
         <table>
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Número</th>
+                    <th>Nro</th>
                     <th>Fecha</th>
                     <th>Cliente</th>
-                    <th>Cond. IVA</th>
-                    <th>Pto. Venta</th>
-                    <th>Ítems</th>
+                    <th>Pto. Vta</th>
                     <th>Total</th>
                     <th>Estado</th>
+                    <th>ARCA (CAE / Vto)</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody id="tablaFacturasBody"></tbody>
         </table>
+
+        <div class="paginacion">
+            <button type="button" id="btnPaginaAnterior" class="sec">← Anterior</button>
+            <span id="infoPaginacion">Página 1 de 1</span>
+            <button type="button" id="btnPaginaSiguiente" class="sec">Siguiente →</button>
+        </div>
     </section>
+
+    <!-- MODAL EXPLORER 1: Buscar Cliente -->
+    <div id="modalCliente" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Explorer: Buscar Cliente</h3>
+                <button type="button" id="btnCerrarModalCliente" class="sec">Cerrar</button>
+            </div>
+            <div class="input-group">
+                <input type="text" id="inputBuscarCliente" placeholder="Buscar por nombre o CUIT..." />
+                <button type="button" id="btnEjecutarBuscarCliente">Buscar</button>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>Denominación</th><th>CUIT/CUIL</th><th>Acción</th></tr>
+                </thead>
+                <tbody id="tablaModalClientes"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL EXPLORER 2: Buscar ListaPrecioArticulo -->
+    <div id="modalArticulo" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Explorer: Buscar Artículo (Lista de Precios)</h3>
+                <button type="button" id="btnCerrarModalArticulo" class="sec">Cerrar</button>
+            </div>
+            <div class="input-group">
+                <input type="text" id="inputBuscarArticulo" placeholder="Buscar artículo por nombre..." />
+                <button type="button" id="btnEjecutarBuscarArticulo">Buscar</button>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>Art. ID</th><th>Artículo</th><th>Precio Lista</th><th>Acción</th></tr>
+                </thead>
+                <tbody id="tablaModalArticulos"></tbody>
+            </table>
+        </div>
+    </div>
 
     <script type="module" src="./dist/app.js"></script>
 </body>

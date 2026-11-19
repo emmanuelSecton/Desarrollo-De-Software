@@ -1,24 +1,26 @@
 export class FacturaService {
     constructor() {
-        this.baseUrl = "http://localhost:8080/api/facturas";
+        this.apiBase = "http://localhost:8080/api";
+        this.baseUrl = `${this.apiBase}/facturas`;
     }
     async obtenerFacturas(filtros = {}) {
         const params = new URLSearchParams();
-        if (filtros.fechaDesde) {
+        if (filtros.numeroFactura !== undefined && !Number.isNaN(filtros.numeroFactura)) {
+            params.append("numeroFactura", String(filtros.numeroFactura));
+        }
+        if (filtros.fechaDesde)
             params.append("fechaDesde", filtros.fechaDesde);
-        }
-        if (filtros.fechaHasta) {
+        if (filtros.fechaHasta)
             params.append("fechaHasta", filtros.fechaHasta);
+        if (filtros.cliente && filtros.cliente.trim() !== "") {
+            params.append("cliente", filtros.cliente.trim());
         }
-        if (filtros.estado && filtros.estado.trim() !== "") {
-            params.append("estado", filtros.estado.trim());
+        if (filtros.informadaArca === "true" || filtros.informadaArca === "false") {
+            params.append("informadaArca", filtros.informadaArca);
         }
-        if (filtros.montoMinimo !== undefined && !Number.isNaN(filtros.montoMinimo)) {
-            params.append("montoMinimo", String(filtros.montoMinimo));
-        }
-        const queryString = params.toString();
-        const url = queryString ? `${this.baseUrl}?${queryString}` : this.baseUrl;
-        const response = await fetch(url);
+        params.append("page", String(filtros.page ?? 0));
+        params.append("size", String(filtros.size ?? 5));
+        const response = await fetch(`${this.baseUrl}?${params.toString()}`);
         if (!response.ok) {
             throw new Error(`Error al obtener facturas (HTTP ${response.status})`);
         }
@@ -27,9 +29,7 @@ export class FacturaService {
     async crearFactura(factura) {
         const response = await fetch(this.baseUrl, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(factura)
         });
         if (!response.ok) {
@@ -40,14 +40,11 @@ export class FacturaService {
     }
     async actualizarEstado(id, estado, observaciones) {
         const body = { estado };
-        if (observaciones !== undefined) {
+        if (observaciones !== undefined)
             body.observaciones = observaciones;
-        }
         const response = await fetch(`${this.baseUrl}/${id}`, {
             method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body)
         });
         if (!response.ok) {
@@ -57,12 +54,35 @@ export class FacturaService {
         return await response.json();
     }
     async eliminarFactura(id) {
-        const response = await fetch(`${this.baseUrl}/${id}`, {
-            method: "DELETE"
-        });
+        const response = await fetch(`${this.baseUrl}/${id}`, { method: "DELETE" });
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(`Error al eliminar factura (HTTP ${response.status}): ${errorText}`);
         }
+    }
+    async informarArca(id) {
+        const response = await fetch(`${this.baseUrl}/${id}/informar-arca`, { method: "POST" });
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Error al informar a ARCA (HTTP ${response.status}): ${errorText}`);
+        }
+        return await response.json();
+    }
+    obtenerUrlPdf(id) {
+        return `${this.baseUrl}/${id}/pdf`;
+    }
+    async buscarClientes(busqueda = "") {
+        const query = busqueda.trim() ? `?busqueda=${encodeURIComponent(busqueda.trim())}` : "";
+        const response = await fetch(`${this.apiBase}/clientes${query}`);
+        if (!response.ok)
+            throw new Error(`Error al buscar clientes (HTTP ${response.status})`);
+        return await response.json();
+    }
+    async buscarArticulosPrecio(busqueda = "") {
+        const query = busqueda.trim() ? `?busqueda=${encodeURIComponent(busqueda.trim())}` : "";
+        const response = await fetch(`${this.apiBase}/articulos-precio${query}`);
+        if (!response.ok)
+            throw new Error(`Error al buscar artículos (HTTP ${response.status})`);
+        return await response.json();
     }
 }

@@ -8,6 +8,17 @@ export interface FacturaReporteDTO {
     importeTotal: number;
     cantidadItems: number;
     estado: string;
+    cae?: string | null;
+    caeFechaVencimiento?: string | null;
+    resultadoAfip?: string | null;
+}
+
+export interface PageResponseDTO<T> {
+    content: T[];
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
 }
 
 export interface FacturaDetalleRequestDTO {
@@ -31,8 +42,24 @@ export interface FacturaRequestDTO {
 }
 
 export interface FacturaFiltrosDTO {
+    numeroFactura?: number;
     fechaDesde?: string;
     fechaHasta?: string;
-    estado?: string;
-    montoMinimo?: number;
+    cliente?: string;
+    informadaArca?: string; // "" | "true" | "false"
+    page?: number;
+    size?: number;
+}
+
+export interface ClienteDTO {
+    id: number;
+    denominacion: string;
+    cuitCuil?: string | null;
+}
+
+export interface ListaPrecioArticuloDTO {
+    id: number;
+    articuloId: number;
+    articuloDenominacion: string;
+    precioVenta: number;
 }

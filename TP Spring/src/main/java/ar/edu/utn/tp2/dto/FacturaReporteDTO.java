@@ -24,4 +24,11 @@ public class FacturaReporteDTO {
     private double importeTotal;
     private long cantidadItems;
     private String estado;
+
+    private String cae;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "America/Argentina/Mendoza")
+    private Date caeFechaVencimiento;
+
+    private String resultadoAfip;
 }
