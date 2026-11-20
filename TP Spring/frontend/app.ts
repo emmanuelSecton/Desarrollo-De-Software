@@ -60,11 +60,14 @@ function esc(valor: unknown): string {
 }
 
 let timerMensaje: number | undefined;
-function mostrarMensaje(texto: string, tipo: "ok" | "err" | "info" = "ok"): void {
+/** Muestra un aviso. Con `fijo = true` queda visible hasta que otro mensaje lo reemplace. */
+function mostrarMensaje(texto: string, tipo: "ok" | "err" | "info" = "ok", fijo = false): void {
     divMensaje.textContent = texto;
     divMensaje.className = tipo;
     window.clearTimeout(timerMensaje);
-    timerMensaje = window.setTimeout(() => (divMensaje.className = ""), tipo === "err" ? 7000 : 4000);
+    if (!fijo) {
+        timerMensaje = window.setTimeout(() => (divMensaje.className = ""), tipo === "err" ? 7000 : 4000);
+    }
 }
 const mostrarError = (error: unknown) => mostrarMensaje((error as Error).message, "err");
 
@@ -757,6 +760,13 @@ formFactura.addEventListener("submit", async (e) => {
         detalles: detallesEnMemoria
     };
 
+    // Bloquear el botón mientras se guarda para evitar envíos duplicados
+    const btnGuardarFactura = formFactura.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const textoBoton = btnGuardarFactura.textContent;
+    btnGuardarFactura.disabled = true;
+    btnGuardarFactura.textContent = "Guardando...";
+    mostrarMensaje("Guardando factura...", "info", true);
+
     try {
         if (facturaEditandoId !== null) {
             const actualizada = await facturaService.actualizarFactura(facturaEditandoId, nuevaFactura);
@@ -771,6 +781,7 @@ formFactura.addEventListener("submit", async (e) => {
         cerrarModal(modalFactura);
         await cargarFacturas();
     } catch (error) {
+        btnGuardarFactura.textContent = textoBoton;
         mostrarError(error);
         // Número repetido: marcar el campo para que se corrija
         if ((error as Error).message.startsWith("Ya existe una factura con el número")) {
@@ -779,6 +790,8 @@ formFactura.addEventListener("submit", async (e) => {
             inputNumero.focus();
             inputNumero.addEventListener("input", () => inputNumero.classList.remove("invalido"), { once: true });
         }
+    } finally {
+        btnGuardarFactura.disabled = false;
     }
 });
 

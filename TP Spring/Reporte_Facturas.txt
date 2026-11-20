@@ -4,4 +4,6 @@ Número	Fecha	Punto de Venta	Cliente	Condición IVA	Ítems	Total
 2	2026-11-19 00:00:00.0	Sucursal Centro	Consumidor Final	Responsable Inscripto	2	191180.0
 3	2026-11-20 00:00:00.0	Sucursal Centro	Emmanuel Secton	Monotributo Trabajador Independiente Promovido	2	568700.0
 4	2026-11-20 00:00:00.0	Sucursal Centro	Daniela Tavano	Responsable Inscripto	1	359975.0
-5	2026-11-20 00:00:00.0	Sucursal Norte	Tomás González	Responsable Inscripto	2	665500.0
+5	2026-11-20 00:00:00.0	Sucursal Norte	Tomás González	Responsable Inscripto	3	907500.0
+6	2026-11-20 00:00:00.0	Sucursal Centro	Tomás González	Responsable Inscripto	1	9680.0
+7	2026-11-20 00:00:00.0	Sucursal Centro	Emmanuel Secton	Responsable Inscripto	1	2904000.0
