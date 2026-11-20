@@ -63,3 +63,39 @@ export interface ListaPrecioArticuloDTO {
     articuloDenominacion: string;
     precioVenta: number;
 }
+export interface ClienteRequestDTO {
+    cuitCuil: string;
+    denominacion: string;
+    email?: string;
+    telefono?: string;
+    celular?: string;
+    nombreCalle: string;
+    numeroCalle: string;
+}
+
+export interface TipoMonedaDTO {
+    id: number;
+    simbolo: string;
+    denominacion: string;
+    codigoAfip: string;
+}
+
+export interface CondicionIvaDTO {
+    id: number;
+    denominacion: string;
+    codigoAfip: number;
+}
+
+export interface OpcionDTO {
+    id: number;
+    denominacion: string;
+}
+
+export interface ArticuloRequestDTO {
+    codigo: string;
+    denominacion: string;
+    rubroId?: number;
+    marcaId?: number;
+    listaPrecioId: number;
+    precioVenta: number;
+}

@@ -34,7 +34,7 @@ public class DatosInicialesLoader implements CommandLineRunner {
         configurarAuditoria(condicionIva, usuario);
         entityManager.persist(condicionIva);
 
-        TipoMoneda tipoMoneda = new TipoMoneda("011", "Pesos Argentinos", "$");
+        TipoMoneda tipoMoneda = new TipoMoneda("PES", "Pesos Argentinos", "$");
         configurarAuditoria(tipoMoneda, usuario);
         entityManager.persist(tipoMoneda);
 

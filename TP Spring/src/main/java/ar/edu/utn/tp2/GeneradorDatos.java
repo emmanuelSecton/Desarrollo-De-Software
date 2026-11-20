@@ -57,6 +57,11 @@ public class GeneradorDatos {
         setAuditoria(clienteMundo, u);
         em.persist(c1); em.persist(d1); em.persist(clienteMundo);
 
+        // 5b. Monedas según tabla de AFIP/ARCA (el peso "PES" llega creado como tMoneda)
+        TipoMoneda dolar = new TipoMoneda("DOL", "Dólar Estadounidense", "US$");
+        setAuditoria(dolar, u);
+        em.persist(dolar);
+
         // 6. Crear Facturas (Distintos estados y valores para consultas 5 y 20)
         
         // Factura 1: Alto Valor (Mayor a 50k), EMITIDA, sin anular

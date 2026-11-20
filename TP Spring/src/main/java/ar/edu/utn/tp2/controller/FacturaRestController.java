@@ -72,4 +72,12 @@ public class FacturaRestController {
         facturaService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
+
+    /** Devuelve el motivo del error como texto plano para que el frontend lo muestre. */
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<String> manejarError(org.springframework.web.server.ResponseStatusException ex) {
+        return ResponseEntity.status(ex.getStatusCode())
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(ex.getReason());
+    }
 }

@@ -221,6 +221,21 @@ public class FacturaService {
         }
 
         PuntoVenta puntoVenta = buscarEntidadObligatoria(PuntoVenta.class, dto.getPuntoVentaId(), "Punto de venta");
+
+        // El número de factura es único dentro de cada punto de venta (como en ARCA)
+        if (dto.getNumero() != null) {
+            Long existentes = em.createQuery(
+                            "SELECT COUNT(f) FROM FacturaVenta f WHERE f.numero = :numero AND f.puntoVenta = :puntoVenta",
+                            Long.class)
+                    .setParameter("numero", dto.getNumero())
+                    .setParameter("puntoVenta", puntoVenta)
+                    .getSingleResult();
+            if (existentes > 0) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "Ya existe una factura con el número " + dto.getNumero()
+                                + " en el punto de venta " + puntoVenta.getNumero() + ".");
+            }
+        }
         CondicionIva condicionIva = buscarEntidadObligatoria(CondicionIva.class, dto.getCondicionIvaId(), "Condición de IVA");
         TipoMoneda tipoMoneda = buscarEntidadObligatoria(TipoMoneda.class, dto.getTipoMonedaId(), "Tipo de moneda");
 

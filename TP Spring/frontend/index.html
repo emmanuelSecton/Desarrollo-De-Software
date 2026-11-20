@@ -1,197 +1,932 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Facturación Electrónica ARCA - CRUD</title>
+    <title>Facturación ARCA</title>
     <style>
-        body { font-family: system-ui, -apple-system, sans-serif; max-width: 1200px; margin: 24px auto; padding: 0 16px; background: #f6f8fa; color: #222; }
-        h1 { margin-bottom: 16px; }
-        section { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 20px; }
-        h2 { margin-top: 0; font-size: 1.15rem; border-bottom: 1px solid #eee; padding-bottom: 8px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 12px; }
-        label { display: flex; flex-direction: column; font-size: 0.85rem; font-weight: 600; gap: 4px; }
-        .input-group { display: flex; gap: 6px; width: 100%; }
-        .input-group input { flex: 1; min-width: 0; }
-        input, select, button { padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.88rem; }
-        button { cursor: pointer; border: none; background: #2563eb; color: #fff; font-weight: 600; }
-        button:hover:not(:disabled) { background: #1d4ed8; }
-        button:disabled { opacity: 0.45; cursor: not-allowed; }
-        button.sec { background: #64748b; }
-        button.sec:hover:not(:disabled) { background: #475569; }
-        button.ok-btn { background: #15803d; }
-        button.ok-btn:hover:not(:disabled) { background: #166534; }
-        button.warn { background: #d97706; }
-        button.warn:hover:not(:disabled) { background: #b45309; }
-        button.danger { background: #dc2626; }
-        button.danger:hover:not(:disabled) { background: #b91c1c; }
-        table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.86rem; }
-        th, td { border: 1px solid #e2e8f0; padding: 7px; text-align: left; }
-        th { background: #f1f5f9; }
-        .acciones { display: flex; flex-wrap: wrap; gap: 5px; }
-        .paginacion { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; }
-        .badge-ok { background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.78rem; }
-        .badge-pend { background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.78rem; }
-        #mensaje { margin-bottom: 12px; font-weight: 600; }
-        .ok { color: #15803d; }
-        .err { color: #b91c1c; }
+        :root {
+            --bg: #f4f6f9;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --muted: #64748b;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #15803d;
+            --success-bg: #dcfce7;
+            --warning: #b45309;
+            --warning-bg: #fef3c7;
+            --danger: #dc2626;
+            --danger-bg: #fee2e2;
+            --radius: 8px;
+            --shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+        }
 
-        /* Modales Explorer */
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
-        .modal-overlay.abierto { display: flex; }
-        .modal-box { background: #fff; width: 90%; max-width: 650px; max-height: 80vh; overflow-y: auto; border-radius: 8px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 12px; }
-        .modal-header h3 { margin: 0; }
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 15px;
+            line-height: 1.45;
+        }
+
+        /* Encabezado */
+        .topbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .topbar-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .topbar h1 {
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .topbar p {
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 16px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 0 0 14px;
+        }
+
+        .card-title h2 {
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        /* Formularios */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+        }
+
+        .span-2 {
+            grid-column: span 2;
+        }
+
+        /* Datos del comprobante en una sola línea: Número | Fecha | Pto. venta | Condición IVA | Moneda */
+        .grid-comprobante {
+            grid-template-columns: minmax(90px, 1fr) 150px 110px minmax(180px, 2fr) 90px;
+        }
+
+        .grid-comprobante .lbl {
+            white-space: nowrap;
+        }
+
+        /* Ítems en una sola línea: Artículo | Cantidad | Precio unitario | Bonificación % */
+        .grid-items {
+            grid-template-columns: minmax(220px, 1fr) 90px 130px 110px;
+        }
+
+        .grid-items .lbl {
+            white-space: nowrap;
+        }
+
+        label {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        label .lbl {
+            display: inline;
+        }
+
+        label .req {
+            color: var(--danger);
+            margin-left: 2px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 9px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font: inherit;
+            font-size: 0.9rem;
+            background: #fff;
+            color: var(--text);
+        }
+
+        input:focus,
+        select:focus {
+            outline: 2px solid #bfdbfe;
+            border-color: var(--primary);
+        }
+
+        input[readonly] {
+            background: #f8fafc;
+            cursor: default;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .input-group input,
+        .input-group select {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        /* Botones */
+        button {
+            font: inherit;
+            font-size: 0.88rem;
+            font-weight: 600;
+            padding: 9px 14px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            background: var(--primary);
+            color: #fff;
+            white-space: nowrap;
+        }
+
+        button:hover:not(:disabled) {
+            background: var(--primary-hover);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        button.sec {
+            background: #fff;
+            color: var(--text);
+            border-color: #cbd5e1;
+        }
+
+        button.sec:hover:not(:disabled) {
+            background: #f1f5f9;
+        }
+
+        button.ok-btn {
+            background: var(--success);
+        }
+
+        button.ok-btn:hover:not(:disabled) {
+            background: #166534;
+        }
+
+        button.warn {
+            background: #fff;
+            color: var(--warning);
+            border-color: #fcd34d;
+        }
+
+        button.warn:hover:not(:disabled) {
+            background: var(--warning-bg);
+        }
+
+        button.danger {
+            background: #fff;
+            color: var(--danger);
+            border-color: #fca5a5;
+        }
+
+        button.danger:hover:not(:disabled) {
+            background: var(--danger-bg);
+        }
+
+        button.danger-solid {
+            background: var(--danger);
+        }
+
+        button.danger-solid:hover:not(:disabled) {
+            background: #b91c1c;
+        }
+
+        button.sm {
+            padding: 5px 9px;
+            font-size: 0.8rem;
+        }
+
+        button.icon {
+            padding: 4px 9px;
+            background: transparent;
+            color: var(--muted);
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        button.icon:hover:not(:disabled) {
+            background: #f1f5f9;
+            color: var(--text);
+        }
+
+        /* Tablas */
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        th,
+        td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        th {
+            background: #f8fafc;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--muted);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        td.num,
+        th.num {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        td.vacio {
+            text-align: center;
+            color: var(--muted);
+            padding: 28px 12px;
+        }
+
+        .acciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .sub {
+            display: block;
+            color: var(--muted);
+            font-size: 0.78rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .badge-ok {
+            background: var(--success-bg);
+            color: #166534;
+        }
+
+        .badge-pend {
+            background: var(--warning-bg);
+            color: #92400e;
+        }
+
+        .badge-anulada {
+            background: var(--danger-bg);
+            color: #991b1b;
+        }
+
+        .badge-neutral {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .paginacion {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .paginacion span {
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        /* Totales del modal de factura */
+        .totales {
+            display: flex;
+            justify-content: flex-end;
+            gap: 6px;
+            align-items: baseline;
+            margin-top: 10px;
+            font-size: 0.95rem;
+        }
+
+        .totales strong {
+            font-size: 1.15rem;
+        }
+
+        .seccion-modal {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .seccion-modal h4 {
+            margin: 0 0 12px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .paso {
+            display: inline-flex;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            font-size: 0.75rem;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Modales */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 16px;
+        }
+
+        .modal-overlay.abierto {
+            display: flex;
+        }
+
+        .modal-overlay.nivel-2 {
+            z-index: 200;
+        }
+
+        .modal-overlay.nivel-3 {
+            z-index: 300;
+        }
+
+        .modal-overlay.nivel-4 {
+            z-index: 400;
+        }
+
+        input.invalido {
+            border-color: var(--danger);
+            outline-color: #fecaca;
+        }
+
+        .modal-box {
+            background: var(--surface);
+            width: 100%;
+            max-width: 650px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            border-radius: 10px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+        }
+
+        .modal-box.lg {
+            max-width: 920px;
+        }
+
+        .modal-box.sm {
+            max-width: 440px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.05rem;
+        }
+
+        .modal-body {
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        .modal-body>.input-group {
+            margin-bottom: 12px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            padding: 12px 18px;
+            border-top: 1px solid var(--border);
+            background: #f8fafc;
+            border-radius: 0 0 10px 10px;
+        }
+
+        /* Notificaciones */
+        #mensaje {
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            z-index: 500;
+            max-width: min(420px, calc(100vw - 32px));
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        #mensaje.ok {
+            display: block;
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+
+        #mensaje.err {
+            display: block;
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        #mensaje.info {
+            display: block;
+            background: #eff6ff;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        @media (max-width: 640px) {
+            .span-2 {
+                grid-column: auto;
+            }
+
+            .topbar-inner {
+                padding: 12px 16px;
+            }
+        }
+
+        /* En pantallas angostas la línea única no entra: pasa a 2 columnas */
+        @media (max-width: 780px) {
+            .grid-comprobante {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .grid-items {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .grid-items>label:first-child {
+                grid-column: 1 / -1;
+            }
+        }
     </style>
 </head>
+
 <body>
-    <h1>Gestión de Facturas de Venta + ARCA / AFIP</h1>
-    <div id="mensaje"></div>
-
-    <!-- SECCIÓN 1: Filtros -->
-    <section>
-        <h2>1. Buscar y Filtrar Facturas</h2>
-        <form id="formFiltros">
-            <div class="grid">
-                <label>Nro. Factura <input type="number" id="filtroNumero" placeholder="Ej: 1" /></label>
-                <label>Fecha Desde <input type="date" id="filtroFechaDesde" /></label>
-                <label>Fecha Hasta <input type="date" id="filtroFechaHasta" /></label>
-                <label>Cliente <input type="text" id="filtroCliente" placeholder="Nombre o Consumidor Final" /></label>
-                <label>Informada a ARCA
-                    <select id="filtroInformadaArca">
-                        <option value="">Todas</option>
-                        <option value="true">Sí (Con CAE)</option>
-                        <option value="false">No (Pendientes)</option>
-                    </select>
-                </label>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div>
+                <h1>Facturas de Venta</h1>
+                <p>Gestión y autorización electrónica ARCA / AFIP</p>
             </div>
-            <button type="submit">Buscar</button>
-            <button type="button" id="btnLimpiarFiltros" class="sec">Limpiar</button>
-        </form>
-    </section>
-
-    <!-- SECCIÓN 2: Alta de factura con Modales Explorer -->
-    <section>
-        <h2>2. Nueva Factura</h2>
-        <form id="formFactura">
-            <div class="grid">
-                <label>Número * <input type="number" id="numero" required /></label>
-                <label>Fecha Emisión * <input type="date" id="fechaEmision" required /></label>
-                <label style="grid-column: span 2;">Cliente (Modal Explorer)
-                    <div class="input-group">
-                        <input type="hidden" id="clienteId" />
-                        <input type="text" id="clienteNombre" value="Consumidor Final" readonly />
-                        <button type="button" id="btnAbrirModalCliente" class="sec">Buscar</button>
-                        <button type="button" id="btnLimpiarCliente" class="sec" title="Consumidor Final">X</button>
-                    </div>
-                </label>
-                <label>Condición IVA ID * <input type="number" id="condicionIvaId" value="1" required /></label>
-                <label>Punto de Venta ID * <input type="number" id="puntoVentaId" value="1" required /></label>
-                <label>Tipo Moneda ID * <input type="number" id="tipoMonedaId" value="1" required /></label>
-                <label>Observaciones <input type="text" id="observaciones" placeholder="Opcional" /></label>
-            </div>
-
-            <h3>Ítems / Detalles de la Factura</h3>
-            <div class="grid">
-                <label>Artículo / Lista Precio (Modal)
-                    <div class="input-group">
-                        <input type="hidden" id="itemArticuloId" />
-                        <input type="text" id="itemDescripcion" placeholder="Seleccioná un artículo..." readonly />
-                        <button type="button" id="btnAbrirModalArticulo" class="sec">Buscar</button>
-                    </div>
-                </label>
-                <label>Cantidad * <input type="number" step="0.01" id="itemCantidad" value="1" /></label>
-                <label>Precio Unit. <input type="number" step="0.01" id="itemPrecio" placeholder="Automático" /></label>
-                <label>% Bonificación <input type="number" step="0.01" id="itemBonificacion" value="0" /></label>
-            </div>
-            <button type="button" id="btnAgregarItem" class="sec">+ Agregar Ítem</button>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Art. ID</th>
-                        <th>Descripción</th>
-                        <th>Cantidad</th>
-                        <th>Precio Unit.</th>
-                        <th>% Bonif.</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaDetallesBody"></tbody>
-            </table>
-
-            <br />
-            <button type="submit">Guardar Factura</button>
-        </form>
-    </section>
-
-    <!-- SECCIÓN 3: Grilla Paginada -->
-    <section>
-        <h2>3. Listado de Facturas Registradas</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nro</th>
-                    <th>Fecha</th>
-                    <th>Cliente</th>
-                    <th>Pto. Vta</th>
-                    <th>Total</th>
-                    <th>Estado</th>
-                    <th>ARCA (CAE / Vto)</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="tablaFacturasBody"></tbody>
-        </table>
-
-        <div class="paginacion">
-            <button type="button" id="btnPaginaAnterior" class="sec">← Anterior</button>
-            <span id="infoPaginacion">Página 1 de 1</span>
-            <button type="button" id="btnPaginaSiguiente" class="sec">Siguiente →</button>
+            <button type="button" id="btnAbrirModalFactura">+ Nueva factura</button>
         </div>
-    </section>
+    </header>
 
-    <!-- MODAL EXPLORER 1: Buscar Cliente -->
-    <div id="modalCliente" class="modal-overlay">
+    <main>
+        <!-- Filtros -->
+        <section class="card">
+            <div class="card-title">
+                <h2>Buscar facturas</h2>
+            </div>
+            <form id="formFiltros">
+                <div class="grid">
+                    <label>Nº de factura <input type="number" id="filtroNumero" placeholder="Ej: 1" /></label>
+                    <label>Desde <input type="date" id="filtroFechaDesde" /></label>
+                    <label>Hasta <input type="date" id="filtroFechaHasta" /></label>
+                    <label>Cliente <input type="text" id="filtroCliente" placeholder="Nombre o razón social" /></label>
+                    <label>Estado en ARCA
+                        <select id="filtroInformadaArca">
+                            <option value="">Todas</option>
+                            <option value="true">Autorizadas (con CAE)</option>
+                            <option value="false">Pendientes de informar</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="btnLimpiarFiltros" class="sec">Limpiar filtros</button>
+                    <button type="submit">Buscar</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Listado -->
+        <section class="card">
+            <div class="card-title">
+                <h2>Facturas registradas</h2>
+                <span class="hint" id="infoTotal"></span>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nº</th>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Punto de venta</th>
+                            <th class="num">Total</th>
+                            <th>Estado</th>
+                            <th>ARCA</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaFacturasBody">
+                        <tr>
+                            <td colspan="8" class="vacio">Cargando facturas...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="paginacion">
+                <button type="button" id="btnPaginaAnterior" class="sec">← Anterior</button>
+                <span id="infoPaginacion">Página 1 de 1</span>
+                <button type="button" id="btnPaginaSiguiente" class="sec">Siguiente →</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL: Nueva factura -->
+    <div id="modalFactura" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="tituloModalFactura">
+        <form id="formFactura" class="modal-box lg">
+            <div class="modal-header">
+                <h3 id="tituloModalFactura">Nueva factura</h3>
+                <button type="button" class="icon" data-cerrar="modalFactura" aria-label="Cerrar">×</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="seccion-modal">
+                    <h4><span class="paso">1</span> Datos del comprobante</h4>
+                    <div class="grid grid-comprobante">
+                        <label><span class="lbl">Número <span class="req">*</span></span><input type="number"
+                                id="numero" required /></label>
+                        <label><span class="lbl">Fecha de emisión <span class="req">*</span></span><input type="date"
+                                id="fechaEmision" required /></label>
+                        <label title="Punto de venta (ID)"><span class="lbl">Pto. de venta <span
+                                    class="req">*</span></span><input type="number" id="puntoVentaId" value="1"
+                                required /></label>
+                        <label><span class="lbl">Condición IVA <span class="req">*</span></span>
+                            <select id="condicionIvaId" required>
+                                <option value="" disabled selected>Cargando...</option>
+                            </select>
+                        </label>
+                        <label><span class="lbl">Moneda <span class="req">*</span></span>
+                            <select id="tipoMonedaId" required>
+                                <option value="" disabled selected>Cargando monedas...</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="seccion-modal">
+                    <h4><span class="paso">2</span> Cliente</h4>
+                    <div class="grid">
+                        <label class="span-2">Cliente seleccionado
+                            <div class="input-group">
+                                <input type="hidden" id="clienteId" />
+                                <button type="button" id="btnAbrirModalCliente">Buscar…</button>
+                                <input type="text" id="clienteNombre" value="Consumidor Final" readonly />
+                                <button type="button" id="btnLimpiarCliente" class="sec"
+                                    title="Volver a Consumidor Final">Quitar</button>
+                            </div>
+                        </label>
+                        <label class="span-2">Observaciones <input type="text" id="observaciones"
+                                placeholder="Opcional" /></label>
+                    </div>
+                </div>
+
+                <div class="seccion-modal">
+                    <h4><span class="paso">3</span> Ítems</h4>
+                    <div class="grid grid-items">
+                        <label><span class="lbl">Artículo <span class="req">*</span></span>
+                            <div class="input-group">
+                                <input type="hidden" id="itemArticuloId" />
+                                <button type="button" id="btnAbrirModalArticulo">Buscar…</button>
+                                <input type="text" id="itemDescripcion" placeholder="<- Seleccioná un artículo"
+                                    readonly />
+                            </div>
+                        </label>
+                        <label><span class="lbl">Cantidad <span class="req">*</span></span><input type="number"
+                                step="0.01" min="0.01" id="itemCantidad" value="1" /></label>
+                        <label><span class="lbl">Precio unitario</span><input type="number" step="0.01" id="itemPrecio"
+                                placeholder="Precio de lista" /></label>
+                        <label><span class="lbl">Bonificación %</span><input type="number" step="0.01" min="0" max="100"
+                                id="itemBonificacion" value="0" /></label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="btnAgregarItem" class="sec">+ Agregar ítem</button>
+                    </div>
+
+                    <div class="table-wrap" style="margin-top: 12px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Artículo</th>
+                                    <th class="num">Cantidad</th>
+                                    <th class="num">Precio unit.</th>
+                                    <th class="num">Bonif.</th>
+                                    <th class="num">Subtotal</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaDetallesBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="totales">
+                        <span class="hint">Subtotal estimado (sin IVA):</span>
+                        <strong id="totalEstimado">$ 0,00</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="sec" data-cerrar="modalFactura">Cancelar</button>
+                <button type="submit">Guardar factura</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- MODAL: Buscar cliente -->
+    <div id="modalCliente" class="modal-overlay nivel-2" role="dialog" aria-modal="true"
+        aria-labelledby="tituloModalCliente">
         <div class="modal-box">
             <div class="modal-header">
-                <h3>Explorer: Buscar Cliente</h3>
-                <button type="button" id="btnCerrarModalCliente" class="sec">Cerrar</button>
+                <h3 id="tituloModalCliente">Seleccionar cliente</h3>
+                <button type="button" id="btnCerrarModalCliente" class="icon" aria-label="Cerrar">×</button>
             </div>
-            <div class="input-group">
-                <input type="text" id="inputBuscarCliente" placeholder="Buscar por nombre o CUIT..." />
-                <button type="button" id="btnEjecutarBuscarCliente">Buscar</button>
+            <div class="modal-body">
+                <div class="input-group">
+                    <input type="text" id="inputBuscarCliente"
+                        placeholder="Buscar por nombre o CUIT y presioná Enter" />
+                    <button type="button" id="btnEjecutarBuscarCliente">Buscar</button>
+                    <button type="button" id="btnAbrirModalNuevoCliente" class="ok-btn">+ Nuevo cliente</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Denominación</th>
+                                <th>CUIT / CUIL</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaModalClientes"></tbody>
+                    </table>
+                </div>
             </div>
-            <table>
-                <thead>
-                    <tr><th>ID</th><th>Denominación</th><th>CUIT/CUIL</th><th>Acción</th></tr>
-                </thead>
-                <tbody id="tablaModalClientes"></tbody>
-            </table>
         </div>
     </div>
 
-    <!-- MODAL EXPLORER 2: Buscar ListaPrecioArticulo -->
-    <div id="modalArticulo" class="modal-overlay">
+    <!-- MODAL: Nuevo cliente -->
+    <div id="modalNuevoCliente" class="modal-overlay nivel-3" role="dialog" aria-modal="true"
+        aria-labelledby="tituloModalNuevoCliente">
+        <form id="formNuevoCliente" class="modal-box" novalidate>
+            <div class="modal-header">
+                <h3 id="tituloModalNuevoCliente">Nuevo cliente</h3>
+                <button type="button" class="icon" data-cerrar="modalNuevoCliente" aria-label="Cerrar">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="seccion-modal">
+                    <h4><span class="paso">1</span> Datos fiscales</h4>
+                    <div class="grid">
+                        <label class="span-2"><span class="lbl">Denominación / Razón social <span
+                                    class="req">*</span></span>
+                            <input type="text" id="ncDenominacion" maxlength="255"
+                                placeholder="Ej: Mundo Informático S.A." required />
+                        </label>
+                        <label><span class="lbl">CUIT / CUIL <span class="req">*</span></span>
+                            <input type="text" id="ncCuitCuil" inputmode="numeric" maxlength="13"
+                                placeholder="20-12345678-9" required />
+                        </label>
+                    </div>
+                </div>
+
+                <div class="seccion-modal">
+                    <h4><span class="paso">2</span> Domicilio</h4>
+                    <div class="grid">
+                        <label class="span-2"><span class="lbl">Calle <span class="req">*</span></span>
+                            <input type="text" id="ncNombreCalle" maxlength="255" placeholder="Ej: Av. San Martín"
+                                required />
+                        </label>
+                        <label><span class="lbl">Número <span class="req">*</span></span>
+                            <input type="text" id="ncNumeroCalle" maxlength="20" placeholder="Ej: 1234" required />
+                        </label>
+                    </div>
+                </div>
+
+                <div class="seccion-modal">
+                    <h4><span class="paso">3</span> Contacto <span class="hint">(opcional)</span></h4>
+                    <div class="grid">
+                        <label class="span-2">Email <input type="email" id="ncEmail" maxlength="255"
+                                placeholder="cliente@email.com" /></label>
+                        <label>Teléfono <input type="tel" id="ncTelefono" maxlength="30"
+                                placeholder="Ej: 261 4123456" /></label>
+                        <label>Celular <input type="tel" id="ncCelular" maxlength="30"
+                                placeholder="Ej: 261 155123456" /></label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="sec" data-cerrar="modalNuevoCliente">Cancelar</button>
+                <button type="submit" id="btnGuardarCliente" class="ok-btn">Guardar y seleccionar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- MODAL: Buscar artículo -->
+    <div id="modalArticulo" class="modal-overlay nivel-2" role="dialog" aria-modal="true"
+        aria-labelledby="tituloModalArticulo">
         <div class="modal-box">
             <div class="modal-header">
-                <h3>Explorer: Buscar Artículo (Lista de Precios)</h3>
-                <button type="button" id="btnCerrarModalArticulo" class="sec">Cerrar</button>
+                <h3 id="tituloModalArticulo">Seleccionar artículo</h3>
+                <button type="button" id="btnCerrarModalArticulo" class="icon" aria-label="Cerrar">×</button>
             </div>
-            <div class="input-group">
-                <input type="text" id="inputBuscarArticulo" placeholder="Buscar artículo por nombre..." />
-                <button type="button" id="btnEjecutarBuscarArticulo">Buscar</button>
+            <div class="modal-body">
+                <div class="input-group">
+                    <input type="text" id="inputBuscarArticulo"
+                        placeholder="Buscar artículo por nombre y presioná Enter" />
+                    <button type="button" id="btnEjecutarBuscarArticulo">Buscar</button>
+                    <button type="button" id="btnAbrirModalNuevoArticulo" class="ok-btn">+ Nuevo artículo</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Artículo</th>
+                                <th class="num">Precio de lista</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaModalArticulos"></tbody>
+                    </table>
+                </div>
             </div>
-            <table>
-                <thead>
-                    <tr><th>Art. ID</th><th>Artículo</th><th>Precio Lista</th><th>Acción</th></tr>
-                </thead>
-                <tbody id="tablaModalArticulos"></tbody>
-            </table>
         </div>
     </div>
+
+    <!-- MODAL: Nuevo artículo -->
+    <div id="modalNuevoArticulo" class="modal-overlay nivel-3" role="dialog" aria-modal="true"
+        aria-labelledby="tituloModalNuevoArticulo">
+        <form id="formNuevoArticulo" class="modal-box" novalidate>
+            <div class="modal-header">
+                <h3 id="tituloModalNuevoArticulo">Nuevo artículo</h3>
+                <button type="button" class="icon" data-cerrar="modalNuevoArticulo" aria-label="Cerrar">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="seccion-modal">
+                    <h4><span class="paso">1</span> Datos del artículo</h4>
+                    <div class="grid">
+                        <label class="span-2"><span class="lbl">Denominación <span class="req">*</span></span>
+                            <input type="text" id="naDenominacion" maxlength="255" placeholder="Ej: Smart TV 55&quot;" />
+                        </label>
+                        <label><span class="lbl">Código <span class="req">*</span></span>
+                            <input type="text" id="naCodigo" maxlength="30" placeholder="Ej: TV002"
+                                style="text-transform: uppercase;" />
+                        </label>
+                        <label><span class="lbl">Rubro</span>
+                            <select id="naRubroId"></select>
+                        </label>
+                        <label><span class="lbl">Marca</span>
+                            <select id="naMarcaId"></select>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="seccion-modal">
+                    <h4><span class="paso">2</span> Precio</h4>
+                    <div class="grid">
+                        <label class="span-2"><span class="lbl">Lista de precios <span class="req">*</span></span>
+                            <select id="naListaPrecioId"></select>
+                        </label>
+                        <label><span class="lbl">Precio de venta <span class="req">*</span></span>
+                            <input type="number" id="naPrecioVenta" step="0.01" min="0.01" placeholder="Ej: 150000" />
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="sec" data-cerrar="modalNuevoArticulo">Cancelar</button>
+                <button type="submit" id="btnGuardarArticulo" class="ok-btn">Guardar y seleccionar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- MODAL: Confirmación -->
+    <div id="modalConfirmar" class="modal-overlay nivel-4" role="alertdialog" aria-modal="true"
+        aria-labelledby="tituloConfirmar">
+        <div class="modal-box sm">
+            <div class="modal-header">
+                <h3 id="tituloConfirmar">Confirmar</h3>
+            </div>
+            <div class="modal-body">
+                <p id="textoConfirmar" style="margin: 0;"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnConfirmarNo" class="sec">Cancelar</button>
+                <button type="button" id="btnConfirmarSi">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mensaje" role="status" aria-live="polite"></div>
 
     <script type="module" src="./dist/app.js"></script>
 </body>
+
 </html>

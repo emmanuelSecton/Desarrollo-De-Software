@@ -34,7 +34,7 @@ export class FacturaService {
         });
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`Error al crear factura (HTTP ${response.status}): ${errorText}`);
+            throw new Error(errorText || `Error al crear factura (HTTP ${response.status})`);
         }
         return await response.json();
     }
@@ -76,6 +76,57 @@ export class FacturaService {
         const response = await fetch(`${this.apiBase}/clientes${query}`);
         if (!response.ok)
             throw new Error(`Error al buscar clientes (HTTP ${response.status})`);
+        return await response.json();
+    }
+    async crearCliente(cliente) {
+        const response = await fetch(`${this.apiBase}/clientes`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(cliente)
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || `Error al crear el cliente (HTTP ${response.status})`);
+        }
+        return await response.json();
+    }
+    async obtenerCondicionesIva() {
+        const response = await fetch(`${this.apiBase}/condiciones-iva`);
+        if (!response.ok)
+            throw new Error(`Error al obtener las condiciones de IVA (HTTP ${response.status})`);
+        return await response.json();
+    }
+    async obtenerMonedas() {
+        const response = await fetch(`${this.apiBase}/monedas`);
+        if (!response.ok)
+            throw new Error(`Error al obtener las monedas (HTTP ${response.status})`);
+        return await response.json();
+    }
+    async obtenerRubros() {
+        return this.obtenerOpciones("rubros", "los rubros");
+    }
+    async obtenerMarcas() {
+        return this.obtenerOpciones("marcas", "las marcas");
+    }
+    async obtenerListasPrecio() {
+        return this.obtenerOpciones("listas-precio", "las listas de precio");
+    }
+    async obtenerOpciones(ruta, nombre) {
+        const response = await fetch(`${this.apiBase}/${ruta}`);
+        if (!response.ok)
+            throw new Error(`Error al obtener ${nombre} (HTTP ${response.status})`);
+        return await response.json();
+    }
+    async crearArticulo(articulo) {
+        const response = await fetch(`${this.apiBase}/articulos`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(articulo)
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || `Error al crear el artículo (HTTP ${response.status})`);
+        }
         return await response.json();
     }
     async buscarArticulosPrecio(busqueda = "") {

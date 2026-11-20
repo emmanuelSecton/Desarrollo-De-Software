@@ -1,10 +1,15 @@
 import {
     ClienteDTO,
+    ClienteRequestDTO,
+    CondicionIvaDTO,
     FacturaFiltrosDTO,
     FacturaReporteDTO,
     FacturaRequestDTO,
     ListaPrecioArticuloDTO,
-    PageResponseDTO
+    OpcionDTO,
+    ArticuloRequestDTO,
+    PageResponseDTO,
+    TipoMonedaDTO
 } from "../models/factura.dto.js";
 
 export class FacturaService {
@@ -43,7 +48,7 @@ export class FacturaService {
         });
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`Error al crear factura (HTTP ${response.status}): ${errorText}`);
+            throw new Error(errorText || `Error al crear factura (HTTP ${response.status})`);
         }
         return await response.json();
     }
@@ -89,6 +94,62 @@ export class FacturaService {
         const query = busqueda.trim() ? `?busqueda=${encodeURIComponent(busqueda.trim())}` : "";
         const response = await fetch(`${this.apiBase}/clientes${query}`);
         if (!response.ok) throw new Error(`Error al buscar clientes (HTTP ${response.status})`);
+        return await response.json();
+    }
+
+    async crearCliente(cliente: ClienteRequestDTO): Promise<ClienteDTO> {
+        const response = await fetch(`${this.apiBase}/clientes`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(cliente)
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || `Error al crear el cliente (HTTP ${response.status})`);
+        }
+        return await response.json();
+    }
+
+    async obtenerCondicionesIva(): Promise<CondicionIvaDTO[]> {
+        const response = await fetch(`${this.apiBase}/condiciones-iva`);
+        if (!response.ok) throw new Error(`Error al obtener las condiciones de IVA (HTTP ${response.status})`);
+        return await response.json();
+    }
+
+    async obtenerMonedas(): Promise<TipoMonedaDTO[]> {
+        const response = await fetch(`${this.apiBase}/monedas`);
+        if (!response.ok) throw new Error(`Error al obtener las monedas (HTTP ${response.status})`);
+        return await response.json();
+    }
+
+    async obtenerRubros(): Promise<OpcionDTO[]> {
+        return this.obtenerOpciones("rubros", "los rubros");
+    }
+
+    async obtenerMarcas(): Promise<OpcionDTO[]> {
+        return this.obtenerOpciones("marcas", "las marcas");
+    }
+
+    async obtenerListasPrecio(): Promise<OpcionDTO[]> {
+        return this.obtenerOpciones("listas-precio", "las listas de precio");
+    }
+
+    private async obtenerOpciones(ruta: string, nombre: string): Promise<OpcionDTO[]> {
+        const response = await fetch(`${this.apiBase}/${ruta}`);
+        if (!response.ok) throw new Error(`Error al obtener ${nombre} (HTTP ${response.status})`);
+        return await response.json();
+    }
+
+    async crearArticulo(articulo: ArticuloRequestDTO): Promise<ListaPrecioArticuloDTO> {
+        const response = await fetch(`${this.apiBase}/articulos`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(articulo)
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || `Error al crear el artículo (HTTP ${response.status})`);
+        }
         return await response.json();
     }
 
