@@ -1,5 +1,6 @@
 package ar.edu.utn.tp2.controller;
 
+import ar.edu.utn.tp2.dto.FacturaEdicionDTO;
 import ar.edu.utn.tp2.dto.FacturaReporteDTO;
 import ar.edu.utn.tp2.dto.FacturaRequestDTO;
 import ar.edu.utn.tp2.dto.PageResponseDTO;
@@ -29,6 +30,10 @@ public class FacturaRestController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=factura-" + id + ".pdf")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdfBytes);
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<FacturaEdicionDTO> obtenerFacturaPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(facturaService.obtenerPorId(id));
     }
     @GetMapping
     public ResponseEntity<PageResponseDTO<FacturaReporteDTO>> obtenerFacturas(

@@ -10,7 +10,8 @@ import {
     ArticuloRequestDTO,
     PageResponseDTO,
     PuntoVentaDTO,
-    TipoMonedaDTO
+    TipoMonedaDTO,
+    FacturaEdicionDTO
 } from "../models/factura.dto.js";
 
 export class FacturaService {
@@ -164,6 +165,27 @@ export class FacturaService {
         const query = busqueda.trim() ? `?busqueda=${encodeURIComponent(busqueda.trim())}` : "";
         const response = await fetch(`${this.apiBase}/articulos-precio${query}`);
         if (!response.ok) throw new Error(`Error al buscar artículos (HTTP ${response.status})`);
+        return await response.json();
+    }
+    async obtenerFacturaPorId(id: number): Promise<FacturaEdicionDTO> {
+        const response = await fetch(`${this.baseUrl}/${id}`);
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || `Error al obtener la factura (HTTP ${response.status})`);
+        }
+        return await response.json();
+    }
+
+    async actualizarFactura(id: number, factura: FacturaRequestDTO): Promise<FacturaReporteDTO> {
+        const response = await fetch(`${this.baseUrl}/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(factura)
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || `Error al actualizar factura (HTTP ${response.status})`);
+        }
         return await response.json();
     }
 }

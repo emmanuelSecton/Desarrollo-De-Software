@@ -1,6 +1,7 @@
 import { FacturaService } from "./services/FacturaService.js";
 const facturaService = new FacturaService();
 let detallesEnMemoria = [];
+let facturaEditandoId = null;
 let paginaActual = 0;
 let totalPaginas = 1;
 const TAMANIO_PAGINA = 5;
@@ -249,6 +250,7 @@ function renderizarFacturas(facturas) {
             <td>
                 <div class="acciones">
                     <button type="button" class="ok-btn sm btn-arca" ${informadaArca || yaAnulada ? "disabled" : ""}>Informar a ARCA</button>
+                    <button type="button" class="sec sm btn-editar" ${informadaArca || yaAnulada ? "disabled title='Solo se pueden editar facturas pendientes'" : ""}>Editar</button>
                     <button type="button" class="sec sm btn-pdf">PDF</button>
                     <button type="button" class="warn sm btn-anular" ${yaAnulada ? "disabled" : ""}>Anular</button>
                     <button type="button" class="danger sm btn-eliminar" ${informadaArca ? "disabled title='No se puede eliminar: ya fue informada a ARCA'" : ""}>Eliminar</button>
@@ -263,6 +265,35 @@ function renderizarFacturas(facturas) {
                 const resp = await facturaService.informarArca(f.id);
                 mostrarMensaje(`Autorizada por ARCA. CAE ${resp.cae} (vence ${fecha(resp.caeFechaVencimiento)})`);
                 await cargarFacturas();
+            }
+            catch (error) {
+                mostrarError(error);
+            }
+        });
+        tr.querySelector(".btn-editar")?.addEventListener("click", async () => {
+            if (informadaArca || yaAnulada)
+                return;
+            try {
+                const detalle = await facturaService.obtenerFacturaPorId(f.id);
+                facturaEditandoId = detalle.id;
+                resetearFormularioFactura();
+                $("tituloModalFactura").textContent = `Editar factura Nº ${detalle.numero}`;
+                formFactura.querySelector('button[type="submit"]').textContent = "Guardar cambios";
+                $("numero").value = String(detalle.numero ?? "");
+                $("fechaEmision").value = detalle.fechaEmision ? detalle.fechaEmision.substring(0, 10) : "";
+                selectPuntoVenta.value = String(detalle.puntoVentaId ?? "");
+                selectCondicionIva.value = String(detalle.condicionIvaId ?? "");
+                selectMoneda.value = String(detalle.tipoMonedaId ?? "");
+                $("observaciones").value = detalle.observaciones ?? "";
+                if (detalle.clienteId) {
+                    $("clienteId").value = String(detalle.clienteId);
+                    $("clienteNombre").value = detalle.clienteCuitCuil
+                        ? `${detalle.clienteDenominacion} — ${detalle.clienteCuitCuil}`
+                        : detalle.clienteDenominacion;
+                }
+                detallesEnMemoria = detalle.detalles.map((d) => ({ ...d }));
+                renderizarDetalles();
+                abrirModal(modalFactura, $("numero"));
             }
             catch (error) {
                 mostrarError(error);
@@ -332,9 +363,15 @@ async function cargarFacturas() {
     }
 }
 // ---------- Explorer: Clientes ----------
+let destinoModalCliente = "factura";
 function seleccionarCliente(c) {
-    $("clienteId").value = String(c.id);
-    $("clienteNombre").value = c.cuitCuil ? `${c.denominacion} — ${c.cuitCuil}` : c.denominacion;
+    if (destinoModalCliente === "filtro") {
+        $("filtroCliente").value = c.denominacion;
+    }
+    else {
+        $("clienteId").value = String(c.id);
+        $("clienteNombre").value = c.cuitCuil ? `${c.denominacion} — ${c.cuitCuil}` : c.denominacion;
+    }
     cerrarModal(modalCliente);
 }
 async function cargarModalClientes(busqueda = "") {
@@ -397,11 +434,21 @@ async function cargarModalArticulos(busqueda = "") {
 }
 // ---------- Eventos de modales ----------
 $("btnAbrirModalFactura").addEventListener("click", () => {
-    if (detallesEnMemoria.length === 0)
-        resetearFormularioFactura();
+    facturaEditandoId = null;
+    $("tituloModalFactura").textContent = "Nueva factura";
+    formFactura.querySelector('button[type="submit"]').textContent = "Guardar factura";
+    resetearFormularioFactura();
     abrirModal(modalFactura, $("numero"));
 });
 $("btnAbrirModalCliente").addEventListener("click", () => {
+    destinoModalCliente = "factura";
+    $("btnAbrirModalNuevoCliente").style.display = "";
+    abrirModal(modalCliente, inputBuscarCliente);
+    cargarModalClientes(inputBuscarCliente.value);
+});
+$("btnAbrirModalClienteFiltro").addEventListener("click", () => {
+    destinoModalCliente = "filtro";
+    $("btnAbrirModalNuevoCliente").style.display = "none";
     abrirModal(modalCliente, inputBuscarCliente);
     cargarModalClientes(inputBuscarCliente.value);
 });
@@ -668,11 +715,18 @@ formFactura.addEventListener("submit", async (e) => {
         detalles: detallesEnMemoria
     };
     try {
-        const creada = await facturaService.crearFactura(nuevaFactura);
-        mostrarMensaje(`Factura Nº ${creada.numeroFactura} creada. Total: ${moneda(creada.importeTotal)}`);
+        if (facturaEditandoId !== null) {
+            const actualizada = await facturaService.actualizarFactura(facturaEditandoId, nuevaFactura);
+            mostrarMensaje(`Factura Nº ${actualizada.numeroFactura} actualizada. Total: ${moneda(actualizada.importeTotal)}`);
+            facturaEditandoId = null;
+        }
+        else {
+            const creada = await facturaService.crearFactura(nuevaFactura);
+            mostrarMensaje(`Factura Nº ${creada.numeroFactura} creada. Total: ${moneda(creada.importeTotal)}`);
+            paginaActual = 0;
+        }
         resetearFormularioFactura();
         cerrarModal(modalFactura);
-        paginaActual = 0;
         await cargarFacturas();
     }
     catch (error) {

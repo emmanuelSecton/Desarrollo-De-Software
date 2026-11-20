@@ -105,3 +105,18 @@ export interface PuntoVentaDTO {
     numero: number;
     descripcion: string;
 }
+
+export interface FacturaEdicionDTO {
+    id: number;
+    numero: number;
+    fechaEmision: string;
+    clienteId?: number | null;
+    clienteDenominacion: string;
+    clienteCuitCuil?: string | null;
+    condicionIvaId: number;
+    puntoVentaId: number;
+    tipoMonedaId: number;
+    estado: string;
+    observaciones?: string | null;
+    detalles: FacturaDetalleRequestDTO[];
+}

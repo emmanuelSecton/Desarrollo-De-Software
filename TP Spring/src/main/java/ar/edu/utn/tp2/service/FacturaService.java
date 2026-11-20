@@ -5,6 +5,7 @@ import ar.edu.utn.tp2.arca.AfipCaeResponse;
 import ar.edu.utn.tp2.arca.AfipWsaaClient;
 import ar.edu.utn.tp2.arca.AfipWsfeClient;
 import ar.edu.utn.tp2.dto.FacturaDetalleRequestDTO;
+import ar.edu.utn.tp2.dto.FacturaEdicionDTO;
 import ar.edu.utn.tp2.dto.FacturaReporteDTO;
 import ar.edu.utn.tp2.dto.FacturaRequestDTO;
 import ar.edu.utn.tp2.dto.PageResponseDTO;
@@ -45,6 +46,40 @@ public class FacturaService {
     @Autowired
     private AfipWsfeClient wsfeClient;
 
+    public FacturaEdicionDTO obtenerPorId(Long id) {
+        FacturaVenta f = em.find(FacturaVenta.class, id);
+        if (f == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Factura no encontrada con ID: " + id);
+        }
+
+        List<FacturaDetalleRequestDTO> detalles = new ArrayList<>();
+        if (f.getDetalles() != null) {
+            for (FacturaVentaDetalle d : f.getDetalles()) {
+                detalles.add(new FacturaDetalleRequestDTO(
+                        d.getListaPrecioArticulo().getArticulo().getId(),
+                        d.getDescripcion(),
+                        d.getCantidad(),
+                        d.getPrecioUnitario(),
+                        d.getPorcentajeBonificacion()
+                ));
+            }
+        }
+
+        return new FacturaEdicionDTO(
+                f.getId(),
+                f.getNumero(),
+                f.getFechaEmision(),
+                f.getCliente() != null ? f.getCliente().getId() : null,
+                f.getCliente() != null ? f.getCliente().getDenominacion() : "Consumidor Final",
+                f.getCliente() != null ? f.getCliente().getCuitCuil() : null,
+                f.getCondicionIva() != null ? f.getCondicionIva().getId() : null,
+                f.getPuntoVenta() != null ? f.getPuntoVenta().getId() : null,
+                f.getTipoMoneda() != null ? f.getTipoMoneda().getId() : null,
+                f.getEstado(),
+                f.getObservaciones(),
+                detalles
+        );
+    }
     public byte[] generarPdfFactura(Long id) {
         FacturaVenta factura = em.find(FacturaVenta.class, id);
         if (factura == null) {
@@ -360,12 +395,39 @@ public class FacturaService {
             return mapearAReporteDTO(factura);
         }
 
+        
         // Si NO está informada a ARCA, permite modificar cabecera e ítems normalmente
+        boolean esEdicionCompleta = dto.getDetalles() != null && !dto.getDetalles().isEmpty();
+
+        PuntoVenta nuevoPtoVta = dto.getPuntoVentaId() != null
+                ? buscarEntidadObligatoria(PuntoVenta.class, dto.getPuntoVentaId(), "Punto de venta")
+                : factura.getPuntoVenta();
+        Long nuevoNumero = dto.getNumero() != null ? dto.getNumero() : factura.getNumero();
+
+        if (nuevoNumero != null && nuevoPtoVta != null) {
+            Long existentes = em.createQuery(
+                            "SELECT COUNT(f) FROM FacturaVenta f WHERE f.numero = :numero AND f.puntoVenta = :puntoVenta AND f.id <> :id",
+                            Long.class)
+                    .setParameter("numero", nuevoNumero)
+                    .setParameter("puntoVenta", nuevoPtoVta)
+                    .setParameter("id", id)
+                    .getSingleResult();
+            if (existentes > 0) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "Ya existe una factura con el número " + nuevoNumero
+                                + " en el punto de venta " + nuevoPtoVta.getNumero() + ".");
+            }
+        }
+
         if (dto.getNumero() != null) factura.setNumero(dto.getNumero());
         if (dto.getFechaEmision() != null) factura.setFechaEmision(dto.getFechaEmision());
-        if (dto.getClienteId() != null) factura.setCliente(buscarEntidadObligatoria(Cliente.class, dto.getClienteId(), "Cliente"));
+        if (dto.getClienteId() != null) {
+            factura.setCliente(buscarEntidadObligatoria(Cliente.class, dto.getClienteId(), "Cliente"));
+        } else if (esEdicionCompleta) {
+            factura.setCliente(null); // Volver a Consumidor Final
+        }
         if (dto.getCondicionIvaId() != null) factura.setCondicionIva(buscarEntidadObligatoria(CondicionIva.class, dto.getCondicionIvaId(), "Condición de IVA"));
-        if (dto.getPuntoVentaId() != null) factura.setPuntoVenta(buscarEntidadObligatoria(PuntoVenta.class, dto.getPuntoVentaId(), "Punto de venta"));
+        if (dto.getPuntoVentaId() != null) factura.setPuntoVenta(nuevoPtoVta);
         if (dto.getTipoMonedaId() != null) factura.setTipoMoneda(buscarEntidadObligatoria(TipoMoneda.class, dto.getTipoMonedaId(), "Tipo de moneda"));
         if (dto.getObservaciones() != null) factura.setObservaciones(dto.getObservaciones());
 
@@ -376,7 +438,7 @@ public class FacturaService {
             }
         }
 
-        if (dto.getDetalles() != null && !dto.getDetalles().isEmpty()) {
+        if (esEdicionCompleta) {
             factura.getDetalles().clear();
             double nuevoTotal = cargarDetallesYCalcularTotal(factura, dto.getDetalles());
             factura.setImporteTotal(nuevoTotal);
