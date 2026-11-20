@@ -186,8 +186,174 @@ public class FacturaService {
             int page,
             int size
     ) {
-        StringBuilder whereClause = new StringBuilder("WHERE 1=1 ");
         Map<String, Object> params = new HashMap<>();
+        String whereClause = armarFiltros(numeroFactura, fechaDesde, fechaHasta, cliente, informadaArca, params);
+
+        // 1. Contar total de facturas que cumplen los filtros
+        String countJpql = "SELECT COUNT(DISTINCT f.id) FROM FacturaVenta f LEFT JOIN f.cliente c " + whereClause;
+        TypedQuery<Long> countQuery = em.createQuery(countJpql, Long.class);
+        params.forEach(countQuery::setParameter);
+        long totalElements = countQuery.getSingleResult();
+
+        // 2. Traer solo la página solicitada
+        int safePage = Math.max(page, 0);
+        int safeSize = size > 0 ? size : 5;
+
+        TypedQuery<FacturaReporteDTO> dataQuery = em.createQuery(consultaReporte(whereClause), FacturaReporteDTO.class);
+        params.forEach(dataQuery::setParameter);
+        dataQuery.setFirstResult(safePage * safeSize);
+        dataQuery.setMaxResults(safeSize);
+
+        List<FacturaReporteDTO> content = dataQuery.getResultList();
+        int totalPages = (int) Math.ceil((double) totalElements / safeSize);
+
+        return new PageResponseDTO<>(content, safePage, safeSize, totalElements, totalPages);
+    }
+
+    /** Todas las facturas que cumplen los filtros (sin paginar), en el mismo orden que la grilla. */
+    public List<FacturaReporteDTO> listarFacturasFiltradas(
+            Long numeroFactura, Date fechaDesde, Date fechaHasta, String cliente, Boolean informadaArca) {
+        Map<String, Object> params = new HashMap<>();
+        String whereClause = armarFiltros(numeroFactura, fechaDesde, fechaHasta, cliente, informadaArca, params);
+        TypedQuery<FacturaReporteDTO> query = em.createQuery(consultaReporte(whereClause), FacturaReporteDTO.class);
+        params.forEach(query::setParameter);
+        return query.getResultList();
+    }
+
+    /** Reporte PDF con las facturas filtradas (o todas si no hay filtros), con las columnas de la grilla. */
+    public byte[] generarPdfReporte(
+            Long numeroFactura, Date fechaDesde, Date fechaHasta, String cliente, Boolean informadaArca) {
+        List<FacturaReporteDTO> facturas =
+                listarFacturasFiltradas(numeroFactura, fechaDesde, fechaHasta, cliente, informadaArca);
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        java.text.NumberFormat formatoMoneda = java.text.NumberFormat.getCurrencyInstance(new Locale("es", "AR"));
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            Document document = new Document(PageSize.A4.rotate(), 30, 30, 30, 30);
+            PdfWriter.getInstance(document, baos);
+            document.open();
+
+            Font tituloFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16);
+            Font encabezadoFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.WHITE);
+            Font normalFont = FontFactory.getFont(FontFactory.HELVETICA, 9);
+            Font chicoFont = FontFactory.getFont(FontFactory.HELVETICA, 8, BaseColor.DARK_GRAY);
+            Font totalFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10);
+
+            // Cabecera del reporte
+            Paragraph titulo = new Paragraph("REPORTE DE FACTURAS DE VENTA", tituloFont);
+            titulo.setAlignment(Element.ALIGN_CENTER);
+            titulo.setSpacingAfter(6);
+            document.add(titulo);
+
+            Paragraph generado = new Paragraph(
+                    "Generado el " + new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date()), chicoFont);
+            generado.setAlignment(Element.ALIGN_CENTER);
+            document.add(generado);
+
+            // Filtros aplicados
+            List<String> filtros = new ArrayList<>();
+            if (numeroFactura != null) filtros.add("Nº " + numeroFactura);
+            if (fechaDesde != null) filtros.add("Desde " + sdf.format(fechaDesde));
+            if (fechaHasta != null) filtros.add("Hasta " + sdf.format(fechaHasta));
+            if (cliente != null && !cliente.isBlank()) filtros.add("Cliente contiene \"" + cliente.trim() + "\"");
+            if (informadaArca != null) filtros.add(informadaArca ? "Autorizadas por ARCA" : "Pendientes de ARCA");
+            Paragraph filtrosP = new Paragraph(
+                    "Filtros: " + (filtros.isEmpty() ? "ninguno (todas las facturas)" : String.join(" · ", filtros)),
+                    normalFont);
+            filtrosP.setSpacingBefore(10);
+            filtrosP.setSpacingAfter(10);
+            document.add(filtrosP);
+
+            // Tabla con las columnas de la grilla (sin Acciones)
+            PdfPTable table = new PdfPTable(7);
+            table.setWidthPercentage(100);
+            table.setWidths(new float[]{1.1f, 1.2f, 3f, 2f, 1.6f, 1.3f, 2.6f});
+            table.setHeaderRows(1);
+
+            BaseColor colorEncabezado = new BaseColor(37, 99, 235);
+            String[] headers = {"Nº", "Fecha", "Cliente", "Punto de venta", "Total", "Estado", "ARCA"};
+            for (String h : headers) {
+                PdfPCell cell = new PdfPCell(new Phrase(h, encabezadoFont));
+                cell.setBackgroundColor(colorEncabezado);
+                cell.setPadding(6);
+                if (h.equals("Total")) cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                table.addCell(cell);
+            }
+
+            double sumaTotal = 0;
+            for (FacturaReporteDTO f : facturas) {
+                table.addCell(celda(f.getNumeroFactura() != null ? String.valueOf(f.getNumeroFactura()) : "-", normalFont));
+                table.addCell(celda(f.getFechaEmision() != null ? sdf.format(f.getFechaEmision()) : "-", normalFont));
+                table.addCell(celda(f.getClienteDenominacion() != null ? f.getClienteDenominacion() : "-", normalFont));
+                table.addCell(celda(f.getPuntoVentaDescripcion() != null ? f.getPuntoVentaDescripcion() : "-", normalFont));
+                PdfPCell total = celda(formatoMoneda.format(f.getImporteTotal()), normalFont);
+                total.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                table.addCell(total);
+                table.addCell(celda(f.getEstado() != null ? f.getEstado() : "-", normalFont));
+
+                boolean autorizada = f.getCae() != null && !f.getCae().isBlank();
+                String arca = autorizada
+                        ? "Autorizada\nCAE " + f.getCae()
+                          + (f.getCaeFechaVencimiento() != null ? "\nVence " + sdf.format(f.getCaeFechaVencimiento()) : "")
+                        : "ANULADA".equals(f.getEstado()) ? "No presentada" : "Pendiente";
+                table.addCell(celda(arca, normalFont));
+                sumaTotal += f.getImporteTotal();
+            }
+
+            if (facturas.isEmpty()) {
+                PdfPCell vacio = celda("No se encontraron facturas con esos filtros.", normalFont);
+                vacio.setColspan(7);
+                vacio.setHorizontalAlignment(Element.ALIGN_CENTER);
+                table.addCell(vacio);
+            }
+            document.add(table);
+
+            // Resumen
+            Paragraph resumen = new Paragraph(
+                    facturas.size() + " factura" + (facturas.size() == 1 ? "" : "s")
+                            + "  ·  Importe total: " + formatoMoneda.format(sumaTotal),
+                    totalFont);
+            resumen.setAlignment(Element.ALIGN_RIGHT);
+            resumen.setSpacingBefore(10);
+            document.add(resumen);
+
+            document.close();
+            return baos.toByteArray();
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al generar el reporte PDF: " + e.getMessage());
+        }
+    }
+
+    private static PdfPCell celda(String texto, Font font) {
+        PdfPCell cell = new PdfPCell(new Phrase(texto, font));
+        cell.setPadding(5);
+        cell.setBorderColor(BaseColor.LIGHT_GRAY);
+        return cell;
+    }
+
+    /** SELECT de las facturas para la grilla y el reporte, con el WHERE recibido. */
+    private static String consultaReporte(String whereClause) {
+        return "SELECT new ar.edu.utn.tp2.dto.FacturaReporteDTO(" +
+            "f.id, f.numero, f.fechaEmision, COALESCE(c.denominacion, 'Consumidor Final'), " +
+            "ci.denominacion, pv.descripcion, f.importeTotal, COUNT(d), f.estado, " +
+            "f.cae, f.caeFechaVencimiento, f.resultadoAfip" +
+            ") " +
+            "FROM FacturaVenta f " +
+            "LEFT JOIN f.cliente c " +
+            "LEFT JOIN f.condicionIva ci " +
+            "LEFT JOIN f.puntoVenta pv " +
+            "LEFT JOIN f.detalles d " +
+            whereClause +
+            "GROUP BY f.id, f.numero, f.fechaEmision, c.denominacion, ci.denominacion, pv.descripcion, f.importeTotal, f.estado, f.cae, f.caeFechaVencimiento, f.resultadoAfip " +
+            "ORDER BY f.id DESC";
+    }
+
+    /** Arma el WHERE de los filtros de facturas y carga sus parámetros en {@code params}. */
+    private static String armarFiltros(
+            Long numeroFactura, Date fechaDesde, Date fechaHasta, String cliente, Boolean informadaArca,
+            Map<String, Object> params) {
+        StringBuilder whereClause = new StringBuilder("WHERE 1=1 ");
 
         if (numeroFactura != null) {
             whereClause.append("AND f.numero = :numeroFactura ");
@@ -209,44 +375,12 @@ public class FacturaService {
             if (informadaArca) {
                 whereClause.append("AND f.cae IS NOT NULL AND f.cae <> '' ");
             } else {
-                whereClause.append("AND (f.cae IS NULL OR f.cae = '') ");
+                // Pendientes: sin CAE y no anuladas (a las anuladas no les aplica informar a ARCA)
+                whereClause.append("AND (f.cae IS NULL OR f.cae = '') AND (f.estado IS NULL OR f.estado <> 'ANULADA') ");
             }
         }
 
-        // 1. Contar total de facturas que cumplen los filtros
-        String countJpql = "SELECT COUNT(DISTINCT f.id) FROM FacturaVenta f LEFT JOIN f.cliente c " + whereClause;
-        TypedQuery<Long> countQuery = em.createQuery(countJpql, Long.class);
-        params.forEach(countQuery::setParameter);
-        long totalElements = countQuery.getSingleResult();
-
-        // 2. Traer solo la página solicitada
-        String dataJpql =
-            "SELECT new ar.edu.utn.tp2.dto.FacturaReporteDTO(" +
-            "f.id, f.numero, f.fechaEmision, COALESCE(c.denominacion, 'Consumidor Final'), " +
-            "ci.denominacion, pv.descripcion, f.importeTotal, COUNT(d), f.estado, " +
-            "f.cae, f.caeFechaVencimiento, f.resultadoAfip" +
-            ") " +
-            "FROM FacturaVenta f " +
-            "LEFT JOIN f.cliente c " +
-            "LEFT JOIN f.condicionIva ci " +
-            "LEFT JOIN f.puntoVenta pv " +
-            "LEFT JOIN f.detalles d " +
-            whereClause +
-            "GROUP BY f.id, f.numero, f.fechaEmision, c.denominacion, ci.denominacion, pv.descripcion, f.importeTotal, f.estado, f.cae, f.caeFechaVencimiento, f.resultadoAfip " +
-            "ORDER BY f.id DESC";
-
-        int safePage = Math.max(page, 0);
-        int safeSize = size > 0 ? size : 5;
-
-        TypedQuery<FacturaReporteDTO> dataQuery = em.createQuery(dataJpql, FacturaReporteDTO.class);
-        params.forEach(dataQuery::setParameter);
-        dataQuery.setFirstResult(safePage * safeSize);
-        dataQuery.setMaxResults(safeSize);
-
-        List<FacturaReporteDTO> content = dataQuery.getResultList();
-        int totalPages = (int) Math.ceil((double) totalElements / safeSize);
-
-        return new PageResponseDTO<>(content, safePage, safeSize, totalElements, totalPages);
+        return whereClause.toString();
     }
 
     @Transactional

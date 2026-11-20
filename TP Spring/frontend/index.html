@@ -9,6 +9,15 @@
 </head>
 
 <body>
+    <!-- Modal de carga: tapa el index hasta que app.ts termina la carga inicial -->
+    <div id="pantallaCarga" role="dialog" aria-modal="true" aria-label="Cargando">
+        <div class="carga-box" role="status" aria-live="polite">
+            <div class="spinner" aria-hidden="true"></div>
+            <p class="carga-titulo">Facturación ARCA</p>
+            <p class="carga-texto">Cargando datos...</p>
+        </div>
+    </div>
+
     <header class="topbar">
         <div class="topbar-inner">
             <div>
@@ -55,7 +64,11 @@
         <section class="card">
             <div class="card-title">
                 <h2>Facturas registradas</h2>
-                <span class="hint" id="infoTotal"></span>
+                <div class="card-title-acciones">
+                    <span class="hint" id="infoTotal"></span>
+                    <button type="button" id="btnReportePdf" class="sec sm"
+                        title="Reporte PDF de las facturas filtradas (o de todas si no hay filtros)">Imprimir reporte PDF</button>
+                </div>
             </div>
             <div class="table-wrap">
                 <table>

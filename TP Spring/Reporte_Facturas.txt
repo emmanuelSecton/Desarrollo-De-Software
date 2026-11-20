@@ -7,3 +7,5 @@ Número	Fecha	Punto de Venta	Cliente	Condición IVA	Ítems	Total
 5	2026-11-20 00:00:00.0	Sucursal Norte	Tomás González	Responsable Inscripto	3	907500.0
 6	2026-11-20 00:00:00.0	Sucursal Centro	Tomás González	Responsable Inscripto	1	9680.0
 7	2026-11-20 00:00:00.0	Sucursal Centro	Emmanuel Secton	Responsable Inscripto	1	2904000.0
+8	2026-11-20 00:00:00.0	Sucursal Norte	Consumidor Final	Consumidor Final	1	1234200.0
+1	2026-11-20 00:00:00.0	Sucursal Norte	Emmanuel Secton	Consumidor Final	2	251680.0

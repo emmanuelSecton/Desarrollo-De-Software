@@ -241,7 +241,9 @@ function renderizarFacturas(facturas) {
         const informadaArca = Boolean(f.cae && f.cae.trim() !== "");
         const columnaArca = informadaArca
             ? `<span class="badge badge-ok">Autorizada</span><span class="sub">CAE ${esc(f.cae)}</span><span class="sub">Vence ${fecha(f.caeFechaVencimiento)}</span>`
-            : `<span class="badge badge-pend">Pendiente</span>`;
+            : yaAnulada
+                ? `<span class="badge badge-neutral">No presentada</span>`
+                : `<span class="badge badge-pend">Pendiente</span>`;
         tr.innerHTML = `
             <td><strong>${esc(f.numeroFactura ?? "-")}</strong><span class="sub">ID ${f.id}</span></td>
             <td>${fecha(f.fechaEmision)}</td>
@@ -334,13 +336,14 @@ function renderizarFacturas(facturas) {
         tablaFacturasBody.appendChild(tr);
     });
 }
-async function cargarFacturas() {
+/** Lee los filtros del formulario de búsqueda (los mismos para la grilla y el reporte PDF). */
+function leerFiltros() {
     const nroStr = $("filtroNumero").value;
     const fechaDesde = $("filtroFechaDesde").value;
     const fechaHasta = $("filtroFechaHasta").value;
     const cliente = $("filtroCliente").value;
     const informadaArca = $("filtroInformadaArca").value;
-    const filtros = { page: paginaActual, size: TAMANIO_PAGINA };
+    const filtros = {};
     if (nroStr)
         filtros.numeroFactura = Number(nroStr);
     if (fechaDesde)
@@ -351,6 +354,10 @@ async function cargarFacturas() {
         filtros.cliente = cliente;
     if (informadaArca)
         filtros.informadaArca = informadaArca;
+    return filtros;
+}
+async function cargarFacturas() {
+    const filtros = { ...leerFiltros(), page: paginaActual, size: TAMANIO_PAGINA };
     try {
         const pageResp = await facturaService.obtenerFacturas(filtros);
         renderizarFacturas(pageResp.content);
@@ -764,6 +771,10 @@ btnLimpiarFiltros.addEventListener("click", async () => {
     paginaActual = 0;
     await cargarFacturas();
 });
+// Reporte PDF con todas las facturas filtradas (todas las páginas); sin filtros, todas las facturas
+$("btnReportePdf").addEventListener("click", () => {
+    window.open(facturaService.obtenerUrlReportePdf(leerFiltros()), "_blank");
+});
 btnPaginaAnterior.addEventListener("click", async () => {
     if (paginaActual > 0) {
         paginaActual--;
@@ -778,7 +789,14 @@ btnPaginaSiguiente.addEventListener("click", async () => {
 });
 // ---------- Carga inicial ----------
 resetearFormularioFactura();
-cargarPuntosVenta();
-cargarCondicionesIva();
-cargarMonedas();
-cargarFacturas();
+// La pantalla principal se muestra recién cuando terminan todas las cargas (bien o con error)
+Promise.allSettled([
+    cargarPuntosVenta(),
+    cargarCondicionesIva(),
+    cargarMonedas(),
+    cargarFacturas()
+]).then(() => {
+    const pantallaCarga = $("pantallaCarga");
+    pantallaCarga.classList.add("oculta");
+    pantallaCarga.addEventListener("transitionend", () => pantallaCarga.remove(), { once: true });
+});

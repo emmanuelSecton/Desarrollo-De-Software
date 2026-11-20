@@ -31,6 +31,22 @@ public class FacturaRestController {
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdfBytes);
     }
+    /** Reporte PDF de las facturas que cumplen los filtros de la grilla (todas si no hay filtros). */
+    @GetMapping("/reporte/pdf")
+    public ResponseEntity<byte[]> descargarReportePdf(
+            @RequestParam(required = false) Long numeroFactura,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaDesde,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaHasta,
+            @RequestParam(required = false) String cliente,
+            @RequestParam(required = false) Boolean informadaArca
+    ) {
+        byte[] pdfBytes = facturaService.generarPdfReporte(numeroFactura, fechaDesde, fechaHasta, cliente, informadaArca);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=reporte-facturas.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<FacturaEdicionDTO> obtenerFacturaPorId(@PathVariable Long id) {
         return ResponseEntity.ok(facturaService.obtenerPorId(id));

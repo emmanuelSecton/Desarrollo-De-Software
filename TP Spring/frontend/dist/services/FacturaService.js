@@ -3,7 +3,8 @@ export class FacturaService {
         this.apiBase = "http://localhost:8080/api";
         this.baseUrl = `${this.apiBase}/facturas`;
     }
-    async obtenerFacturas(filtros = {}) {
+    /** Parámetros de búsqueda de facturas (sin paginación). */
+    parametrosFiltros(filtros) {
         const params = new URLSearchParams();
         if (filtros.numeroFactura !== undefined && !Number.isNaN(filtros.numeroFactura)) {
             params.append("numeroFactura", String(filtros.numeroFactura));
@@ -18,6 +19,15 @@ export class FacturaService {
         if (filtros.informadaArca === "true" || filtros.informadaArca === "false") {
             params.append("informadaArca", filtros.informadaArca);
         }
+        return params;
+    }
+    /** URL del reporte PDF con todas las facturas que cumplen los filtros. */
+    obtenerUrlReportePdf(filtros = {}) {
+        const query = this.parametrosFiltros(filtros).toString();
+        return `${this.baseUrl}/reporte/pdf${query ? `?${query}` : ""}`;
+    }
+    async obtenerFacturas(filtros = {}) {
+        const params = this.parametrosFiltros(filtros);
         params.append("page", String(filtros.page ?? 0));
         params.append("size", String(filtros.size ?? 5));
         const response = await fetch(`${this.baseUrl}?${params.toString()}`);

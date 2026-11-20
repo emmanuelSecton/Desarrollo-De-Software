@@ -1,10 +1,7 @@
 package ar.edu.utn.tp2.config;
 
-import java.awt.Desktop;
 import java.net.URI;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -15,8 +12,9 @@ import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Sirve la carpeta frontend/ (index.html + dist/) desde el mismo servidor de Spring
- * y abre el navegador automáticamente cuando la aplicación termina de arrancar.
+ * Sirve la carpeta frontend/ (index.html + dist/) desde el mismo servidor de Spring.
+ * Al terminar de arrancar abre el navegador en el index, que muestra un modal de carga
+ * hasta que termina de traer los datos iniciales.
  */
 @Configuration
 public class FrontendConfig implements WebMvcConfigurer {
@@ -26,7 +24,7 @@ public class FrontendConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        Path frontend = localizarFrontend();
+        Path frontend = Navegador.localizarFrontend();
         if (frontend != null) {
             registry.addResourceHandler("/**")
                     .addResourceLocations(frontend.toUri().toString())
@@ -45,30 +43,7 @@ public class FrontendConfig implements WebMvcConfigurer {
     public void abrirNavegador() {
         String url = "http://localhost:" + port + "/";
         System.out.println("[Frontend] Disponible en " + url);
-        try {
-            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                Desktop.getDesktop().browse(new URI(url));
-            } else if (System.getProperty("os.name").toLowerCase().contains("win")) {
-                new ProcessBuilder("rundll32", "url.dll,FileProtocolHandler", url).start();
-            } else {
-                new ProcessBuilder("xdg-open", url).start();
-            }
-        } catch (Exception e) {
-            System.err.println("[Frontend] No se pudo abrir el navegador: " + e.getMessage());
-        }
-    }
-
-    /** Busca frontend/ tanto si se ejecuta desde "TP Spring" como desde la raíz del repo. */
-    private Path localizarFrontend() {
-        Path[] candidatos = {
-                Paths.get("frontend"),
-                Paths.get("TP Spring", "frontend")
-        };
-        for (Path p : candidatos) {
-            if (Files.exists(p.resolve("index.html"))) {
-                return p.toAbsolutePath().normalize();
-            }
-        }
-        return null;
+        // El index se abre con el modal de carga encima hasta que termina de traer los datos
+        Navegador.abrir(URI.create(url));
     }
 }
