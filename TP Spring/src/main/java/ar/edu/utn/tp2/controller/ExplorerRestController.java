@@ -4,6 +4,7 @@ import ar.edu.utn.tp2.dto.ClienteDTO;
 import ar.edu.utn.tp2.dto.CondicionIvaDTO;
 import ar.edu.utn.tp2.dto.ListaPrecioArticuloDTO;
 import ar.edu.utn.tp2.dto.OpcionDTO;
+import ar.edu.utn.tp2.dto.PuntoVentaDTO;
 import ar.edu.utn.tp2.dto.TipoMonedaDTO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -56,6 +57,16 @@ public class ExplorerRestController {
                       "WHERE c.fechaBaja IS NULL " +
                       "ORDER BY c.denominacion ASC";
         return ResponseEntity.ok(em.createQuery(jpql, CondicionIvaDTO.class).getResultList());
+    }
+
+    /** Puntos de venta vigentes (sin fecha de baja) para el desplegable de la factura. */
+    @GetMapping("/puntos-venta")
+    public ResponseEntity<List<PuntoVentaDTO>> listarPuntosVenta() {
+        String jpql = "SELECT new ar.edu.utn.tp2.dto.PuntoVentaDTO(p.id, p.numero, p.descripcion) " +
+                      "FROM PuntoVenta p " +
+                      "WHERE p.fechaBaja IS NULL " +
+                      "ORDER BY p.numero ASC";
+        return ResponseEntity.ok(em.createQuery(jpql, PuntoVentaDTO.class).getResultList());
     }
 
     /** Rubros, marcas y listas de precio vigentes, para los desplegables del alta de artículo. */

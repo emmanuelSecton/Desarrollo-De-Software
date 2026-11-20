@@ -90,6 +90,12 @@ export class FacturaService {
         }
         return await response.json();
     }
+    async obtenerPuntosVenta() {
+        const response = await fetch(`${this.apiBase}/puntos-venta`);
+        if (!response.ok)
+            throw new Error(`Error al obtener los puntos de venta (HTTP ${response.status})`);
+        return await response.json();
+    }
     async obtenerCondicionesIva() {
         const response = await fetch(`${this.apiBase}/condiciones-iva`);
         if (!response.ok)

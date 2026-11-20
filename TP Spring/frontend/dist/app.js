@@ -150,6 +150,28 @@ function resetearFormularioFactura() {
     detallesEnMemoria = [];
     renderizarDetalles();
 }
+// ---------- Puntos de venta (solo los existentes en la base) ----------
+const selectPuntoVenta = $("puntoVentaId");
+async function cargarPuntosVenta() {
+    try {
+        const puntos = await facturaService.obtenerPuntosVenta();
+        selectPuntoVenta.innerHTML = "";
+        if (puntos.length === 0) {
+            selectPuntoVenta.innerHTML = `<option value="" disabled selected>No hay puntos de venta</option>`;
+            return;
+        }
+        // Por defecto el primero (menor número); defaultSelected hace que formFactura.reset() vuelva a él
+        puntos.forEach((p, i) => {
+            const opcion = new Option(p.descripcion, String(p.id), i === 0, i === 0);
+            opcion.title = `Punto de venta Nº ${p.numero}`;
+            selectPuntoVenta.add(opcion);
+        });
+    }
+    catch (error) {
+        selectPuntoVenta.innerHTML = `<option value="" disabled selected>No se pudieron cargar</option>`;
+        mostrarError(error);
+    }
+}
 // ---------- Condiciones de IVA (solo las existentes en la base) ----------
 const selectCondicionIva = $("condicionIvaId");
 async function cargarCondicionesIva() {
@@ -618,6 +640,11 @@ formFactura.addEventListener("submit", async (e) => {
         mostrarMensaje("Agregá al menos un ítem antes de guardar la factura.", "err");
         return;
     }
+    if (!selectPuntoVenta.value) {
+        mostrarMensaje("Elegí un punto de venta de la lista.", "err");
+        selectPuntoVenta.focus();
+        return;
+    }
     if (!selectCondicionIva.value) {
         mostrarMensaje("Elegí una condición de IVA de la lista.", "err");
         selectCondicionIva.focus();
@@ -634,7 +661,7 @@ formFactura.addEventListener("submit", async (e) => {
         fechaEmision: $("fechaEmision").value,
         clienteId: clienteIdStr ? Number(clienteIdStr) : null,
         condicionIvaId: Number(selectCondicionIva.value),
-        puntoVentaId: Number($("puntoVentaId").value),
+        puntoVentaId: Number(selectPuntoVenta.value),
         tipoMonedaId: Number(selectMoneda.value),
         estado: "EMITIDA",
         observaciones: $("observaciones").value.trim(),
@@ -684,6 +711,7 @@ btnPaginaSiguiente.addEventListener("click", async () => {
 });
 // ---------- Carga inicial ----------
 resetearFormularioFactura();
+cargarPuntosVenta();
 cargarCondicionesIva();
 cargarMonedas();
 cargarFacturas();

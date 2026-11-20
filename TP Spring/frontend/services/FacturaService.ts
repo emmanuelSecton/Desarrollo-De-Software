@@ -9,6 +9,7 @@ import {
     OpcionDTO,
     ArticuloRequestDTO,
     PageResponseDTO,
+    PuntoVentaDTO,
     TipoMonedaDTO
 } from "../models/factura.dto.js";
 
@@ -107,6 +108,12 @@ export class FacturaService {
             const errorText = await response.text();
             throw new Error(errorText || `Error al crear el cliente (HTTP ${response.status})`);
         }
+        return await response.json();
+    }
+
+    async obtenerPuntosVenta(): Promise<PuntoVentaDTO[]> {
+        const response = await fetch(`${this.apiBase}/puntos-venta`);
+        if (!response.ok) throw new Error(`Error al obtener los puntos de venta (HTTP ${response.status})`);
         return await response.json();
     }
 

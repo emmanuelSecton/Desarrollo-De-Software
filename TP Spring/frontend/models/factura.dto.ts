@@ -99,3 +99,9 @@ export interface ArticuloRequestDTO {
     listaPrecioId: number;
     precioVenta: number;
 }
+
+export interface PuntoVentaDTO {
+    id: number;
+    numero: number;
+    descripcion: string;
+}
