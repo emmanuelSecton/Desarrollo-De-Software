@@ -1,13 +1,16 @@
 package ar.edu.utn.tp2;
 
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 
 @SpringBootApplication
 public class Main {
     public static void main(String[] args) {
-        // Esta línea arranca toda la magia de Spring Boot
-        SpringApplication.run(Main.class, args);
+        // Arranca Spring Boot. headless(false) permite abrir el navegador con el index.html
+        // (ver config/FrontendConfig).
+        new SpringApplicationBuilder(Main.class)
+                .headless(false)
+                .run(args);
     }
 }
 

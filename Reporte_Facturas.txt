@@ -1,0 +1,5 @@
+Número	Fecha	Punto de Venta	Cliente	Condición IVA	Ítems	Total
+3	2026-10-21 00:00:00.0	Sucursal Norte	Mundo Informático	Responsable Inscripto	1	8000.0
+1	2026-11-19 00:00:00.0	Sucursal Centro	Consumidor Final	Responsable Inscripto	1	181500.0
+2	2026-11-19 00:00:00.0	Sucursal Centro	Consumidor Final	Responsable Inscripto	2	191180.0
+4	2026-11-20 00:00:00.0	Sucursal Centro	Emmanuel Secton	Monotributo Trabajador Independiente Promovido	2	568700.0

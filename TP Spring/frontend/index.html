@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Facturación ARCA</title>
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+    <!-- Modal de carga: tapa el index hasta que app.ts termina la carga inicial -->
+    <div id="pantallaCarga" role="dialog" aria-modal="true" aria-label="Cargando">
+        <div class="carga-box" role="status" aria-live="polite">
+            <div class="spinner" aria-hidden="true"></div>
+            <p class="carga-titulo">Facturación ARCA</p>
+            <p class="carga-texto">Cargando datos...</p>
+        </div>
+    </div>
+
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div>
+                <h1>Facturas de Venta</h1>
+                <p>Gestión y autorización electrónica ARCA / AFIP</p>
+            </div>
+            <button type="button" id="btnAbrirModalFactura">+ Nueva factura</button>
+        </div>
+    </header>
+
+    <main>
+        <!-- Filtros -->
+        <section class="card">
+            <div class="card-title">
+                <h2>Buscar facturas</h2>
+            </div>
+            <form id="formFiltros">
+                <div class="grid">
+                    <label>Nº de factura <input type="number" id="filtroNumero" placeholder="Ej: 1" /></label>
+                    <label>Desde <input type="date" id="filtroFechaDesde" /></label>
+                    <label>Hasta <input type="date" id="filtroFechaHasta" /></label>
+                    <label class="span-2">Cliente
+                <div class="input-group">
+                    <button type="button" id="btnAbrirModalClienteFiltro" class="sec">Buscar…</button>
+                    <input type="text" id="filtroCliente" placeholder="Nombre o razón social" />
+                </div>
+                    </label>
+                    <label>Estado en ARCA
+                        <select id="filtroInformadaArca">
+                            <option value="">Todas</option>
+                            <option value="true">Autorizadas (con CAE)</option>
+                            <option value="false">Pendientes de informar</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="btnLimpiarFiltros" class="sec">Limpiar filtros</button>
+                    <button type="submit">Buscar</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Listado -->
+        <section class="card">
+            <div class="card-title">
+                <h2>Facturas registradas</h2>
+                <div class="card-title-acciones">
+                    <span class="hint" id="infoTotal"></span>
+                    <button type="button" id="btnReportePdf" class="sec sm"
+                        title="Reporte PDF de las facturas filtradas (o de todas si no hay filtros)">Imprimir reporte PDF</button>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nº</th>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Punto de venta</th>
+                            <th class="num">Total</th>
+                            <th>Estado</th>
+                            <th>ARCA</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaFacturasBody">
+                        <tr>
+                            <td colspan="8" class="vacio">Cargando facturas...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="paginacion">
+                <button type="button" id="btnPaginaAnterior" class="sec">← Anterior</button>
+                <span id="infoPaginacion">Página 1 de 1</span>
+                <button type="button" id="btnPaginaSiguiente" class="sec">Siguiente →</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL: Nueva factura -->
+    <div id="modalFactura" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="tituloModalFactura">
+        <form id="formFactura" class="modal-box lg">
+            <div class="modal-header">
+                <h3 id="tituloModalFactura">Nueva factura</h3>
+                <button type="button" class="icon" data-cerrar="modalFactura" aria-label="Cerrar">×</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="seccion-modal">
+                    <h4><span class="paso">1</span> Datos del comprobante</h4>
+                    <div class="grid grid-comprobante">
+                        <label><span class="lbl">Número</span><input type="number"
+                                id="numero" readonly title="Se asigna automáticamente al guardar" /></label>
+                        <label><span class="lbl">Fecha de emisión <span class="req">*</span></span><input type="date"
+                                id="fechaEmision" required /></label>
+                        <label><span class="lbl">Punto de venta <span class="req">*</span></span>
+                            <select id="puntoVentaId" required>
+                                <option value="" disabled selected>Cargando...</option>
+                            </select>
+                        </label>
+                        <label><span class="lbl">Condición IVA <span class="req">*</span></span>
+                            <select id="condicionIvaId" required>
+                                <option value="" disabled selected>Cargando...</option>
+                            </select>
+                        </label>
+                        <label><span class="lbl">Moneda <span class="req">*</span></span>
+                            <select id="tipoMonedaId" required>
+                                <option value="" disabled selected>Cargando monedas...</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="seccion-modal">
+                    <h4><span class="paso">2</span> Cliente</h4>
+                    <div class="grid">
+                        <label class="span-2">Cliente seleccionado
+                            <div class="input-group">
+                                <input type="hidden" id="clienteId" />
+                                <button type="button" id="btnAbrirModalCliente">Buscar…</button>
+                                <input type="text" id="clienteNombre" value="Consumidor Final" readonly />
+                                <button type="button" id="btnLimpiarCliente" class="sec"
+                                    title="Volver a Consumidor Final">Quitar</button>
+                            </div>
+                        </label>
+                        <label class="span-2">Observaciones <input type="text" id="observaciones"
+                                placeholder="Opcional" /></label>
+                    </div>
+                </div>
+
+                <div class="seccion-modal">
+                    <h4><span class="paso">3</span> Ítems</h4>
+                    <div class="grid grid-items">
+                        <label><span class="lbl">Artículo <span class="req">*</span></span>
+                            <div class="input-group">
+                                <input type="hidden" id="itemArticuloId" />
+                                <input type="hidden" id="itemListaPrecioArticuloId" />
+                                <button type="button" id="btnAbrirModalArticulo">Buscar…</button>
+                                <input type="text" id="itemDescripcion" placeholder="<- Seleccioná un artículo"
+                                    readonly />
+                            </div>
+                        </label>
+                        <label><span class="lbl">Cantidad <span class="req">*</span></span><input type="number"
+                                step="1" min="1" id="itemCantidad" value="1" /></label>
+                        <label><span class="lbl">Precio unitario</span><input type="number" step="0.01" id="itemPrecio"
+                                placeholder="Precio de lista" readonly tabindex="-1"
+                                title="Sale de la lista de precios elegida en Seleccionar artículo" /></label>
+                        <label><span class="lbl">Bonificación %</span><input type="number" step="0.01" min="0" max="100"
+                                id="itemBonificacion" value="0" /></label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="btnAgregarItem" class="sec" disabled
+                            title="Primero elegí un artículo con el botón Buscar">+ Agregar ítem</button>
+                    </div>
+
+                    <div class="table-wrap" style="margin-top: 12px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Artículo</th>
+                                    <th class="num">Cantidad</th>
+                                    <th class="num">Precio unit.</th>
+                                    <th class="num">Bonif.</th>
+                                    <th class="num">Subtotal</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaDetallesBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="totales">
+                        <span class="hint">Subtotal estimado (sin IVA):</span>
+                        <strong id="totalEstimado">$ 0,00</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="sec" data-cerrar="modalFactura">Cancelar</button>
+                <button type="submit">Guardar factura</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- MODAL: Buscar cliente -->
+    <div id="modalCliente" class="modal-overlay nivel-2" role="dialog" aria-modal="true"
+        aria-labelledby="tituloModalCliente">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="tituloModalCliente">Seleccionar cliente</h3>
+                <button type="button" id="btnCerrarModalCliente" class="icon" aria-label="Cerrar">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <input type="text" id="inputBuscarCliente"
+                        placeholder="Buscar por nombre o CUIT y presioná Enter" />
+                    <button type="button" id="btnEjecutarBuscarCliente">Buscar</button>
+                    <button type="button" id="btnAbrirModalNuevoCliente" class="ok-btn">+ Nuevo cliente</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Denominación</th>
+                                <th>CUIT / CUIL</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaModalClientes"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Nuevo cliente -->
+    <div id="modalNuevoCliente" class="modal-overlay nivel-3" role="dialog" aria-modal="true"
+        aria-labelledby="tituloModalNuevoCliente">
+        <form id="formNuevoCliente" class="modal-box" novalidate>
+            <div class="modal-header">
+                <h3 id="tituloModalNuevoCliente">Nuevo cliente</h3>
+                <button type="button" class="icon" data-cerrar="modalNuevoCliente" aria-label="Cerrar">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="seccion-modal">
+                    <h4><span class="paso">1</span> Datos fiscales</h4>
+                    <div class="grid">
+                        <label class="span-2"><span class="lbl">Denominación / Razón social <span
+                                    class="req">*</span></span>
+                            <input type="text" id="ncDenominacion" maxlength="255"
+                                placeholder="Ej: Mundo Informático S.A." required />
+                        </label>
+                        <label><span class="lbl">CUIT / CUIL <span class="req">*</span></span>
+                            <input type="text" id="ncCuitCuil" inputmode="numeric" maxlength="13"
+                                placeholder="20-12345678-9" required />
+                        </label>
+                    </div>
+                </div>
+
+                <div class="seccion-modal">
+                    <h4><span class="paso">2</span> Domicilio</h4>
+                    <div class="grid">
+                        <label class="span-2"><span class="lbl">Calle <span class="req">*</span></span>
+                            <input type="text" id="ncNombreCalle" maxlength="255" placeholder="Ej: Av. San Martín"
+                                required />
+                        </label>
+                        <label><span class="lbl">Número <span class="req">*</span></span>
+                            <input type="text" id="ncNumeroCalle" maxlength="20" placeholder="Ej: 1234" required />
+                        </label>
+                    </div>
+                </div>
+
+                <div class="seccion-modal">
+                    <h4><span class="paso">3</span> Contacto <span class="hint">(opcional)</span></h4>
+                    <div class="grid">
+                        <label class="span-2">Email <input type="email" id="ncEmail" maxlength="255"
+                                placeholder="cliente@email.com" /></label>
+                        <label>Teléfono <input type="tel" id="ncTelefono" maxlength="30"
+                                placeholder="Ej: 261 4123456" /></label>
+                        <label>Celular <input type="tel" id="ncCelular" maxlength="30"
+                                placeholder="Ej: 261 155123456" /></label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="sec" data-cerrar="modalNuevoCliente">Cancelar</button>
+                <button type="submit" id="btnGuardarCliente" class="ok-btn">Guardar y seleccionar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- MODAL: Buscar artículo -->
+    <div id="modalArticulo" class="modal-overlay nivel-2" role="dialog" aria-modal="true"
+        aria-labelledby="tituloModalArticulo">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="tituloModalArticulo">Seleccionar artículo</h3>
+                <button type="button" id="btnCerrarModalArticulo" class="icon" aria-label="Cerrar">×</button>
+            </div>
+            <div class="modal-body">
+                <label class="lista-articulo"><span class="lbl">Lista de precios</span>
+                    <select id="listaPrecioArticulo">
+                        <option value="" disabled selected>Cargando...</option>
+                    </select>
+                </label>
+                <div class="input-group">
+                    <input type="text" id="inputBuscarArticulo"
+                        placeholder="Buscar artículo por nombre y presioná Enter" />
+                    <button type="button" id="btnEjecutarBuscarArticulo">Buscar</button>
+                    <button type="button" id="btnAbrirModalNuevoArticulo" class="ok-btn">+ Nuevo artículo</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Artículo</th>
+                                <th class="num">Precio de lista</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaModalArticulos"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Nuevo artículo -->
+    <div id="modalNuevoArticulo" class="modal-overlay nivel-3" role="dialog" aria-modal="true"
+        aria-labelledby="tituloModalNuevoArticulo">
+        <form id="formNuevoArticulo" class="modal-box" novalidate>
+            <div class="modal-header">
+                <h3 id="tituloModalNuevoArticulo">Nuevo artículo</h3>
+                <button type="button" class="icon" data-cerrar="modalNuevoArticulo" aria-label="Cerrar">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="seccion-modal">
+                    <h4><span class="paso">1</span> Datos del artículo</h4>
+                    <div class="grid">
+                        <label class="span-2"><span class="lbl">Denominación <span class="req">*</span></span>
+                            <input type="text" id="naDenominacion" maxlength="255" placeholder="Ej: Smart TV 55&quot;" />
+                        </label>
+                        <label><span class="lbl">Código <span class="req">*</span></span>
+                            <input type="text" id="naCodigo" maxlength="30" placeholder="Ej: TV002"
+                                style="text-transform: uppercase;" />
+                        </label>
+                        <label><span class="lbl">Rubro</span>
+                            <select id="naRubroId"></select>
+                        </label>
+                        <label><span class="lbl">Marca</span>
+                            <select id="naMarcaId"></select>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="seccion-modal">
+                    <h4><span class="paso">2</span> Precios</h4>
+                    <p class="hint">Cargá el precio en al menos una lista. Dejá en blanco las listas donde no se vende.</p>
+                    <div class="table-wrap">
+                        <table class="tabla-precios">
+                            <thead>
+                                <tr>
+                                    <th>Lista de precios</th>
+                                    <th class="num">Precio</th>
+                                </tr>
+                            </thead>
+                            <tbody id="naTablaPrecios">
+                                <tr>
+                                    <td colspan="2" class="vacio">Cargando listas...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="sec" data-cerrar="modalNuevoArticulo">Cancelar</button>
+                <button type="submit" id="btnGuardarArticulo" class="ok-btn">Guardar y seleccionar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- MODAL: Confirmación -->
+    <div id="modalConfirmar" class="modal-overlay nivel-4" role="alertdialog" aria-modal="true"
+        aria-labelledby="tituloConfirmar">
+        <div class="modal-box sm">
+            <div class="modal-header">
+                <h3 id="tituloConfirmar">Confirmar</h3>
+            </div>
+            <div class="modal-body">
+                <p id="textoConfirmar" style="margin: 0;"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnConfirmarNo" class="sec">Cancelar</button>
+                <button type="button" id="btnConfirmarSi">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mensaje" role="status" aria-live="polite"></div>
+
+    <script type="module" src="./dist/app.js"></script>
+</body>
+
+</html>
