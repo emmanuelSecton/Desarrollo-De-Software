@@ -14,4 +14,5 @@ public class ListaPrecioArticuloDTO {
     private Long articuloId;
     private String articuloDenominacion;
     private double precioVenta;
+    private Long listaPrecioId;
 }

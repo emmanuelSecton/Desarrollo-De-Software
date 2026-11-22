@@ -4,6 +4,7 @@ import ar.edu.utn.tp2.*;
 import ar.edu.utn.tp2.arca.AfipCaeResponse;
 import ar.edu.utn.tp2.arca.AfipWsaaClient;
 import ar.edu.utn.tp2.arca.AfipWsfeClient;
+import ar.edu.utn.tp2.arca.TipoComprobanteArca;
 import ar.edu.utn.tp2.dto.FacturaDetalleRequestDTO;
 import ar.edu.utn.tp2.dto.FacturaEdicionDTO;
 import ar.edu.utn.tp2.dto.FacturaReporteDTO;
@@ -46,6 +47,13 @@ public class FacturaService {
     @Autowired
     private AfipWsfeClient wsfeClient;
 
+    /** Tipo de comprobante con el que se informa a ARCA (el mismo que usa AfipWsfeClient). */
+    @org.springframework.beans.factory.annotation.Value("${arca.cbte-tipo:11}")
+    private int cbteTipo;
+
+    @org.springframework.beans.factory.annotation.Value("${arca.cuit}")
+    private long cuitEmisor;
+
     public FacturaEdicionDTO obtenerPorId(Long id) {
         FacturaVenta f = em.find(FacturaVenta.class, id);
         if (f == null) {
@@ -60,7 +68,8 @@ public class FacturaService {
                         d.getDescripcion(),
                         d.getCantidad(),
                         d.getPrecioUnitario(),
-                        d.getPorcentajeBonificacion()
+                        d.getPorcentajeBonificacion(),
+                        d.getListaPrecioArticulo().getId()
                 ));
             }
         }
@@ -97,11 +106,51 @@ public class FacturaService {
 
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
-            // Cabecera
-            Paragraph titulo = new Paragraph("FACTURA DE VENTA N° " + (factura.getNumero() != null ? factura.getNumero() : factura.getId()), tituloFont);
-            titulo.setAlignment(Element.ALIGN_CENTER);
-            titulo.setSpacingAfter(15);
-            document.add(titulo);
+            // Cabecera con el tipo de comprobante, como pide ARCA: letra en un recuadro al centro
+            // con su código debajo, y punto de venta (5 dígitos) + número (8 dígitos)
+            TipoComprobanteArca tipo = TipoComprobanteArca.desdeCodigo(cbteTipo);
+            int ptoVtaNumero = factura.getPuntoVenta() != null ? factura.getPuntoVenta().getNumero() : 0;
+            long nroComprobante = factura.getNumero() != null ? factura.getNumero() : factura.getId();
+            Font letraFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 30);
+            Font chicoFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8);
+
+            PdfPTable cabecera = new PdfPTable(3);
+            cabecera.setWidthPercentage(100);
+            cabecera.setWidths(new float[]{4.4f, 1.2f, 4.4f});
+
+            PdfPCell izquierda = new PdfPCell();
+            izquierda.setBorder(PdfPCell.BOX);
+            izquierda.setPadding(8);
+            izquierda.addElement(new Paragraph("ORIGINAL", subtituloFont));
+            izquierda.addElement(new Paragraph("CUIT emisor: " + formatearCuit(cuitEmisor), normalFont));
+            // Factura C la emite un Monotributista (el emisor de la app)
+            if (tipo == TipoComprobanteArca.FACTURA_C) {
+                izquierda.addElement(new Paragraph("Condición frente al IVA: Responsable Monotributo", normalFont));
+            }
+            cabecera.addCell(izquierda);
+
+            PdfPCell centro = new PdfPCell();
+            centro.setBorder(PdfPCell.BOX);
+            centro.setBorderWidth(1.5f);
+            centro.setPadding(4);
+            centro.setHorizontalAlignment(Element.ALIGN_CENTER);
+            Paragraph letra = new Paragraph(tipo.getLetra(), letraFont);
+            letra.setAlignment(Element.ALIGN_CENTER);
+            Paragraph codigo = new Paragraph("COD. " + tipo.getCodigoImpreso(), chicoFont);
+            codigo.setAlignment(Element.ALIGN_CENTER);
+            centro.addElement(letra);
+            centro.addElement(codigo);
+            cabecera.addCell(centro);
+
+            PdfPCell derecha = new PdfPCell();
+            derecha.setBorder(PdfPCell.BOX);
+            derecha.setPadding(8);
+            derecha.addElement(new Paragraph("FACTURA", tituloFont));
+            derecha.addElement(new Paragraph(String.format("Punto de Venta: %05d   Comp. Nro: %08d", ptoVtaNumero, nroComprobante), subtituloFont));
+            cabecera.addCell(derecha);
+
+            cabecera.setSpacingAfter(12);
+            document.add(cabecera);
 
             String fechaStr = factura.getFechaEmision() != null ? sdf.format(factura.getFechaEmision()) : "-";
             String clienteStr = factura.getCliente() != null ? factura.getCliente().getDenominacion() : "Consumidor Final";
@@ -113,7 +162,7 @@ public class FacturaService {
             document.add(new Paragraph("Fecha de Emisión: " + fechaStr, normalFont));
             document.add(new Paragraph("Punto de Venta: " + ptoVtaStr, normalFont));
             document.add(new Paragraph("Cliente: " + clienteStr + "  |  CUIT/CUIL: " + cuitStr, normalFont));
-            document.add(new Paragraph("Condición IVA: " + condIvaStr, normalFont));
+            document.add(new Paragraph("Condición IVA del cliente: " + condIvaStr, normalFont));
             document.add(new Paragraph("Estado: " + factura.getEstado(), subtituloFont));
             document.add(new Paragraph(" "));
 
@@ -325,6 +374,12 @@ public class FacturaService {
         }
     }
 
+    /** 20449853564 -> 20-44985356-4 */
+    private static String formatearCuit(long cuit) {
+        String s = String.format("%011d", cuit);
+        return s.substring(0, 2) + "-" + s.substring(2, 10) + "-" + s.substring(10);
+    }
+
     private static PdfPCell celda(String texto, Font font) {
         PdfPCell cell = new PdfPCell(new Phrase(texto, font));
         cell.setPadding(5);
@@ -383,6 +438,36 @@ public class FacturaService {
         return whereClause.toString();
     }
 
+    /**
+     * True si el error vino de la restricción única (punto de venta, número) de factura_venta,
+     * es decir, otra factura ya tiene ese número en el mismo punto de venta.
+     */
+    public static boolean esNumeroDuplicado(Throwable error) {
+        for (Throwable t = error; t != null; t = t.getCause()) {
+            if (t instanceof java.sql.SQLException sql && sql.getMessage() != null
+                    && sql.getMessage().toLowerCase().contains(FacturaVenta.UK_NUMERO_PUNTO_VENTA)) {
+                return true;
+            }
+            if (t.getCause() == t) break;
+        }
+        return false;
+    }
+
+    /** Próximo número de factura para el punto de venta (para mostrarlo en el formulario antes de guardar). */
+    public Long obtenerProximoNumero(Long puntoVentaId) {
+        PuntoVenta puntoVenta = buscarEntidadObligatoria(PuntoVenta.class, puntoVentaId, "Punto de venta");
+        return calcularProximoNumero(puntoVenta);
+    }
+
+    /** Mayor número usado en el punto de venta + 1 (1 si todavía no tiene facturas). */
+    private Long calcularProximoNumero(PuntoVenta puntoVenta) {
+        Long maximo = em.createQuery(
+                        "SELECT MAX(f.numero) FROM FacturaVenta f WHERE f.puntoVenta = :puntoVenta", Long.class)
+                .setParameter("puntoVenta", puntoVenta)
+                .getSingleResult();
+        return maximo == null ? 1L : maximo + 1;
+    }
+
     @Transactional
     public FacturaReporteDTO crear(FacturaRequestDTO dto) {
         if (dto.getDetalles() == null || dto.getDetalles().isEmpty()) {
@@ -391,20 +476,10 @@ public class FacturaService {
 
         PuntoVenta puntoVenta = buscarEntidadObligatoria(PuntoVenta.class, dto.getPuntoVentaId(), "Punto de venta");
 
-        // El número de factura es único dentro de cada punto de venta (como en ARCA)
-        if (dto.getNumero() != null) {
-            Long existentes = em.createQuery(
-                            "SELECT COUNT(f) FROM FacturaVenta f WHERE f.numero = :numero AND f.puntoVenta = :puntoVenta",
-                            Long.class)
-                    .setParameter("numero", dto.getNumero())
-                    .setParameter("puntoVenta", puntoVenta)
-                    .getSingleResult();
-            if (existentes > 0) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT,
-                        "Ya existe una factura con el número " + dto.getNumero()
-                                + " en el punto de venta " + puntoVenta.getNumero() + ".");
-            }
-        }
+        // El número se autogenera: el siguiente dentro del punto de venta (único por punto de venta, como en ARCA).
+        // Se ignora cualquier número enviado por el cliente.
+        Long numero = calcularProximoNumero(puntoVenta);
+
         CondicionIva condicionIva = buscarEntidadObligatoria(CondicionIva.class, dto.getCondicionIvaId(), "Condición de IVA");
         TipoMoneda tipoMoneda = buscarEntidadObligatoria(TipoMoneda.class, dto.getTipoMonedaId(), "Tipo de moneda");
 
@@ -412,11 +487,12 @@ public class FacturaService {
         if (dto.getClienteId() != null) {
             cliente = buscarEntidadObligatoria(Cliente.class, dto.getClienteId(), "Cliente");
         }
+        validarClienteSegunCondicionIva(condicionIva, cliente);
 
         Usuario usuario = obtenerUsuarioPorDefecto();
 
         FacturaVenta factura = new FacturaVenta();
-        factura.setNumero(dto.getNumero());
+        factura.setNumero(numero);
         factura.setFechaEmision(dto.getFechaEmision() != null ? dto.getFechaEmision() : new Date());
         factura.setCliente(cliente);
         factura.setCondicionIva(condicionIva);
@@ -473,11 +549,22 @@ public class FacturaService {
                     Date vto = new SimpleDateFormat("yyyyMMdd").parse(resp.getCaeFechaVencimiento());
                     factura.setCaeFechaVencimiento(vto);
                 }
-                factura.setNumero(resp.getNumeroComprobante());
-                factura.setMotivoRechazo(null);
-                factura.setFechaModificacion(new Date());
-                em.merge(factura);
-                em.flush();
+                // El número válido es el que asignó ARCA. Si otra factura local del mismo punto de venta
+                // ya lo usa, se la mueve al siguiente número libre antes de guardar.
+                try {
+                    liberarNumeroParaArca(factura, resp.getNumeroComprobante());
+                    factura.setNumero(resp.getNumeroComprobante());
+                    factura.setMotivoRechazo(null);
+                    factura.setFechaModificacion(new Date());
+                    em.merge(factura);
+                    em.flush();
+                } catch (RuntimeException e) {
+                    // ARCA ya emitió el CAE: dejarlo en el mensaje para que no se pierda
+                    String detalle = e instanceof ResponseStatusException rse ? rse.getReason() : e.getMessage();
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                            "ARCA autorizó la factura (CAE " + resp.getCae() + ", comprobante Nº "
+                                    + resp.getNumeroComprobante() + ") pero no se pudo guardar en la base: " + detalle);
+                }
                 return mapearAReporteDTO(factura);
             } else {
                 String motivo = resp.getObservaciones() != null ? resp.getObservaciones() : "Comprobante rechazado por ARCA.";
@@ -547,13 +634,19 @@ public class FacturaService {
                     .setParameter("id", id)
                     .getSingleResult();
             if (existentes > 0) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT,
-                        "Ya existe una factura con el número " + nuevoNumero
-                                + " en el punto de venta " + nuevoPtoVta.getNumero() + ".");
+                boolean cambiaPuntoVenta = factura.getPuntoVenta() == null
+                        || !nuevoPtoVta.getId().equals(factura.getPuntoVenta().getId());
+                if (!cambiaPuntoVenta) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT,
+                            "Ya existe una factura con el número " + nuevoNumero
+                                    + " en el punto de venta " + nuevoPtoVta.getNumero() + ".");
+                }
+                // Se movió a otro punto de venta donde el número ya está usado: toma el siguiente de ese punto
+                nuevoNumero = calcularProximoNumero(nuevoPtoVta);
             }
         }
 
-        if (dto.getNumero() != null) factura.setNumero(dto.getNumero());
+        if (nuevoNumero != null) factura.setNumero(nuevoNumero);
         if (dto.getFechaEmision() != null) factura.setFechaEmision(dto.getFechaEmision());
         if (dto.getClienteId() != null) {
             factura.setCliente(buscarEntidadObligatoria(Cliente.class, dto.getClienteId(), "Cliente"));
@@ -573,6 +666,7 @@ public class FacturaService {
         }
 
         if (esEdicionCompleta) {
+            validarClienteSegunCondicionIva(factura.getCondicionIva(), factura.getCliente());
             factura.getDetalles().clear();
             double nuevoTotal = cargarDetallesYCalcularTotal(factura, dto.getDetalles());
             factura.setImporteTotal(nuevoTotal);
@@ -604,6 +698,50 @@ public class FacturaService {
 
     // --- Métodos auxiliares ---
 
+    /**
+     * Antes de asignarle a {@code factura} el número que devolvió ARCA, mueve al siguiente número libre
+     * a las otras facturas del mismo punto de venta que ya lo usan (solo las no informadas a ARCA).
+     */
+    private void liberarNumeroParaArca(FacturaVenta factura, Long numeroArca) {
+        if (numeroArca == null || factura.getPuntoVenta() == null) return;
+
+        List<FacturaVenta> ocupantes = em.createQuery(
+                        "SELECT f FROM FacturaVenta f WHERE f.puntoVenta = :puntoVenta AND f.numero = :numero AND f.id <> :id",
+                        FacturaVenta.class)
+                .setParameter("puntoVenta", factura.getPuntoVenta())
+                .setParameter("numero", numeroArca)
+                .setParameter("id", factura.getId())
+                .getResultList();
+
+        for (FacturaVenta otra : ocupantes) {
+            if (estaInformadaArca(otra)) {
+                // No debería pasar: ARCA no repite números en un punto de venta
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "la factura ID " + otra.getId() + " ya tiene el número " + numeroArca
+                                + " con el CAE " + otra.getCae() + " en el mismo punto de venta.");
+            }
+            Long nuevoNumero = calcularProximoNumero(factura.getPuntoVenta());
+            System.out.println("[ARCA] Factura ID " + otra.getId() + ": número " + numeroArca
+                    + " pasa a " + nuevoNumero + " (lo asignó ARCA a la factura ID " + factura.getId() + ")");
+            otra.setNumero(nuevoNumero);
+            otra.setFechaModificacion(new Date());
+            // Guardar ya, para que el número quede libre antes de asignárselo a la factura informada
+            em.flush();
+        }
+    }
+
+    /** Código ARCA de la condición de IVA "Consumidor Final". */
+    private static final int CODIGO_AFIP_CONSUMIDOR_FINAL = 5;
+
+    /** Si la condición de IVA no es Consumidor Final, la factura necesita un cliente identificado. */
+    private void validarClienteSegunCondicionIva(CondicionIva condicionIva, Cliente cliente) {
+        if (condicionIva != null && condicionIva.getCodigoAfip() != CODIGO_AFIP_CONSUMIDOR_FINAL && cliente == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Con la condición de IVA \"" + condicionIva.getDenominacion()
+                            + "\" hay que elegir un cliente; no puede ser Consumidor Final.");
+        }
+    }
+
     private boolean estaInformadaArca(FacturaVenta f) {
         return f.getCae() != null && !f.getCae().isBlank();
     }
@@ -612,7 +750,7 @@ public class FacturaService {
         double totalFactura = 0.0;
 
         for (FacturaDetalleRequestDTO itemDto : detallesDTO) {
-            ListaPrecioArticulo lpa = buscarListaPrecioPorArticuloId(itemDto.getArticuloId());
+            ListaPrecioArticulo lpa = buscarPrecioDelItem(itemDto);
 
             double precioUnitario = (itemDto.getPrecioUnitario() != null && itemDto.getPrecioUnitario() > 0)
                     ? itemDto.getPrecioUnitario()
@@ -655,6 +793,26 @@ public class FacturaService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, nombreEntidad + " no encontrado con ID: " + id);
         }
         return entidad;
+    }
+
+    /**
+     * Precio del que sale el ítem: el de la lista elegida en el navegador (listaPrecioArticuloId).
+     * Si no viene, cae al primer precio del artículo (compatibilidad con clientes viejos).
+     */
+    private ListaPrecioArticulo buscarPrecioDelItem(FacturaDetalleRequestDTO itemDto) {
+        if (itemDto.getListaPrecioArticuloId() == null) {
+            return buscarListaPrecioPorArticuloId(itemDto.getArticuloId());
+        }
+        ListaPrecioArticulo lpa = em.find(ListaPrecioArticulo.class, itemDto.getListaPrecioArticuloId());
+        if (lpa == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "No se encontró el precio (ListaPrecioArticulo) ID: " + itemDto.getListaPrecioArticuloId());
+        }
+        if (itemDto.getArticuloId() != null && !itemDto.getArticuloId().equals(lpa.getArticulo().getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "El precio ID " + lpa.getId() + " no corresponde al artículo ID " + itemDto.getArticuloId() + ".");
+        }
+        return lpa;
     }
 
     private ListaPrecioArticulo buscarListaPrecioPorArticuloId(Long articuloId) {

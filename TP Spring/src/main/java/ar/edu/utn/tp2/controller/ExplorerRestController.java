@@ -94,18 +94,22 @@ public class ExplorerRestController {
 
     @GetMapping("/articulos-precio")
     public ResponseEntity<List<ListaPrecioArticuloDTO>> buscarArticulosPrecio(
-            @RequestParam(required = false) String busqueda
+            @RequestParam(required = false) String busqueda,
+            @RequestParam(required = false) Long listaPrecioId
     ) {
+        // Sin listaPrecioId trae los precios de todas las listas (el explorer elige cuál mostrar en el navegador)
         String jpql = "SELECT new ar.edu.utn.tp2.dto.ListaPrecioArticuloDTO(" +
-                      "lpa.id, a.id, a.denominacion, lpa.precioVenta) " +
+                      "lpa.id, a.id, a.denominacion, lpa.precioVenta, lpa.listaPrecio.id) " +
                       "FROM ListaPrecioArticulo lpa " +
                       "JOIN lpa.articulo a " +
                       "WHERE (:busqueda IS NULL OR LOWER(a.denominacion) LIKE LOWER(:busqueda)) " +
+                      "AND (:listaPrecioId IS NULL OR lpa.listaPrecio.id = :listaPrecioId) " +
                       "ORDER BY a.denominacion ASC";
 
         TypedQuery<ListaPrecioArticuloDTO> query = em.createQuery(jpql, ListaPrecioArticuloDTO.class);
         String filtro = (busqueda != null && !busqueda.trim().isEmpty()) ? "%" + busqueda.trim() + "%" : null;
         query.setParameter("busqueda", filtro);
+        query.setParameter("listaPrecioId", listaPrecioId);
 
         return ResponseEntity.ok(query.getResultList());
     }

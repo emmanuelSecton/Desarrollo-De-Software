@@ -166,7 +166,9 @@ function renderizarDetalles(): void {
 
 function limpiarItemActual(): void {
     $<HTMLInputElement>("itemArticuloId").value = "";
+    $<HTMLInputElement>("itemListaPrecioArticuloId").value = "";
     $<HTMLInputElement>("itemDescripcion").value = "";
+    btnAgregarItem.disabled = true; // se habilita al elegir un artículo
     $<HTMLInputElement>("itemCantidad").value = "1";
     $<HTMLInputElement>("itemPrecio").value = "";
     $<HTMLInputElement>("itemBonificacion").value = "0";
@@ -180,10 +182,54 @@ function resetearFormularioFactura(): void {
     limpiarItemActual();
     detallesEnMemoria = [];
     renderizarDetalles();
+    aplicarReglaClienteCondicion();
+}
+
+// ---------- Regla: sin Consumidor Final si la condición de IVA no es Consumidor Final ----------
+const CODIGO_AFIP_CONSUMIDOR_FINAL = "5";
+
+function condicionEsConsumidorFinal(): boolean {
+    const opcion = selectCondicionIva.selectedOptions[0];
+    // Mientras no cargan las condiciones no se bloquea nada
+    return !opcion?.dataset.codigoAfip || opcion.dataset.codigoAfip === CODIGO_AFIP_CONSUMIDOR_FINAL;
+}
+
+/** Ajusta el campo Cliente según la condición de IVA elegida. */
+function aplicarReglaClienteCondicion(): void {
+    const esCF = condicionEsConsumidorFinal();
+    const inputNombre = $<HTMLInputElement>("clienteNombre");
+    const tieneCliente = $<HTMLInputElement>("clienteId").value !== "";
+    const btnQuitar = $<HTMLButtonElement>("btnLimpiarCliente");
+
+    // "Quitar" vuelve a Consumidor Final: solo se permite si la condición es Consumidor Final
+    btnQuitar.disabled = !esCF;
+    btnQuitar.title = esCF ? "Volver a Consumidor Final" : "Con esta condición de IVA hay que elegir un cliente";
+
+    if (!tieneCliente) {
+        inputNombre.value = esCF ? "Consumidor Final" : "";
+        inputNombre.placeholder = esCF ? "" : "Elegí un cliente con Buscar…";
+    }
+    if (esCF || tieneCliente) inputNombre.classList.remove("invalido");
 }
 
 // ---------- Puntos de venta (solo los existentes en la base) ----------
 const selectPuntoVenta = $<HTMLSelectElement>("puntoVentaId");
+
+/** Nueva factura: muestra el número que se le asignará (el backend lo confirma al guardar). */
+async function mostrarProximoNumero(): Promise<void> {
+    const inputNumero = $<HTMLInputElement>("numero");
+    inputNumero.value = "";
+    if (facturaEditandoId !== null || !selectPuntoVenta.value) return;
+    try {
+        inputNumero.value = String(await facturaService.obtenerProximoNumero(Number(selectPuntoVenta.value)));
+    } catch (error) {
+        mostrarError(error);
+    }
+}
+
+selectPuntoVenta.addEventListener("change", () => {
+    if (facturaEditandoId === null) mostrarProximoNumero();
+});
 
 async function cargarPuntosVenta(): Promise<void> {
     try {
@@ -220,13 +266,16 @@ async function cargarCondicionesIva(): Promise<void> {
             return;
         }
 
-        // Por defecto: Responsable Inscripto (código AFIP 1) o, si no existe, la primera
-        const porDefecto = condiciones.find((c) => c.codigoAfip === 1) ?? condiciones[0];
+        // Por defecto: Consumidor Final (código AFIP 5) o, si no existe, la primera
+        const porDefecto = condiciones.find((c) => c.codigoAfip === 5) ?? condiciones[0];
         condiciones.forEach((c) => {
             const esDefecto = c.id === porDefecto.id;
             // defaultSelected hace que formFactura.reset() vuelva a esta opción
-            selectCondicionIva.add(new Option(c.denominacion, String(c.id), esDefecto, esDefecto));
+            const opcion = new Option(c.denominacion, String(c.id), esDefecto, esDefecto);
+            opcion.dataset.codigoAfip = String(c.codigoAfip);
+            selectCondicionIva.add(opcion);
         });
+        aplicarReglaClienteCondicion();
     } catch (error) {
         selectCondicionIva.innerHTML = `<option value="" disabled selected>No se pudieron cargar</option>`;
         mostrarError(error);
@@ -304,16 +353,25 @@ function renderizarFacturas(facturas: FacturaReporteDTO[]): void {
             </td>
         `;
 
-        tr.querySelector(".btn-arca")?.addEventListener("click", async () => {
+        const btnArca = tr.querySelector<HTMLButtonElement>(".btn-arca")!;
+        btnArca.addEventListener("click", async () => {
             if (!(await confirmar(`¿Informar la factura Nº ${f.numeroFactura} a ARCA para obtener el CAE?`, "Informar"))) return;
+            // Se deshabilita apenas se envía; solo vuelve a habilitarse si la autorización falla
+            btnArca.disabled = true;
+            btnArca.textContent = "Informando...";
+            mostrarMensaje(`Informando factura Nº ${f.numeroFactura} a ARCA...`, "info", true);
+            let autorizada = false;
             try {
-                mostrarMensaje(`Informando factura Nº ${f.numeroFactura} a ARCA...`, "info");
                 const resp = await facturaService.informarArca(f.id);
+                autorizada = true;
                 mostrarMensaje(`Autorizada por ARCA. CAE ${resp.cae} (vence ${fecha(resp.caeFechaVencimiento)})`);
-                await cargarFacturas();
             } catch (error) {
+                btnArca.disabled = false;
+                btnArca.textContent = "Informar a ARCA";
                 mostrarError(error);
             }
+            // Con la autorización, la grilla se recarga y el botón queda deshabilitado (ya tiene CAE)
+            if (autorizada) await cargarFacturas();
         });
         tr.querySelector(".btn-editar")?.addEventListener("click", async () => {
             if (informadaArca || yaAnulada) return;
@@ -338,10 +396,11 @@ function renderizarFacturas(facturas: FacturaReporteDTO[]): void {
                         ? `${detalle.clienteDenominacion} — ${detalle.clienteCuitCuil}`
                         : detalle.clienteDenominacion;
                 }
+                aplicarReglaClienteCondicion();
 
                 detallesEnMemoria = detalle.detalles.map((d) => ({ ...d }));
                 renderizarDetalles();
-                abrirModal(modalFactura, $("numero"));
+                abrirModal(modalFactura, $("fechaEmision"));
             } catch (error) {
                 mostrarError(error);
             }
@@ -421,6 +480,7 @@ function seleccionarCliente(c: ClienteDTO): void {
     } else {
         $<HTMLInputElement>("clienteId").value = String(c.id);
         $<HTMLInputElement>("clienteNombre").value = c.cuitCuil ? `${c.denominacion} — ${c.cuitCuil}` : c.denominacion;
+        aplicarReglaClienteCondicion();
     }
     cerrarModal(modalCliente);
 }
@@ -453,31 +513,93 @@ async function cargarModalClientes(busqueda = ""): Promise<void> {
 // ---------- Explorer: Artículos ----------
 function seleccionarArticulo(a: ListaPrecioArticuloDTO): void {
     $<HTMLInputElement>("itemArticuloId").value = String(a.articuloId);
+    $<HTMLInputElement>("itemListaPrecioArticuloId").value = String(a.id);
+    btnAgregarItem.disabled = false;
     $<HTMLInputElement>("itemDescripcion").value = a.articuloDenominacion;
     $<HTMLInputElement>("itemPrecio").value = String(a.precioVenta);
     cerrarModal(modalArticulo);
     $<HTMLInputElement>("itemCantidad").focus();
 }
 
+// Lista de precios del explorer de artículos: los precios de la grilla son los de la lista elegida
+const selectListaArticulo = $<HTMLSelectElement>("listaPrecioArticulo");
+let listasArticuloCargadas = false;
+
+async function cargarListasArticulo(): Promise<void> {
+    if (listasArticuloCargadas) return;
+    const listas = await facturaService.obtenerListasPrecio();
+    selectListaArticulo.innerHTML = "";
+    if (listas.length === 0) {
+        selectListaArticulo.add(new Option("No hay listas de precios", "", true, true));
+        return;
+    }
+    // Por defecto la primera lista creada (menor id), que es la de venta general
+    const idDefecto = Math.min(...listas.map((l) => l.id));
+    listas.forEach((l) => selectListaArticulo.add(new Option(l.denominacion, String(l.id), l.id === idDefecto, l.id === idDefecto)));
+    listasArticuloCargadas = true;
+}
+
+/** Un renglón de la grilla: el artículo con sus precios en todas las listas (clave: id de lista). */
+interface FilaArticulo {
+    precios: Map<number, ListaPrecioArticuloDTO>;
+    celdaPrecio: HTMLTableCellElement;
+    boton: HTMLButtonElement;
+}
+let filasArticulos: FilaArticulo[] = [];
+
+/** Muestra en cada renglón el precio de la lista elegida, sin volver a consultar al servidor. */
+function mostrarPreciosLista(): void {
+    const listaId = Number(selectListaArticulo.value);
+    filasArticulos.forEach((fila) => {
+        const precio = fila.precios.get(listaId);
+        fila.celdaPrecio.innerHTML = precio ? moneda(precio.precioVenta) : `<span class="sub">Sin precio en esta lista</span>`;
+        fila.boton.disabled = !precio;
+    });
+}
+
+selectListaArticulo.addEventListener("change", mostrarPreciosLista);
+
 async function cargarModalArticulos(busqueda = ""): Promise<void> {
     tablaModalArticulos.innerHTML = `<tr><td colspan="3" class="vacio">Buscando...</td></tr>`;
+    filasArticulos = [];
     try {
-        const articulos = await facturaService.buscarArticulosPrecio(busqueda);
+        await cargarListasArticulo();
+        // Trae los precios de todas las listas; al cambiar de lista solo se cambia cuál se muestra
+        const precios = await facturaService.buscarArticulosPrecio(busqueda);
         tablaModalArticulos.innerHTML = "";
-        if (articulos.length === 0) {
+        if (precios.length === 0) {
             tablaModalArticulos.innerHTML = `<tr><td colspan="3" class="vacio">No se encontraron artículos.</td></tr>`;
             return;
         }
-        articulos.forEach((a) => {
+
+        // Agrupar por artículo (vienen ordenados por denominación)
+        const porArticulo = new Map<number, Map<number, ListaPrecioArticuloDTO>>();
+        precios.forEach((p) => {
+            if (!porArticulo.has(p.articuloId)) porArticulo.set(p.articuloId, new Map());
+            porArticulo.get(p.articuloId)!.set(p.listaPrecioId, p);
+        });
+
+        porArticulo.forEach((preciosArticulo) => {
+            const a = preciosArticulo.values().next().value!;
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td>${esc(a.articuloDenominacion)}<span class="sub">Art. ID ${a.articuloId}</span></td>
-                <td class="num">${moneda(a.precioVenta)}</td>
+                <td class="num"></td>
                 <td><button type="button" class="ok-btn sm">Elegir</button></td>
             `;
-            tr.querySelector("button")?.addEventListener("click", () => seleccionarArticulo(a));
+            const fila: FilaArticulo = {
+                precios: preciosArticulo,
+                celdaPrecio: tr.querySelector("td.num")!,
+                boton: tr.querySelector("button")!
+            };
+            fila.boton.addEventListener("click", () => {
+                const precio = fila.precios.get(Number(selectListaArticulo.value));
+                if (precio) seleccionarArticulo(precio);
+            });
+            filasArticulos.push(fila);
             tablaModalArticulos.appendChild(tr);
         });
+        mostrarPreciosLista();
     } catch (error) {
         tablaModalArticulos.innerHTML = "";
         mostrarError(error);
@@ -490,19 +612,18 @@ $("btnAbrirModalFactura").addEventListener("click", () => {
     $<HTMLElement>("tituloModalFactura").textContent = "Nueva factura";
     (formFactura.querySelector('button[type="submit"]') as HTMLButtonElement).textContent = "Guardar factura";
     resetearFormularioFactura();
-    abrirModal(modalFactura, $("numero"));
+    abrirModal(modalFactura, $("fechaEmision"));
+    mostrarProximoNumero();
 });
 
 $("btnAbrirModalCliente").addEventListener("click", () => {
     destinoModalCliente = "factura";
-    $("btnAbrirModalNuevoCliente").style.display = "";
     abrirModal(modalCliente, inputBuscarCliente);
     cargarModalClientes(inputBuscarCliente.value);
 });
 
 $("btnAbrirModalClienteFiltro").addEventListener("click", () => {
     destinoModalCliente = "filtro";
-    $("btnAbrirModalNuevoCliente").style.display = "none";
     abrirModal(modalCliente, inputBuscarCliente);
     cargarModalClientes(inputBuscarCliente.value);
 });
@@ -513,8 +634,9 @@ inputBuscarCliente.addEventListener("keydown", (e) => {
 });
 $("btnLimpiarCliente").addEventListener("click", () => {
     $<HTMLInputElement>("clienteId").value = "";
-    $<HTMLInputElement>("clienteNombre").value = "Consumidor Final";
+    aplicarReglaClienteCondicion();
 });
+selectCondicionIva.addEventListener("change", aplicarReglaClienteCondicion);
 
 // ---------- Alta de cliente ----------
 const modalNuevoCliente = $<HTMLDivElement>("modalNuevoCliente");
@@ -606,7 +728,7 @@ const modalNuevoArticulo = $<HTMLDivElement>("modalNuevoArticulo");
 const formNuevoArticulo = $<HTMLFormElement>("formNuevoArticulo");
 const selectRubro = $<HTMLSelectElement>("naRubroId");
 const selectMarca = $<HTMLSelectElement>("naMarcaId");
-const selectListaPrecio = $<HTMLSelectElement>("naListaPrecioId");
+const tablaPreciosNuevoArticulo = $<HTMLTableSectionElement>("naTablaPrecios");
 
 function llenarSelect(select: HTMLSelectElement, opciones: OpcionDTO[], textoVacio: string | null): void {
     select.innerHTML = "";
@@ -621,6 +743,32 @@ function llenarSelect(select: HTMLSelectElement, opciones: OpcionDTO[], textoVac
     }
 }
 
+/** Grilla de precios del alta: un renglón por lista con un campo de precio (en blanco = sin precio). */
+function llenarTablaPrecios(listas: OpcionDTO[]): void {
+    tablaPreciosNuevoArticulo.innerHTML = "";
+    if (listas.length === 0) {
+        tablaPreciosNuevoArticulo.innerHTML = `<tr><td colspan="2" class="vacio">No hay listas de precios cargadas.</td></tr>`;
+        return;
+    }
+    // Primero la lista creada primero (la de venta general), igual que el selector de artículos
+    [...listas].sort((a, b) => a.id - b.id).forEach((l) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><label for="naPrecio-${l.id}">${esc(l.denominacion)}</label></td>
+            <td class="num"><input type="number" id="naPrecio-${l.id}" class="input-precio" data-lista-id="${l.id}"
+                step="0.01" min="0.01" placeholder="Sin precio" /></td>
+        `;
+        const input = tr.querySelector("input")!;
+        input.addEventListener("input", () => {
+            tablaPreciosNuevoArticulo.querySelectorAll(".invalido").forEach((i) => i.classList.remove("invalido"));
+        });
+        tablaPreciosNuevoArticulo.appendChild(tr);
+    });
+}
+
+const inputsPrecioArticulo = () =>
+    [...tablaPreciosNuevoArticulo.querySelectorAll<HTMLInputElement>("input.input-precio")];
+
 let opcionesArticuloCargadas = false;
 async function cargarOpcionesArticulo(): Promise<void> {
     if (opcionesArticuloCargadas) return;
@@ -631,7 +779,7 @@ async function cargarOpcionesArticulo(): Promise<void> {
     ]);
     llenarSelect(selectRubro, rubros, "(Sin rubro)");
     llenarSelect(selectMarca, marcas, "(Sin marca)");
-    llenarSelect(selectListaPrecio, listas, null);
+    llenarTablaPrecios(listas);
     opcionesArticuloCargadas = true;
 }
 
@@ -660,18 +808,27 @@ $("btnAbrirModalNuevoArticulo").addEventListener("click", async () => {
 formNuevoArticulo.addEventListener("submit", async (e) => {
     e.preventDefault();
     const valor = (id: string) => $<HTMLInputElement>(id).value.trim();
-    const precio = Number(valor("naPrecioVenta"));
 
-    const errores: [string, string][] = [];
-    if (!valor("naDenominacion")) errores.push(["naDenominacion", "Completá la denominación del artículo."]);
-    if (!valor("naCodigo")) errores.push(["naCodigo", "Completá el código del artículo."]);
-    if (!selectListaPrecio.value) errores.push(["naListaPrecioId", "Elegí una lista de precios."]);
-    if (!(precio > 0)) errores.push(["naPrecioVenta", "El precio de venta debe ser mayor a 0."]);
+    const errores: [HTMLElement[], string][] = [];
+    if (!valor("naDenominacion")) errores.push([[$("naDenominacion")], "Completá la denominación del artículo."]);
+    if (!valor("naCodigo")) errores.push([[$("naCodigo")], "Completá el código del artículo."]);
+
+    // Precios: solo las listas con un valor cargado; los cargados deben ser > 0
+    const inputs = inputsPrecioArticulo();
+    const cargados = inputs.filter((i) => i.value.trim() !== "");
+    const invalidos = cargados.filter((i) => !(Number(i.value) > 0));
+    if (inputs.length === 0) {
+        errores.push([[], "No hay listas de precios cargadas para asignar el precio."]);
+    } else if (cargados.length === 0) {
+        errores.push([inputs, "Cargá el precio en al menos una lista."]);
+    } else if (invalidos.length > 0) {
+        errores.push([invalidos, "Los precios deben ser mayores a 0."]);
+    }
 
     formNuevoArticulo.querySelectorAll(".invalido").forEach((i) => i.classList.remove("invalido"));
     if (errores.length > 0) {
-        errores.forEach(([id]) => $(id).classList.add("invalido"));
-        $(errores[0][0]).focus();
+        errores.forEach(([campos]) => campos.forEach((c) => c.classList.add("invalido")));
+        errores[0][0][0]?.focus();
         mostrarMensaje(errores[0][1], "err");
         return;
     }
@@ -679,18 +836,25 @@ formNuevoArticulo.addEventListener("submit", async (e) => {
     const btnGuardar = $<HTMLButtonElement>("btnGuardarArticulo");
     btnGuardar.disabled = true;
     try {
-        const creado = await facturaService.crearArticulo({
+        const creados = await facturaService.crearArticulo({
             denominacion: valor("naDenominacion"),
             codigo: valor("naCodigo"),
             rubroId: selectRubro.value ? Number(selectRubro.value) : undefined,
             marcaId: selectMarca.value ? Number(selectMarca.value) : undefined,
-            listaPrecioId: Number(selectListaPrecio.value),
-            precioVenta: precio
+            precios: cargados.map((i) => ({ listaPrecioId: Number(i.dataset.listaId), precioVenta: Number(i.value) }))
         });
+        // Se selecciona con el precio de la lista que se está mirando en "Seleccionar artículo"
+        const listaActual = Number(selectListaArticulo.value);
+        const elegido = creados.find((p) => p.listaPrecioId === listaActual) ?? creados[0];
+        // Si no tiene precio en la lista que se estaba mirando, el selector pasa a la lista usada
+        if (elegido.listaPrecioId !== listaActual) {
+            selectListaArticulo.value = String(elegido.listaPrecioId);
+            mostrarPreciosLista();
+        }
         cerrarModal(modalNuevoArticulo);
-        seleccionarArticulo(creado);
+        seleccionarArticulo(elegido);
         inputBuscarArticulo.value = "";
-        mostrarMensaje(`Artículo "${creado.articuloDenominacion}" creado y seleccionado.`);
+        mostrarMensaje(`Artículo "${elegido.articuloDenominacion}" creado y seleccionado.`);
     } catch (error) {
         mostrarError(error);
         if ((error as Error).message.startsWith("Ya existe un artículo con el código")) {
@@ -726,6 +890,8 @@ btnAgregarItem.addEventListener("click", () => {
     const nuevoItem: FacturaDetalleRequestDTO = { articuloId, cantidad, porcentajeBonificacion: bonificacion };
     if (descripcion) nuevoItem.descripcion = descripcion;
     if (precioStr) nuevoItem.precioUnitario = Number(precioStr);
+    const listaPrecioArticuloId = Number($<HTMLInputElement>("itemListaPrecioArticuloId").value);
+    if (listaPrecioArticuloId) nuevoItem.listaPrecioArticuloId = listaPrecioArticuloId;
 
     detallesEnMemoria.push(nuevoItem);
     renderizarDetalles();
@@ -749,6 +915,13 @@ formFactura.addEventListener("submit", async (e) => {
         selectCondicionIva.focus();
         return;
     }
+    if (!condicionEsConsumidorFinal() && !$<HTMLInputElement>("clienteId").value) {
+        const condicion = selectCondicionIva.selectedOptions[0]?.text ?? "";
+        mostrarMensaje(`Con la condición de IVA "${condicion}" hay que elegir un cliente; no puede ser Consumidor Final.`, "err");
+        $("clienteNombre").classList.add("invalido");
+        $("btnAbrirModalCliente").focus();
+        return;
+    }
     if (!selectMoneda.value) {
         mostrarMensaje("Elegí una moneda de la lista.", "err");
         selectMoneda.focus();
@@ -757,7 +930,8 @@ formFactura.addEventListener("submit", async (e) => {
 
     const clienteIdStr = $<HTMLInputElement>("clienteId").value;
     const nuevaFactura: FacturaRequestDTO = {
-        numero: Number($<HTMLInputElement>("numero").value),
+        // Al crear, el backend asigna el número; al editar se conserva el que ya tiene
+        numero: facturaEditandoId !== null ? Number($<HTMLInputElement>("numero").value) : undefined,
         fechaEmision: $<HTMLInputElement>("fechaEmision").value,
         clienteId: clienteIdStr ? Number(clienteIdStr) : null,
         condicionIvaId: Number(selectCondicionIva.value),

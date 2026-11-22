@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.web.server.ResponseStatusException;
 import java.util.Date;
 import java.util.List;
 
@@ -31,6 +32,12 @@ public class FacturaRestController {
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdfBytes);
     }
+    /** Próximo número de factura que se asignará en el punto de venta indicado. */
+    @GetMapping("/proximo-numero")
+    public ResponseEntity<Long> obtenerProximoNumero(@RequestParam Long puntoVentaId) {
+        return ResponseEntity.ok(facturaService.obtenerProximoNumero(puntoVentaId));
+    }
+
     /** Reporte PDF de las facturas que cumplen los filtros de la grilla (todas si no hay filtros). */
     @GetMapping("/reporte/pdf")
     public ResponseEntity<byte[]> descargarReportePdf(
@@ -76,16 +83,35 @@ public class FacturaRestController {
 
     @PostMapping
     public ResponseEntity<FacturaReporteDTO> crearFactura(@RequestBody FacturaRequestDTO request) {
-        FacturaReporteDTO creada = facturaService.crear(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(creada);
+        // El número se calcula como máximo + 1. Si otra alta simultánea tomó el mismo número,
+        // la restricción única de la base lo rechaza y se reintenta con el siguiente.
+        // Cada intento es una llamada nueva al servicio, o sea, una transacción nueva.
+        final int maxIntentos = 3;
+        for (int intento = 1; ; intento++) {
+            try {
+                FacturaReporteDTO creada = facturaService.crear(request);
+                return ResponseEntity.status(HttpStatus.CREATED).body(creada);
+            } catch (RuntimeException e) {
+                if (!FacturaService.esNumeroDuplicado(e)) throw e;
+                if (intento >= maxIntentos) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT,
+                            "No se pudo asignar un número de factura libre. Intentá guardar de nuevo.");
+                }
+            }
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<FacturaReporteDTO> actualizarFactura(
             @PathVariable Long id,
             @RequestBody FacturaRequestDTO request) {
-        FacturaReporteDTO actualizada = facturaService.actualizar(id, request);
-        return ResponseEntity.ok(actualizada);
+        try {
+            return ResponseEntity.ok(facturaService.actualizar(id, request));
+        } catch (RuntimeException e) {
+            if (!FacturaService.esNumeroDuplicado(e)) throw e;
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ya existe otra factura con ese número en el punto de venta. Volvé a intentarlo.");
+        }
     }
 
     @DeleteMapping("/{id}")

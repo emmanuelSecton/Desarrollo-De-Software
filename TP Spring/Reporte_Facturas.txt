@@ -5,7 +5,14 @@ Número	Fecha	Punto de Venta	Cliente	Condición IVA	Ítems	Total
 3	2026-11-20 00:00:00.0	Sucursal Centro	Emmanuel Secton	Monotributo Trabajador Independiente Promovido	2	568700.0
 4	2026-11-20 00:00:00.0	Sucursal Centro	Daniela Tavano	Responsable Inscripto	1	359975.0
 5	2026-11-20 00:00:00.0	Sucursal Norte	Tomás González	Responsable Inscripto	3	907500.0
-6	2026-11-20 00:00:00.0	Sucursal Centro	Tomás González	Responsable Inscripto	1	9680.0
-7	2026-11-20 00:00:00.0	Sucursal Centro	Emmanuel Secton	Responsable Inscripto	1	2904000.0
+11	2026-11-20 00:00:00.0	Sucursal Centro	Emmanuel Secton	Responsable Inscripto	1	2904000.0
 8	2026-11-20 00:00:00.0	Sucursal Norte	Consumidor Final	Consumidor Final	1	1234200.0
 1	2026-11-20 00:00:00.0	Sucursal Norte	Emmanuel Secton	Consumidor Final	2	251680.0
+5	2026-11-20 00:00:00.0	Sucursal Centro	Daniela Tavano	Consumidor Final	2	605000.0
+6	2026-11-20 00:00:00.0	Sucursal Centro	Consumidor Final	Responsable Inscripto	1	381150.0
+7	2026-11-20 00:00:00.0	Sucursal Centro	Consumidor Final	Responsable Inscripto	2	484000.0
+9	2026-11-20 00:00:00.0	Sucursal Norte	Emmanuel Secton	Responsable Inscripto	1	363000.0
+8	2026-11-20 00:00:00.0	Sucursal Centro	Consumidor Final	Responsable Inscripto	1	52272.0
+9	2026-11-20 00:00:00.0	Sucursal Centro	Daniela Tavano	Responsable Inscripto	1	987360.0
+12	2026-11-20 00:00:00.0	Sucursal Centro	Consumidor Final	Consumidor Final	2	421080.0
+13	2026-11-20 00:00:00.0	Sucursal Centro	Pepe Juan SRL	Consumidor Final	1	435600.0

@@ -27,6 +27,7 @@ export interface FacturaDetalleRequestDTO {
     cantidad: number;
     precioUnitario?: number;
     porcentajeBonificacion: number;
+    listaPrecioArticuloId?: number; // precio de la lista elegida en "Seleccionar artículo"
 }
 
 export interface FacturaRequestDTO {
@@ -62,6 +63,7 @@ export interface ListaPrecioArticuloDTO {
     articuloId: number;
     articuloDenominacion: string;
     precioVenta: number;
+    listaPrecioId: number;
 }
 export interface ClienteRequestDTO {
     cuitCuil: string;
@@ -96,6 +98,10 @@ export interface ArticuloRequestDTO {
     denominacion: string;
     rubroId?: number;
     marcaId?: number;
+    precios: PrecioListaDTO[]; // un precio por lista (al menos uno)
+}
+
+export interface PrecioListaDTO {
     listaPrecioId: number;
     precioVenta: number;
 }

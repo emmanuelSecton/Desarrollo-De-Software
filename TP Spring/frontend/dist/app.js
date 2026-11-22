@@ -140,7 +140,9 @@ function renderizarDetalles() {
 }
 function limpiarItemActual() {
     $("itemArticuloId").value = "";
+    $("itemListaPrecioArticuloId").value = "";
     $("itemDescripcion").value = "";
+    btnAgregarItem.disabled = true; // se habilita al elegir un artículo
     $("itemCantidad").value = "1";
     $("itemPrecio").value = "";
     $("itemBonificacion").value = "0";
@@ -153,9 +155,50 @@ function resetearFormularioFactura() {
     limpiarItemActual();
     detallesEnMemoria = [];
     renderizarDetalles();
+    aplicarReglaClienteCondicion();
+}
+// ---------- Regla: sin Consumidor Final si la condición de IVA no es Consumidor Final ----------
+const CODIGO_AFIP_CONSUMIDOR_FINAL = "5";
+function condicionEsConsumidorFinal() {
+    const opcion = selectCondicionIva.selectedOptions[0];
+    // Mientras no cargan las condiciones no se bloquea nada
+    return !opcion?.dataset.codigoAfip || opcion.dataset.codigoAfip === CODIGO_AFIP_CONSUMIDOR_FINAL;
+}
+/** Ajusta el campo Cliente según la condición de IVA elegida. */
+function aplicarReglaClienteCondicion() {
+    const esCF = condicionEsConsumidorFinal();
+    const inputNombre = $("clienteNombre");
+    const tieneCliente = $("clienteId").value !== "";
+    const btnQuitar = $("btnLimpiarCliente");
+    // "Quitar" vuelve a Consumidor Final: solo se permite si la condición es Consumidor Final
+    btnQuitar.disabled = !esCF;
+    btnQuitar.title = esCF ? "Volver a Consumidor Final" : "Con esta condición de IVA hay que elegir un cliente";
+    if (!tieneCliente) {
+        inputNombre.value = esCF ? "Consumidor Final" : "";
+        inputNombre.placeholder = esCF ? "" : "Elegí un cliente con Buscar…";
+    }
+    if (esCF || tieneCliente)
+        inputNombre.classList.remove("invalido");
 }
 // ---------- Puntos de venta (solo los existentes en la base) ----------
 const selectPuntoVenta = $("puntoVentaId");
+/** Nueva factura: muestra el número que se le asignará (el backend lo confirma al guardar). */
+async function mostrarProximoNumero() {
+    const inputNumero = $("numero");
+    inputNumero.value = "";
+    if (facturaEditandoId !== null || !selectPuntoVenta.value)
+        return;
+    try {
+        inputNumero.value = String(await facturaService.obtenerProximoNumero(Number(selectPuntoVenta.value)));
+    }
+    catch (error) {
+        mostrarError(error);
+    }
+}
+selectPuntoVenta.addEventListener("change", () => {
+    if (facturaEditandoId === null)
+        mostrarProximoNumero();
+});
 async function cargarPuntosVenta() {
     try {
         const puntos = await facturaService.obtenerPuntosVenta();
@@ -186,13 +229,16 @@ async function cargarCondicionesIva() {
             selectCondicionIva.innerHTML = `<option value="" disabled selected>No hay condiciones cargadas</option>`;
             return;
         }
-        // Por defecto: Responsable Inscripto (código AFIP 1) o, si no existe, la primera
-        const porDefecto = condiciones.find((c) => c.codigoAfip === 1) ?? condiciones[0];
+        // Por defecto: Consumidor Final (código AFIP 5) o, si no existe, la primera
+        const porDefecto = condiciones.find((c) => c.codigoAfip === 5) ?? condiciones[0];
         condiciones.forEach((c) => {
             const esDefecto = c.id === porDefecto.id;
             // defaultSelected hace que formFactura.reset() vuelva a esta opción
-            selectCondicionIva.add(new Option(c.denominacion, String(c.id), esDefecto, esDefecto));
+            const opcion = new Option(c.denominacion, String(c.id), esDefecto, esDefecto);
+            opcion.dataset.codigoAfip = String(c.codigoAfip);
+            selectCondicionIva.add(opcion);
         });
+        aplicarReglaClienteCondicion();
     }
     catch (error) {
         selectCondicionIva.innerHTML = `<option value="" disabled selected>No se pudieron cargar</option>`;
@@ -262,18 +308,28 @@ function renderizarFacturas(facturas) {
                 </div>
             </td>
         `;
-        tr.querySelector(".btn-arca")?.addEventListener("click", async () => {
+        const btnArca = tr.querySelector(".btn-arca");
+        btnArca.addEventListener("click", async () => {
             if (!(await confirmar(`¿Informar la factura Nº ${f.numeroFactura} a ARCA para obtener el CAE?`, "Informar")))
                 return;
+            // Se deshabilita apenas se envía; solo vuelve a habilitarse si la autorización falla
+            btnArca.disabled = true;
+            btnArca.textContent = "Informando...";
+            mostrarMensaje(`Informando factura Nº ${f.numeroFactura} a ARCA...`, "info", true);
+            let autorizada = false;
             try {
-                mostrarMensaje(`Informando factura Nº ${f.numeroFactura} a ARCA...`, "info");
                 const resp = await facturaService.informarArca(f.id);
+                autorizada = true;
                 mostrarMensaje(`Autorizada por ARCA. CAE ${resp.cae} (vence ${fecha(resp.caeFechaVencimiento)})`);
-                await cargarFacturas();
             }
             catch (error) {
+                btnArca.disabled = false;
+                btnArca.textContent = "Informar a ARCA";
                 mostrarError(error);
             }
+            // Con la autorización, la grilla se recarga y el botón queda deshabilitado (ya tiene CAE)
+            if (autorizada)
+                await cargarFacturas();
         });
         tr.querySelector(".btn-editar")?.addEventListener("click", async () => {
             if (informadaArca || yaAnulada)
@@ -296,9 +352,10 @@ function renderizarFacturas(facturas) {
                         ? `${detalle.clienteDenominacion} — ${detalle.clienteCuitCuil}`
                         : detalle.clienteDenominacion;
                 }
+                aplicarReglaClienteCondicion();
                 detallesEnMemoria = detalle.detalles.map((d) => ({ ...d }));
                 renderizarDetalles();
-                abrirModal(modalFactura, $("numero"));
+                abrirModal(modalFactura, $("fechaEmision"));
             }
             catch (error) {
                 mostrarError(error);
@@ -381,6 +438,7 @@ function seleccionarCliente(c) {
     else {
         $("clienteId").value = String(c.id);
         $("clienteNombre").value = c.cuitCuil ? `${c.denominacion} — ${c.cuitCuil}` : c.denominacion;
+        aplicarReglaClienteCondicion();
     }
     cerrarModal(modalCliente);
 }
@@ -412,30 +470,82 @@ async function cargarModalClientes(busqueda = "") {
 // ---------- Explorer: Artículos ----------
 function seleccionarArticulo(a) {
     $("itemArticuloId").value = String(a.articuloId);
+    $("itemListaPrecioArticuloId").value = String(a.id);
+    btnAgregarItem.disabled = false;
     $("itemDescripcion").value = a.articuloDenominacion;
     $("itemPrecio").value = String(a.precioVenta);
     cerrarModal(modalArticulo);
     $("itemCantidad").focus();
 }
+// Lista de precios del explorer de artículos: los precios de la grilla son los de la lista elegida
+const selectListaArticulo = $("listaPrecioArticulo");
+let listasArticuloCargadas = false;
+async function cargarListasArticulo() {
+    if (listasArticuloCargadas)
+        return;
+    const listas = await facturaService.obtenerListasPrecio();
+    selectListaArticulo.innerHTML = "";
+    if (listas.length === 0) {
+        selectListaArticulo.add(new Option("No hay listas de precios", "", true, true));
+        return;
+    }
+    // Por defecto la primera lista creada (menor id), que es la de venta general
+    const idDefecto = Math.min(...listas.map((l) => l.id));
+    listas.forEach((l) => selectListaArticulo.add(new Option(l.denominacion, String(l.id), l.id === idDefecto, l.id === idDefecto)));
+    listasArticuloCargadas = true;
+}
+let filasArticulos = [];
+/** Muestra en cada renglón el precio de la lista elegida, sin volver a consultar al servidor. */
+function mostrarPreciosLista() {
+    const listaId = Number(selectListaArticulo.value);
+    filasArticulos.forEach((fila) => {
+        const precio = fila.precios.get(listaId);
+        fila.celdaPrecio.innerHTML = precio ? moneda(precio.precioVenta) : `<span class="sub">Sin precio en esta lista</span>`;
+        fila.boton.disabled = !precio;
+    });
+}
+selectListaArticulo.addEventListener("change", mostrarPreciosLista);
 async function cargarModalArticulos(busqueda = "") {
     tablaModalArticulos.innerHTML = `<tr><td colspan="3" class="vacio">Buscando...</td></tr>`;
+    filasArticulos = [];
     try {
-        const articulos = await facturaService.buscarArticulosPrecio(busqueda);
+        await cargarListasArticulo();
+        // Trae los precios de todas las listas; al cambiar de lista solo se cambia cuál se muestra
+        const precios = await facturaService.buscarArticulosPrecio(busqueda);
         tablaModalArticulos.innerHTML = "";
-        if (articulos.length === 0) {
+        if (precios.length === 0) {
             tablaModalArticulos.innerHTML = `<tr><td colspan="3" class="vacio">No se encontraron artículos.</td></tr>`;
             return;
         }
-        articulos.forEach((a) => {
+        // Agrupar por artículo (vienen ordenados por denominación)
+        const porArticulo = new Map();
+        precios.forEach((p) => {
+            if (!porArticulo.has(p.articuloId))
+                porArticulo.set(p.articuloId, new Map());
+            porArticulo.get(p.articuloId).set(p.listaPrecioId, p);
+        });
+        porArticulo.forEach((preciosArticulo) => {
+            const a = preciosArticulo.values().next().value;
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td>${esc(a.articuloDenominacion)}<span class="sub">Art. ID ${a.articuloId}</span></td>
-                <td class="num">${moneda(a.precioVenta)}</td>
+                <td class="num"></td>
                 <td><button type="button" class="ok-btn sm">Elegir</button></td>
             `;
-            tr.querySelector("button")?.addEventListener("click", () => seleccionarArticulo(a));
+            const fila = {
+                precios: preciosArticulo,
+                celdaPrecio: tr.querySelector("td.num"),
+                boton: tr.querySelector("button")
+            };
+            fila.boton.addEventListener("click", () => {
+                const precio = fila.precios.get(Number(selectListaArticulo.value));
+                if (precio)
+                    seleccionarArticulo(precio);
+            });
+            filasArticulos.push(fila);
             tablaModalArticulos.appendChild(tr);
         });
+        mostrarPreciosLista();
     }
     catch (error) {
         tablaModalArticulos.innerHTML = "";
@@ -448,17 +558,16 @@ $("btnAbrirModalFactura").addEventListener("click", () => {
     $("tituloModalFactura").textContent = "Nueva factura";
     formFactura.querySelector('button[type="submit"]').textContent = "Guardar factura";
     resetearFormularioFactura();
-    abrirModal(modalFactura, $("numero"));
+    abrirModal(modalFactura, $("fechaEmision"));
+    mostrarProximoNumero();
 });
 $("btnAbrirModalCliente").addEventListener("click", () => {
     destinoModalCliente = "factura";
-    $("btnAbrirModalNuevoCliente").style.display = "";
     abrirModal(modalCliente, inputBuscarCliente);
     cargarModalClientes(inputBuscarCliente.value);
 });
 $("btnAbrirModalClienteFiltro").addEventListener("click", () => {
     destinoModalCliente = "filtro";
-    $("btnAbrirModalNuevoCliente").style.display = "none";
     abrirModal(modalCliente, inputBuscarCliente);
     cargarModalClientes(inputBuscarCliente.value);
 });
@@ -472,8 +581,9 @@ inputBuscarCliente.addEventListener("keydown", (e) => {
 });
 $("btnLimpiarCliente").addEventListener("click", () => {
     $("clienteId").value = "";
-    $("clienteNombre").value = "Consumidor Final";
+    aplicarReglaClienteCondicion();
 });
+selectCondicionIva.addEventListener("change", aplicarReglaClienteCondicion);
 // ---------- Alta de cliente ----------
 const modalNuevoCliente = $("modalNuevoCliente");
 const formNuevoCliente = $("formNuevoCliente");
@@ -569,7 +679,7 @@ const modalNuevoArticulo = $("modalNuevoArticulo");
 const formNuevoArticulo = $("formNuevoArticulo");
 const selectRubro = $("naRubroId");
 const selectMarca = $("naMarcaId");
-const selectListaPrecio = $("naListaPrecioId");
+const tablaPreciosNuevoArticulo = $("naTablaPrecios");
 function llenarSelect(select, opciones, textoVacio) {
     select.innerHTML = "";
     // textoVacio != null => campo opcional, se agrega la opción "sin valor"
@@ -583,6 +693,29 @@ function llenarSelect(select, opciones, textoVacio) {
         select.add(new Option("No hay opciones cargadas", "", true, true));
     }
 }
+/** Grilla de precios del alta: un renglón por lista con un campo de precio (en blanco = sin precio). */
+function llenarTablaPrecios(listas) {
+    tablaPreciosNuevoArticulo.innerHTML = "";
+    if (listas.length === 0) {
+        tablaPreciosNuevoArticulo.innerHTML = `<tr><td colspan="2" class="vacio">No hay listas de precios cargadas.</td></tr>`;
+        return;
+    }
+    // Primero la lista creada primero (la de venta general), igual que el selector de artículos
+    [...listas].sort((a, b) => a.id - b.id).forEach((l) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><label for="naPrecio-${l.id}">${esc(l.denominacion)}</label></td>
+            <td class="num"><input type="number" id="naPrecio-${l.id}" class="input-precio" data-lista-id="${l.id}"
+                step="0.01" min="0.01" placeholder="Sin precio" /></td>
+        `;
+        const input = tr.querySelector("input");
+        input.addEventListener("input", () => {
+            tablaPreciosNuevoArticulo.querySelectorAll(".invalido").forEach((i) => i.classList.remove("invalido"));
+        });
+        tablaPreciosNuevoArticulo.appendChild(tr);
+    });
+}
+const inputsPrecioArticulo = () => [...tablaPreciosNuevoArticulo.querySelectorAll("input.input-precio")];
 let opcionesArticuloCargadas = false;
 async function cargarOpcionesArticulo() {
     if (opcionesArticuloCargadas)
@@ -594,7 +727,7 @@ async function cargarOpcionesArticulo() {
     ]);
     llenarSelect(selectRubro, rubros, "(Sin rubro)");
     llenarSelect(selectMarca, marcas, "(Sin marca)");
-    llenarSelect(selectListaPrecio, listas, null);
+    llenarTablaPrecios(listas);
     opcionesArticuloCargadas = true;
 }
 const inputCodigoArticulo = $("naCodigo");
@@ -619,38 +752,53 @@ $("btnAbrirModalNuevoArticulo").addEventListener("click", async () => {
 formNuevoArticulo.addEventListener("submit", async (e) => {
     e.preventDefault();
     const valor = (id) => $(id).value.trim();
-    const precio = Number(valor("naPrecioVenta"));
     const errores = [];
     if (!valor("naDenominacion"))
-        errores.push(["naDenominacion", "Completá la denominación del artículo."]);
+        errores.push([[$("naDenominacion")], "Completá la denominación del artículo."]);
     if (!valor("naCodigo"))
-        errores.push(["naCodigo", "Completá el código del artículo."]);
-    if (!selectListaPrecio.value)
-        errores.push(["naListaPrecioId", "Elegí una lista de precios."]);
-    if (!(precio > 0))
-        errores.push(["naPrecioVenta", "El precio de venta debe ser mayor a 0."]);
+        errores.push([[$("naCodigo")], "Completá el código del artículo."]);
+    // Precios: solo las listas con un valor cargado; los cargados deben ser > 0
+    const inputs = inputsPrecioArticulo();
+    const cargados = inputs.filter((i) => i.value.trim() !== "");
+    const invalidos = cargados.filter((i) => !(Number(i.value) > 0));
+    if (inputs.length === 0) {
+        errores.push([[], "No hay listas de precios cargadas para asignar el precio."]);
+    }
+    else if (cargados.length === 0) {
+        errores.push([inputs, "Cargá el precio en al menos una lista."]);
+    }
+    else if (invalidos.length > 0) {
+        errores.push([invalidos, "Los precios deben ser mayores a 0."]);
+    }
     formNuevoArticulo.querySelectorAll(".invalido").forEach((i) => i.classList.remove("invalido"));
     if (errores.length > 0) {
-        errores.forEach(([id]) => $(id).classList.add("invalido"));
-        $(errores[0][0]).focus();
+        errores.forEach(([campos]) => campos.forEach((c) => c.classList.add("invalido")));
+        errores[0][0][0]?.focus();
         mostrarMensaje(errores[0][1], "err");
         return;
     }
     const btnGuardar = $("btnGuardarArticulo");
     btnGuardar.disabled = true;
     try {
-        const creado = await facturaService.crearArticulo({
+        const creados = await facturaService.crearArticulo({
             denominacion: valor("naDenominacion"),
             codigo: valor("naCodigo"),
             rubroId: selectRubro.value ? Number(selectRubro.value) : undefined,
             marcaId: selectMarca.value ? Number(selectMarca.value) : undefined,
-            listaPrecioId: Number(selectListaPrecio.value),
-            precioVenta: precio
+            precios: cargados.map((i) => ({ listaPrecioId: Number(i.dataset.listaId), precioVenta: Number(i.value) }))
         });
+        // Se selecciona con el precio de la lista que se está mirando en "Seleccionar artículo"
+        const listaActual = Number(selectListaArticulo.value);
+        const elegido = creados.find((p) => p.listaPrecioId === listaActual) ?? creados[0];
+        // Si no tiene precio en la lista que se estaba mirando, el selector pasa a la lista usada
+        if (elegido.listaPrecioId !== listaActual) {
+            selectListaArticulo.value = String(elegido.listaPrecioId);
+            mostrarPreciosLista();
+        }
         cerrarModal(modalNuevoArticulo);
-        seleccionarArticulo(creado);
+        seleccionarArticulo(elegido);
         inputBuscarArticulo.value = "";
-        mostrarMensaje(`Artículo "${creado.articuloDenominacion}" creado y seleccionado.`);
+        mostrarMensaje(`Artículo "${elegido.articuloDenominacion}" creado y seleccionado.`);
     }
     catch (error) {
         mostrarError(error);
@@ -687,6 +835,9 @@ btnAgregarItem.addEventListener("click", () => {
         nuevoItem.descripcion = descripcion;
     if (precioStr)
         nuevoItem.precioUnitario = Number(precioStr);
+    const listaPrecioArticuloId = Number($("itemListaPrecioArticuloId").value);
+    if (listaPrecioArticuloId)
+        nuevoItem.listaPrecioArticuloId = listaPrecioArticuloId;
     detallesEnMemoria.push(nuevoItem);
     renderizarDetalles();
     limpiarItemActual();
@@ -707,6 +858,13 @@ formFactura.addEventListener("submit", async (e) => {
         selectCondicionIva.focus();
         return;
     }
+    if (!condicionEsConsumidorFinal() && !$("clienteId").value) {
+        const condicion = selectCondicionIva.selectedOptions[0]?.text ?? "";
+        mostrarMensaje(`Con la condición de IVA "${condicion}" hay que elegir un cliente; no puede ser Consumidor Final.`, "err");
+        $("clienteNombre").classList.add("invalido");
+        $("btnAbrirModalCliente").focus();
+        return;
+    }
     if (!selectMoneda.value) {
         mostrarMensaje("Elegí una moneda de la lista.", "err");
         selectMoneda.focus();
@@ -714,7 +872,8 @@ formFactura.addEventListener("submit", async (e) => {
     }
     const clienteIdStr = $("clienteId").value;
     const nuevaFactura = {
-        numero: Number($("numero").value),
+        // Al crear, el backend asigna el número; al editar se conserva el que ya tiene
+        numero: facturaEditandoId !== null ? Number($("numero").value) : undefined,
         fechaEmision: $("fechaEmision").value,
         clienteId: clienteIdStr ? Number(clienteIdStr) : null,
         condicionIvaId: Number(selectCondicionIva.value),

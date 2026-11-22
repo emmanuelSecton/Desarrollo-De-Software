@@ -15,4 +15,5 @@ public class FacturaDetalleRequestDTO {
     private double cantidad;
     private Double precioUnitario; // Opcional: si es null, se toma el de ListaPrecioArticulo
     private double porcentajeBonificacion;
+    private Long listaPrecioArticuloId; // Precio (de la lista elegida) del que sale el ítem; si es null, se usa el primero del artículo
 }

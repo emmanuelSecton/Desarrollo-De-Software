@@ -1,5 +1,7 @@
 package ar.edu.utn.tp2.dto;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +19,6 @@ public class ArticuloRequestDTO {
     private Long rubroId;   // opcional
     private Long marcaId;   // opcional
 
-    // ListaPrecioArticulo
-    private Long listaPrecioId;
-    private Double precioVenta;
+    // ListaPrecioArticulo: un precio por lista (al menos uno)
+    private List<PrecioListaDTO> precios;
 }

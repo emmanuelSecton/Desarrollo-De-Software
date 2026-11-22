@@ -36,6 +36,12 @@ export class FacturaService {
         }
         return await response.json();
     }
+    async obtenerProximoNumero(puntoVentaId) {
+        const response = await fetch(`${this.baseUrl}/proximo-numero?puntoVentaId=${puntoVentaId}`);
+        if (!response.ok)
+            throw new Error(`Error al obtener el próximo número de factura (HTTP ${response.status})`);
+        return await response.json();
+    }
     async crearFactura(factura) {
         const response = await fetch(this.baseUrl, {
             method: "POST",
@@ -145,8 +151,13 @@ export class FacturaService {
         }
         return await response.json();
     }
-    async buscarArticulosPrecio(busqueda = "") {
-        const query = busqueda.trim() ? `?busqueda=${encodeURIComponent(busqueda.trim())}` : "";
+    async buscarArticulosPrecio(busqueda = "", listaPrecioId) {
+        const params = new URLSearchParams();
+        if (busqueda.trim())
+            params.append("busqueda", busqueda.trim());
+        if (listaPrecioId !== undefined)
+            params.append("listaPrecioId", String(listaPrecioId));
+        const query = params.toString() ? `?${params.toString()}` : "";
         const response = await fetch(`${this.apiBase}/articulos-precio${query}`);
         if (!response.ok)
             throw new Error(`Error al buscar artículos (HTTP ${response.status})`);

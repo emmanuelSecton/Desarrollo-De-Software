@@ -54,6 +54,12 @@ export class FacturaService {
         return await response.json();
     }
 
+    async obtenerProximoNumero(puntoVentaId: number): Promise<number> {
+        const response = await fetch(`${this.baseUrl}/proximo-numero?puntoVentaId=${puntoVentaId}`);
+        if (!response.ok) throw new Error(`Error al obtener el próximo número de factura (HTTP ${response.status})`);
+        return await response.json();
+    }
+
     async crearFactura(factura: FacturaRequestDTO): Promise<FacturaReporteDTO> {
         const response = await fetch(this.baseUrl, {
             method: "POST",
@@ -160,7 +166,7 @@ export class FacturaService {
         return await response.json();
     }
 
-    async crearArticulo(articulo: ArticuloRequestDTO): Promise<ListaPrecioArticuloDTO> {
+    async crearArticulo(articulo: ArticuloRequestDTO): Promise<ListaPrecioArticuloDTO[]> {
         const response = await fetch(`${this.apiBase}/articulos`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -173,8 +179,11 @@ export class FacturaService {
         return await response.json();
     }
 
-    async buscarArticulosPrecio(busqueda = ""): Promise<ListaPrecioArticuloDTO[]> {
-        const query = busqueda.trim() ? `?busqueda=${encodeURIComponent(busqueda.trim())}` : "";
+    async buscarArticulosPrecio(busqueda = "", listaPrecioId?: number): Promise<ListaPrecioArticuloDTO[]> {
+        const params = new URLSearchParams();
+        if (busqueda.trim()) params.append("busqueda", busqueda.trim());
+        if (listaPrecioId !== undefined) params.append("listaPrecioId", String(listaPrecioId));
+        const query = params.toString() ? `?${params.toString()}` : "";
         const response = await fetch(`${this.apiBase}/articulos-precio${query}`);
         if (!response.ok) throw new Error(`Error al buscar artículos (HTTP ${response.status})`);
         return await response.json();

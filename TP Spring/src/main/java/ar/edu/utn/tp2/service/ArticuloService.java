@@ -1,7 +1,10 @@
 package ar.edu.utn.tp2.service;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -17,6 +20,7 @@ import ar.edu.utn.tp2.Rubro;
 import ar.edu.utn.tp2.Usuario;
 import ar.edu.utn.tp2.dto.ArticuloRequestDTO;
 import ar.edu.utn.tp2.dto.ListaPrecioArticuloDTO;
+import ar.edu.utn.tp2.dto.PrecioListaDTO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -26,17 +30,27 @@ public class ArticuloService {
     @PersistenceContext
     private EntityManager em;
 
-    /** Crea el Articulo y su precio en la lista elegida, en una sola transacción. */
+    /** Crea el Articulo y sus precios (uno por lista cargada), en una sola transacción. */
     @Transactional
-    public ListaPrecioArticuloDTO crear(ArticuloRequestDTO dto) {
+    public List<ListaPrecioArticuloDTO> crear(ArticuloRequestDTO dto) {
         String codigo = obligatorio(dto.getCodigo(), "El código").toUpperCase();
         String denominacion = obligatorio(dto.getDenominacion(), "La denominación");
 
-        if (dto.getListaPrecioId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La lista de precios es obligatoria.");
+        List<PrecioListaDTO> precios = dto.getPrecios() != null ? dto.getPrecios() : List.of();
+        if (precios.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cargá el precio en al menos una lista.");
         }
-        if (dto.getPrecioVenta() == null || dto.getPrecioVenta() <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El precio de venta debe ser mayor a 0.");
+        Set<Long> listasVistas = new HashSet<>();
+        for (PrecioListaDTO p : precios) {
+            if (p.getListaPrecioId() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cada precio debe indicar su lista de precios.");
+            }
+            if (!listasVistas.add(p.getListaPrecioId())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hay más de un precio para la misma lista.");
+            }
+            if (p.getPrecioVenta() == null || p.getPrecioVenta() <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Los precios deben ser mayores a 0.");
+            }
         }
 
         Long existentes = em.createQuery(
@@ -47,7 +61,6 @@ public class ArticuloService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe un artículo con el código " + codigo + ".");
         }
 
-        ListaPrecio lista = buscar(ListaPrecio.class, dto.getListaPrecioId(), "Lista de precios");
         Rubro rubro = dto.getRubroId() != null ? buscar(Rubro.class, dto.getRubroId(), "Rubro") : null;
         Marca marca = dto.getMarcaId() != null ? buscar(Marca.class, dto.getMarcaId(), "Marca") : null;
 
@@ -57,12 +70,20 @@ public class ArticuloService {
         auditar(articulo, usuario);
         em.persist(articulo);
 
-        ListaPrecioArticulo precio = new ListaPrecioArticulo(lista, dto.getPrecioVenta(), articulo);
-        auditar(precio, usuario);
-        em.persist(precio);
+        List<ListaPrecioArticulo> creados = new ArrayList<>();
+        for (PrecioListaDTO p : precios) {
+            ListaPrecio lista = buscar(ListaPrecio.class, p.getListaPrecioId(), "Lista de precios");
+            ListaPrecioArticulo precio = new ListaPrecioArticulo(lista, p.getPrecioVenta(), articulo);
+            auditar(precio, usuario);
+            em.persist(precio);
+            creados.add(precio);
+        }
         em.flush();
 
-        return new ListaPrecioArticuloDTO(precio.getId(), articulo.getId(), articulo.getDenominacion(), precio.getPrecioVenta());
+        return creados.stream()
+                .map(precio -> new ListaPrecioArticuloDTO(precio.getId(), articulo.getId(), articulo.getDenominacion(),
+                        precio.getPrecioVenta(), precio.getListaPrecio().getId()))
+                .toList();
     }
 
     private <T> T buscar(Class<T> clase, Long id, String nombre) {
