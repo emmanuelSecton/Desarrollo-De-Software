@@ -1,0 +1,4 @@
+# Perfil de test: solo valores ficticios. La base real la inyecta @ServiceConnection (Testcontainers).
+app:
+  base-url: http://localhost:8080
+  db-url: jdbc:postgresql://reemplazada-por-service-connection/test

@@ -168,7 +168,7 @@ Notas del plan:
 ## FASE 0 — Fundación técnica
 
 ### [C-01] `scaffolding-monorepo-y-base-tecnica`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (apply: 2026-11-24; pendiente archivar el change)
 - **Scope**:
   - Monorepo `backend/` (Gradle o Maven, Java 21, Spring Boot 3) con paquetes por módulo vacíos: `agenda`, `pacientes`, `clinica`, `caja`, `notificaciones`, `integraciones`, `identidad`, `auditoria`, `shared` y capas `api/application/domain/infrastructure`
   - Verificación de límites de módulo con ArchUnit o Spring Modulith (test que falla si un módulo rompe la regla de capas)
