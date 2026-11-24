@@ -1,0 +1,110 @@
+/* Global SDD — design tokens (Revision 1)
+ * Single source of visual values. Mockups and the React app import this file.
+ * Fonts are system stacks: no remote font dependency.
+ */
+:root {
+  /* ---------- Color: brand ---------- */
+  --color-brand-50:  #effaf8;
+  --color-brand-100: #d5f2ec;
+  --color-brand-200: #aae4da;
+  --color-brand-500: #14907f;
+  --color-brand-600: #0f766e; /* primary actions */
+  --color-brand-700: #0b5e58; /* hover / pressed */
+  --color-brand-900: #073b38;
+
+  /* ---------- Color: neutrals ---------- */
+  --color-bg:          #f6f8f8; /* app background */
+  --color-surface:     #ffffff; /* cards, panels */
+  --color-surface-alt: #eef2f2; /* table stripes, subtle fills */
+  --color-border:      #d7dfde;
+  --color-border-strong: #b5c2c0;
+  --color-text:        #142422; /* body text: 15.9:1 on white */
+  --color-text-muted:  #4d5f5c; /* secondary text: 6.8:1 on white */
+  --color-text-inverse:#ffffff;
+
+  /* ---------- Color: feedback ---------- */
+  --color-success-bg: #e7f6ec; --color-success-fg: #17663a; --color-success-border: #9fd8b4;
+  --color-warning-bg: #fff6e0; --color-warning-fg: #8a5300; --color-warning-border: #f3cf7a;
+  --color-danger-bg:  #fdecec; --color-danger-fg:  #b42318; --color-danger-border:  #f2aaa4;
+  --color-info-bg:    #e8f1fd; --color-info-fg:    #1d4ed8; --color-info-border:    #a9c6f5;
+
+  /* ---------- Color: turno states (RN-TU-01) ---------- */
+  --turno-reservado-bg:  var(--color-info-bg);    --turno-reservado-fg:  var(--color-info-fg);
+  --turno-confirmado-bg: var(--color-success-bg); --turno-confirmado-fg: var(--color-success-fg);
+  --turno-sinconf-bg:    var(--color-warning-bg); --turno-sinconf-fg:    var(--color-warning-fg);
+  --turno-atendido-bg:   var(--color-brand-50);   --turno-atendido-fg:   var(--color-brand-700);
+  --turno-ausente-bg:    var(--color-danger-bg);  --turno-ausente-fg:    var(--color-danger-fg);
+  --turno-cancelado-bg:  var(--color-surface-alt);--turno-cancelado-fg:  var(--color-text-muted);
+
+  /* ---------- Color: odontograma (convención a confirmar, PA-08) ---------- */
+  --odonto-a-realizar: #d92d20; /* rojo: patología / a realizar */
+  --odonto-realizado:  #1d4ed8; /* azul: tratamiento realizado */
+  --odonto-ausente:    #4d5f5c;
+  --odonto-sano:       #ffffff;
+  --odonto-trazo:      #6b7d7a;
+
+  /* ---------- Color: integrations ---------- */
+  --color-whatsapp: #128c7e; /* only for WhatsApp-related affordances */
+
+  /* ---------- Typography ---------- */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --text-xs:   0.75rem;   /* 12 */
+  --text-sm:   0.875rem;  /* 14 */
+  --text-base: 1rem;      /* 16: minimum for inputs (avoids iOS zoom) */
+  --text-lg:   1.125rem;  /* 18 */
+  --text-xl:   1.375rem;  /* 22 */
+  --text-2xl:  1.75rem;   /* 28 */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ---------- Spacing (4px grid) ---------- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* ---------- Radii ---------- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+
+  /* ---------- Shadows ---------- */
+  --shadow-sm: 0 1px 2px rgba(20, 36, 34, 0.06);
+  --shadow-md: 0 2px 8px rgba(20, 36, 34, 0.08), 0 1px 2px rgba(20, 36, 34, 0.06);
+  --shadow-lg: 0 12px 32px rgba(20, 36, 34, 0.14);
+
+  /* ---------- Focus ---------- */
+  --focus-ring: 0 0 0 3px #ffffff, 0 0 0 5px var(--color-brand-600);
+
+  /* ---------- Sizing ---------- */
+  --control-height: 2.75rem;   /* 44px touch target */
+  --control-height-sm: 2.25rem;
+  --content-max: 1200px;
+
+  /* ---------- Motion ---------- */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+  }
+  *, *::before, *::after {
+    animation-duration: 0ms !important;
+    transition-duration: 0ms !important;
+  }
+}
