@@ -1,0 +1,53 @@
+# Configuracion solo por variables de entorno (D13). Sin valores sensibles por defecto.
+# Las variables obligatorias se declaran con ":" vacio para que AppProperties falle
+# con un mensaje que nombra la variable (APP_BASE_URL, DB_URL).
+spring:
+  application:
+    name: odonto
+  datasource:
+    url: ${DB_URL:}
+    username: ${DB_USER:}
+    password: ${DB_PASSWORD:}
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:5}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        # Instantes siempre en UTC (RN-GL-02), sin importar la zona del host.
+        jdbc:
+          time_zone: UTC
+  flyway:
+    validate-on-migrate: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  mvc:
+    problemdetails:
+      enabled: true
+  web:
+    locale: es-AR
+    locale-resolver: fixed
+
+app:
+  base-url: ${APP_BASE_URL:}
+  timezone: ${APP_TIMEZONE:America/Argentina/Buenos_Aires}
+  db-url: ${DB_URL:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+      show-components: never
+
+server:
+  error:
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never

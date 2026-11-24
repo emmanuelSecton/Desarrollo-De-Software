@@ -1,0 +1,58 @@
+# Base compartida dev/demo (D12). Desarrollo: sumar docker-compose.override.yml (Compose lo carga solo).
+# Uso desde "Global SDD/":
+#   docker compose --env-file .env -f deploy/docker-compose.yml -f deploy/docker-compose.override.yml up -d --build
+name: odonto
+
+services:
+  postgres:
+    image: postgres:16.16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
+      APP_DB_NAME: ${APP_DB_NAME:-consultorio}
+      APP_DB_USER: ${APP_DB_USER:-}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:-}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+    # Sin "ports": la base no se publica en el archivo base (solo el override de desarrollo).
+
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: odonto:dev
+    restart: unless-stopped
+    env_file:
+      - path: ../.env
+        required: false
+    environment:
+      # Una sola fuente de verdad para la base: las APP_DB_* de la instancia.
+      DB_URL: jdbc:postgresql://postgres:5432/${APP_DB_NAME:-consultorio}
+      DB_USER: ${APP_DB_USER:-}
+      DB_PASSWORD: ${APP_DB_PASSWORD:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # El HEALTHCHECK viene definido en la imagen (deploy/Dockerfile).
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 768m
+    cpus: 1.0
+    networks:
+      - backend
+
+networks:
+  backend:
+
+volumes:
+  pgdata:

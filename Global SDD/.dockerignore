@@ -1,0 +1,19 @@
+# Contexto de build = "Global SDD/". Solo entran frontend/, backend/ y design-system/.
+.git
+.github
+.env
+.env.*
+!.env.example
+**/node_modules
+**/dist
+**/build
+**/.gradle
+**/coverage
+knowledge-base
+discovery
+openspec
+.atl
+.claude
+design-system/previews
+deploy
+*.md

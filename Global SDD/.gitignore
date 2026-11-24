@@ -1,0 +1,24 @@
+# Secretos locales
+.env
+
+# Frontend
+node_modules/
+frontend/dist/
+
+# Backend
+backend/build/
+backend/.gradle/
+backend/src/main/resources/static/*
+!backend/src/main/resources/static/.gitkeep
+
+# Cobertura y reportes
+coverage/
+*.lcov
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Registro de skills generado localmente (no versionado, ver AGENTS.md)
+.atl/
