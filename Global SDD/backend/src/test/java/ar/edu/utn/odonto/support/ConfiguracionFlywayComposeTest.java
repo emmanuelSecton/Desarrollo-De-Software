@@ -85,7 +85,7 @@ class ConfiguracionFlywayComposeTest {
         Path atributos = Path.of("..", ".gitattributes").toAbsolutePath().normalize();
 
         assertThat(atributos).exists();
-        assertThat(Files.readString(atributos).trim()).isEqualTo("*.sh text eol=lf");
+        assertThat(Files.readAllLines(atributos)).map(String::trim).contains("*.sh text eol=lf");
     }
 
     @Test

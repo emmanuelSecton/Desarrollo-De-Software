@@ -1,1 +1,3 @@
+# Scripts que se ejecutan en Linux (contenedores, CI): siempre LF,
+# aunque el checkout sea en Windows con core.autocrlf=true.
 *.sh text eol=lf
