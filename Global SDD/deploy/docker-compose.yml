@@ -10,6 +10,8 @@ services:
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
       APP_DB_NAME: ${APP_DB_NAME:-consultorio}
+      APP_DB_MIGRATOR_USER: ${APP_DB_MIGRATOR_USER:-}
+      APP_DB_MIGRATOR_PASSWORD: ${APP_DB_MIGRATOR_PASSWORD:-}
       APP_DB_USER: ${APP_DB_USER:-}
       APP_DB_PASSWORD: ${APP_DB_PASSWORD:-}
     volumes:
@@ -40,6 +42,10 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/${APP_DB_NAME:-consultorio}
       DB_USER: ${APP_DB_USER:-}
       DB_PASSWORD: ${APP_DB_PASSWORD:-}
+      # Flyway corre con el migrator (DDL); la app corre con el runtime (solo SELECT/INSERT).
+      SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/${APP_DB_NAME:-consultorio}
+      SPRING_FLYWAY_USER: ${APP_DB_MIGRATOR_USER:-}
+      SPRING_FLYWAY_PASSWORD: ${APP_DB_MIGRATOR_PASSWORD:-}
     depends_on:
       postgres:
         condition: service_healthy
