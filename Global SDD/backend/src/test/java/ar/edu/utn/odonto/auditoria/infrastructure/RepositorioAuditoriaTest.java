@@ -19,7 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-/** Adaptador JDBC y transacción REQUIRES_NEW sobre PostgreSQL real (C-02, D3/D4). */
+/** Adaptador JDBC y transacción REQUIRED sobre PostgreSQL real (C-02, D3/D4). */
 @SpringBootTest
 @ActiveProfiles("test")
 @Import(PostgresTestConfig.class)
@@ -50,7 +50,7 @@ class RepositorioAuditoriaTest {
     }
 
     @Test
-    void laAuditoriaSobreviveAlRollbackDeLaOperacionQueLaEnvuelve() {
+    void laAuditoriaSeRevierteConLaOperacionQueLaEnvuelve() {
         TransactionTemplate plantilla = new TransactionTemplate(transacciones);
 
         assertThatThrownBy(() -> plantilla.executeWithoutResult(estado -> {
@@ -62,7 +62,7 @@ class RepositorioAuditoriaTest {
         JdbcTemplate jdbc = new JdbcTemplate(dataSource);
         assertThat(jdbc.queryForObject(
                 "select count(*) from evento_auditoria where entidad_id = 't-8'", Integer.class))
-                .isEqualTo(1);
+                .isZero();
     }
 
     @Test

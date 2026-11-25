@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import ar.edu.utn.odonto.support.PostgresTestConfig;
+import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -19,6 +20,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 /** Registro con reloj fijo y transacción independiente (C-02, D3/D4). */
 @SpringBootTest
@@ -42,6 +45,13 @@ class AuditoriaServiceTest {
 
     @Autowired
     DataSource dataSource;
+
+    @Test
+    void elServicioRegistraConPropagacionRequired() throws Exception {
+        Method metodo = AuditoriaServiceImpl.class.getMethod("registrar", RegistroAuditoria.class);
+
+        assertThat(metodo.getAnnotation(Transactional.class).propagation()).isEqualTo(Propagation.REQUIRED);
+    }
 
     @Test
     void elEventoSePersisteConElInstanteDelRelojInyectado() {
@@ -72,6 +82,53 @@ class AuditoriaServiceTest {
         assertThat(fila.get("ACTOR_ID")).isNull();
         assertThat(fila.get("IP")).isNull();
         assertThat(fila.get("DETALLE").toString()).isEqualTo("{}");
+    }
+
+    @Test
+    void unaEntidadNulaSeRechazaAntesDeTocarLaBase() {
+        assertThatThrownBy(() -> servicio.registrar(new RegistroAuditoria(AccionAuditoria.LOGIN,
+                TipoActor.SISTEMA, null, null, "u-validacion-1", Map.of(), null)))
+                .isInstanceOf(AuditoriaInvalidaException.class)
+                .hasMessageContaining("entidad");
+    }
+
+    @Test
+    void losCuatroCamposObligatoriosRechazanNull() {
+        assertRechazado(new RegistroAuditoria(null, TipoActor.USUARIO, "u-2", "TURNO", "t-n", Map.of(), null),
+                "accion", "null");
+        assertRechazado(new RegistroAuditoria(AccionAuditoria.LOGIN, null, "u-2", "TURNO", "t-n", Map.of(), null),
+                "actor_tipo", "null");
+        assertRechazado(new RegistroAuditoria(AccionAuditoria.LOGIN, TipoActor.USUARIO, "u-2", null, "t-n", Map.of(),
+                null), "entidad", "null");
+        assertRechazado(new RegistroAuditoria(AccionAuditoria.LOGIN, TipoActor.USUARIO, "u-2", "TURNO", null,
+                Map.of(), null), "entidad_id", "null");
+    }
+
+    @Test
+    void losCuatroCamposObligatoriosRechazanLongitudExcesiva() {
+        String entidadLarga = "E".repeat(81);
+        String idLargo = "i".repeat(101);
+        String accionLarga = "A".repeat(61);
+        String actorLargo = "T".repeat(21);
+
+        assertRechazado(new RegistroAuditoria(AccionAuditoria.LOGIN, TipoActor.USUARIO, "u-2", entidadLarga,
+                "t-n", Map.of(), null), "entidad", entidadLarga);
+        assertRechazado(new RegistroAuditoria(AccionAuditoria.LOGIN, TipoActor.USUARIO, "u-2", "TURNO", idLargo,
+                Map.of(), null), "entidad_id", idLargo);
+        assertRechazadoTexto("accion", accionLarga, AuditoriaServiceImpl.MAX_ACCION, accionLarga);
+        assertRechazadoTexto("actor_tipo", actorLargo, AuditoriaServiceImpl.MAX_ACTOR_TIPO, actorLargo);
+    }
+
+    private void assertRechazado(RegistroAuditoria registro, String campo, String valorRechazado) {
+        assertThatThrownBy(() -> servicio.registrar(registro))
+                .isInstanceOf(AuditoriaInvalidaException.class)
+                .satisfies(t -> assertThat(t.getMessage()).contains(campo).doesNotContain(valorRechazado));
+    }
+
+    private static void assertRechazadoTexto(String campo, String valor, int maximo, String valorRechazado) {
+        assertThatThrownBy(() -> AuditoriaServiceImpl.validarTexto(campo, valor, maximo))
+                .isInstanceOf(AuditoriaInvalidaException.class)
+                .satisfies(t -> assertThat(t.getMessage()).contains(campo).doesNotContain(valorRechazado));
     }
 
     @Test

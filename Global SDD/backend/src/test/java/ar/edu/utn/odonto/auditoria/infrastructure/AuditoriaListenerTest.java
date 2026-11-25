@@ -7,6 +7,7 @@ import ar.edu.utn.odonto.auditoria.application.AccionAuditoria;
 import ar.edu.utn.odonto.auditoria.application.TipoActor;
 import ar.edu.utn.odonto.auditoria.application.evento.EventoAuditoria;
 import ar.edu.utn.odonto.support.PostgresTestConfig;
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.sql.DataSource;
@@ -18,9 +19,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-/** Publicación AFTER_COMMIT y transacciones independientes (C-02, D6). */
+/** Publicación BEFORE_COMMIT dentro de la transacción de negocio (C-02, D6). */
 @SpringBootTest
 @ActiveProfiles("test")
 @Import(PostgresTestConfig.class)
@@ -36,16 +42,32 @@ class AuditoriaListenerTest {
     DataSource dataSource;
 
     @Test
-    void elEventoSePersisteSoloDespuesDelCommit() {
+    void elListenerNoApilaUnaTransaccionPropia() throws Exception {
+        Method metodo = AuditoriaListener.class.getMethod("alConfirmar", EventoAuditoria.class);
+
+        assertThat(metodo.isAnnotationPresent(Transactional.class)).isFalse();
+        TransactionalEventListener anotacion = metodo.getAnnotation(TransactionalEventListener.class);
+        assertThat(anotacion).isNotNull();
+        assertThat(anotacion.phase()).isEqualTo(TransactionPhase.BEFORE_COMMIT);
+        assertThat(anotacion.fallbackExecution()).isTrue();
+    }
+
+    @Test
+    void elEventoSeRegistraAntesDelCommitDentroDeLaMismaTransaccion() {
         JdbcTemplate jdbc = new JdbcTemplate(dataSource);
-        AtomicBoolean dentroDeLaTransaccion = new AtomicBoolean();
+        AtomicBoolean visibleAntesDelCommit = new AtomicBoolean();
 
         new TransactionTemplate(transacciones).executeWithoutResult(estado -> {
             editor.publishEvent(evento("t-100", Map.of("turno_id", "t-100")));
-            dentroDeLaTransaccion.set(conteo(jdbc, "t-100") > 0);
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void beforeCommit(boolean readOnly) {
+                    visibleAntesDelCommit.set(conteo(jdbc, "t-100") > 0);
+                }
+            });
         });
 
-        assertThat(dentroDeLaTransaccion.get()).isFalse();
+        assertThat(visibleAntesDelCommit.get()).isTrue();
         assertThat(conteo(jdbc, "t-100")).isEqualTo(1);
     }
 

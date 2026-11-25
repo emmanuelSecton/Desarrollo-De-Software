@@ -1,6 +1,7 @@
 package ar.edu.utn.odonto.auditoria.application;
 
 import java.util.LinkedHashMap;
+import java.util.regex.Pattern;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -21,6 +22,7 @@ public class ValidadorDetalle {
             "diagnostico", "email", "telefono", "dni", "nombre", "apellido", "direccion", "password", "token",
             "clave", "nota", "observacion");
     private static final int LONGITUD_MAXIMA = 200;
+    private static final Pattern REFERENCIA = Pattern.compile("[A-Za-z0-9_-]{1,64}");
 
     public Map<String, Object> validar(Map<String, Object> detalle) {
         if (detalle == null || detalle.isEmpty()) {
@@ -30,7 +32,7 @@ public class ValidadorDetalle {
         Map<String, Object> validado = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entrada : detalle.entrySet()) {
             validarClave(entrada.getKey());
-            validarValor(entrada.getValue());
+            validarValor(entrada.getKey(), entrada.getValue());
             validado.put(entrada.getKey(), entrada.getValue());
         }
         return Map.copyOf(validado);
@@ -43,10 +45,14 @@ public class ValidadorDetalle {
         }
     }
 
-    private static void validarValor(Object valor) {
+    private static void validarValor(String clave, Object valor) {
         if (!(valor instanceof String || valor instanceof Number || valor instanceof Boolean)) {
             LOG.warn("detalle rechazado: valor no escalar");
             throw new AuditoriaInvalidaException("detalle: valor no escalar");
+        }
+        if ("referencia".equals(clave) && valor instanceof String texto && !REFERENCIA.matcher(texto).matches()) {
+            LOG.warn("detalle rechazado: referencia fuera del formato permitido");
+            throw new AuditoriaInvalidaException("detalle: referencia invalida");
         }
         if (valor instanceof String texto && texto.length() > LONGITUD_MAXIMA) {
             LOG.warn("detalle rechazado: valor excede la longitud maxima");

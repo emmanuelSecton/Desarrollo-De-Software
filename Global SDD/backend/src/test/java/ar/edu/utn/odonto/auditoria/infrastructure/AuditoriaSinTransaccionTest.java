@@ -46,6 +46,17 @@ class AuditoriaSinTransaccionTest {
     }
 
     @Test
+    void otraLecturaSinTransaccionConOtraAccionSeRegistra() {
+        editor.publishEvent(new EventoAuditoria(AccionAuditoria.LOGIN, TipoActor.SISTEMA, null,
+                "SISTEMA", "s-304", Map.of(), "2001:db8::1"));
+
+        assertThat(fila("s-304"))
+                .containsEntry("ACCION", "LOGIN")
+                .containsEntry("ACTOR_TIPO", "SISTEMA")
+                .containsEntry("IP", "2001:db8::1");
+    }
+
+    @Test
     void elRegistroEsEquivalenteAlDeUnaEscrituraTransaccional() {
         new TransactionTemplate(transacciones).executeWithoutResult(estado -> editor.publishEvent(eventoDeLectura("h-301")));
         editor.publishEvent(eventoDeLectura("h-302"));

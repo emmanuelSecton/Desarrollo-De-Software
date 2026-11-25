@@ -3,6 +3,7 @@ package ar.edu.utn.odonto.auditoria.infrastructure;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import ar.edu.utn.odonto.support.ConexionRuntimeTest;
 import ar.edu.utn.odonto.support.PostgresTestConfig;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -22,9 +23,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @ActiveProfiles("test")
 @Import(PostgresTestConfig.class)
 class PermisosRuntimeTest {
-
-    private static final String USUARIO = "app_runtime";
-    private static final String CLAVE = "clave-ficticia-de-prueba-runtime";
 
     @Autowired
     DataSource dataSource;
@@ -63,12 +61,12 @@ class PermisosRuntimeTest {
 
         String instaladoPor = new JdbcTemplate(dataSource).queryForObject(
                 "select installed_by from flyway_schema_history where version = '2'", String.class);
-        assertThat(instaladoPor).isNotEqualTo(USUARIO);
+        assertThat(instaladoPor).isNotEqualTo(ConexionRuntimeTest.USUARIO);
     }
 
     private static Connection conectarRuntime() throws SQLException {
         PostgreSQLContainer<?> contenedor = PostgresTestConfig.POSTGRES;
-        return DriverManager.getConnection(contenedor.getJdbcUrl(), USUARIO, CLAVE);
+        return         DriverManager.getConnection(contenedor.getJdbcUrl(), ConexionRuntimeTest.USUARIO, ConexionRuntimeTest.CLAVE);
     }
 
     @FunctionalInterface

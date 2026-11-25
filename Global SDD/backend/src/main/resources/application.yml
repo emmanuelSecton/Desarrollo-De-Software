@@ -21,6 +21,8 @@ spring:
           time_zone: UTC
   flyway:
     validate-on-migrate: true
+    placeholders:
+      "[runtime_role]": ${APP_DB_USER:app_runtime}
   jackson:
     serialization:
       write-dates-as-timestamps: false

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import ar.edu.utn.odonto.support.PostgresTestConfig;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import javax.sql.DataSource;
@@ -48,6 +49,37 @@ class TriggerAppendOnlyTest {
         assertThat(jdbc.queryForObject(
                         "select count(*) from evento_auditoria where id = ?", Integer.class, id))
                 .isEqualTo(1);
+    }
+
+    @Test
+    void unTruncateDelDuenoEsRechazadoYConservaLasFilas() {
+        JdbcTemplate jdbc = new JdbcTemplate(dataSource);
+        Long id = insertar(jdbc);
+        Integer totalAntes = jdbc.queryForObject("select count(*) from evento_auditoria", Integer.class);
+
+        assertThat(jdbc.queryForObject(
+                        "select tableowner = current_user from pg_tables where tablename = 'evento_auditoria'",
+                        Boolean.class))
+                .isTrue();
+        assertRechazado(() -> jdbc.execute("truncate table evento_auditoria"));
+
+        assertThat(jdbc.queryForObject("select count(*) from evento_auditoria", Integer.class)).isEqualTo(totalAntes);
+        assertThat(jdbc.queryForObject(
+                        "select count(*) from evento_auditoria where id = ?", Integer.class, id))
+                .isEqualTo(1);
+    }
+
+    @Test
+    void unTruncateConRestartIdentityRechazaConElMismoSqlstateQueUpdate() {
+        JdbcTemplate jdbc = new JdbcTemplate(dataSource);
+        insertar(jdbc);
+
+        assertThatThrownBy(() -> jdbc.execute("truncate table evento_auditoria restart identity"))
+                .isInstanceOf(DataAccessException.class)
+                .satisfies(t -> assertThat(t.getCause())
+                        .isInstanceOf(SQLException.class)
+                        .extracting(c -> ((SQLException) c).getSQLState())
+                        .isEqualTo("42501"));
     }
 
     @Test

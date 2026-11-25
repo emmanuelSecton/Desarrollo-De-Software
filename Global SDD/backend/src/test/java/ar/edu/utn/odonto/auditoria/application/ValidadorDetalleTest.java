@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,6 +56,27 @@ class ValidadorDetalleTest {
                 .isInstanceOf(AuditoriaInvalidaException.class);
         assertThatThrownBy(() -> validador.validar(Map.of("referencia", "x".repeat(201))))
                 .isInstanceOf(AuditoriaInvalidaException.class);
+    }
+
+    @Test
+    void unaReferenciaValidaSeAcepta() {
+        assertThat(validador.validar(Map.of("referencia", "ABC-123_x")))
+                .containsExactly(Map.entry("referencia", "ABC-123_x"));
+    }
+
+    @Test
+    void referenciasConAcentosSimbolosOLongitudExcesivaSeRechazan() {
+        for (String referencia : List.of("ref á", "abc/123", "abc.123", "x".repeat(65), "")) {
+            assertThatThrownBy(() -> validador.validar(Map.of("referencia", referencia)))
+                    .isInstanceOf(AuditoriaInvalidaException.class);
+        }
+    }
+
+    @Test
+    void unaReferenciaConEspaciosSeRechaza() {
+        assertThatThrownBy(() -> validador.validar(Map.of("referencia", "abc def")))
+                .isInstanceOf(AuditoriaInvalidaException.class)
+                .hasMessageContaining("referencia");
     }
 
     @Test

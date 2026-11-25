@@ -19,7 +19,7 @@ CREATE TABLE evento_auditoria (
 
 CREATE OR REPLACE FUNCTION rechazar_modificacion_evento_auditoria() RETURNS TRIGGER AS $$
 BEGIN
-    RAISE EXCEPTION 'evento_auditoria es append-only: UPDATE/DELETE no permitidos'
+    RAISE EXCEPTION 'evento_auditoria es append-only: UPDATE/DELETE/TRUNCATE no permitidos'
         USING ERRCODE = '42501';
 END;
 $$ LANGUAGE plpgsql;
@@ -28,10 +28,14 @@ CREATE TRIGGER trg_evento_auditoria_append_only
     BEFORE UPDATE OR DELETE ON evento_auditoria
     FOR EACH ROW EXECUTE FUNCTION rechazar_modificacion_evento_auditoria();
 
+CREATE TRIGGER trg_evento_auditoria_no_truncate
+    BEFORE TRUNCATE ON evento_auditoria
+    FOR EACH STATEMENT EXECUTE FUNCTION rechazar_modificacion_evento_auditoria();
+
 CREATE INDEX idx_evento_auditoria_ocurrido_at ON evento_auditoria (ocurrido_at DESC);
 CREATE INDEX idx_evento_auditoria_actor ON evento_auditoria (actor_tipo, actor_id);
 CREATE INDEX idx_evento_auditoria_accion ON evento_auditoria (accion);
 CREATE INDEX idx_evento_auditoria_entidad ON evento_auditoria (entidad, entidad_id);
 
-GRANT USAGE, SELECT ON SEQUENCE evento_auditoria_id_seq TO app_runtime;
-GRANT SELECT, INSERT ON evento_auditoria TO app_runtime;
+GRANT USAGE, SELECT ON SEQUENCE evento_auditoria_id_seq TO ${runtime_role};
+GRANT SELECT, INSERT ON evento_auditoria TO ${runtime_role};
