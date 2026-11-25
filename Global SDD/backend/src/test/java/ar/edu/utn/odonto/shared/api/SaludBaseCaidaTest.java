@@ -24,7 +24,8 @@ import org.testcontainers.utility.DockerImageName;
 class SaludBaseCaidaTest {
 
     static final PostgreSQLContainer<?> BASE_DEDICADA =
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres:16.16-alpine"));
+            new PostgreSQLContainer<>(DockerImageName.parse("postgres:16.16-alpine"))
+                    .withInitScript("db/init/auditoria-roles.sql");
 
     static {
         BASE_DEDICADA.start();

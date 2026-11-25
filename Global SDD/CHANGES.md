@@ -193,7 +193,7 @@ Notas del plan:
 > Tras C-03 se abre el primer FORK. C-05, C-07 y C-09 son independientes entre sí.
 
 ### [C-02] `auditoria-append-only`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (apply y archivo: 2026-11-25 → `openspec/changes/archive/2026-11-25-auditoria-append-only`)
 - **Scope**:
   - Migración Flyway: tabla `evento_auditoria` (`id BIGSERIAL`, `ocurrido_at`, `actor_tipo`, `actor_id`, `accion`, `entidad`, `entidad_id`, `detalle JSONB`, `ip INET`)
   - Append-only: trigger que rechaza UPDATE/DELETE y rol de base de la app sin esos permisos (RN-GL-01)

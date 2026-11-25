@@ -24,7 +24,7 @@ import org.springframework.test.context.ActiveProfiles;
 class MigracionBaselineTest {
 
     private static final String INSTALADA_EN =
-            "select extract(epoch from installed_on)::bigint from flyway_schema_history";
+            "select max(extract(epoch from installed_on))::bigint from flyway_schema_history";
 
     @Autowired
     DataSource dataSource;
@@ -33,7 +33,7 @@ class MigracionBaselineTest {
     Environment entorno;
 
     @Test
-    void laBaseVaciaQuedaConV1BaselineYLasTresExtensiones() {
+    void laBaseVaciaQuedaConV1V2YLasTresExtensiones() {
         JdbcTemplate jdbc = new JdbcTemplate(dataSource);
 
         List<String> extensiones = jdbc.queryForList("select extname from pg_extension", String.class);
@@ -42,7 +42,7 @@ class MigracionBaselineTest {
                 String.class);
 
         assertThat(extensiones).contains("btree_gist", "citext", "pgcrypto");
-        assertThat(migraciones).containsExactly("1:baseline");
+        assertThat(migraciones).containsExactly("1:baseline", "2:auditoria");
     }
 
     @Test
@@ -69,7 +69,7 @@ class MigracionBaselineTest {
         }
 
         assertThat(jdbc.queryForObject("select count(*) from flyway_schema_history", Integer.class))
-                .isEqualTo(1);
+                .isEqualTo(2);
         assertThat(jdbc.queryForObject(INSTALADA_EN, Long.class)).isEqualTo(instalacionOriginal);
     }
 }

@@ -10,6 +10,8 @@ services:
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
       APP_DB_NAME: ${APP_DB_NAME:-consultorio}
+      APP_DB_MIGRATOR_USER: ${APP_DB_MIGRATOR_USER:-}
+      APP_DB_MIGRATOR_PASSWORD: ${APP_DB_MIGRATOR_PASSWORD:-}
       APP_DB_USER: ${APP_DB_USER:-}
       APP_DB_PASSWORD: ${APP_DB_PASSWORD:-}
     volumes:
@@ -26,6 +28,27 @@ services:
       - backend
     # Sin "ports": la base no se publica en el archivo base (solo el override de desarrollo).
 
+  # Servicio de un solo uso: aplica V1/V2 con el migrator y termina con exito.
+  migrate:
+    image: flyway/flyway:11.7.2
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres:5432/${APP_DB_NAME:-consultorio}
+      FLYWAY_USER: ${APP_DB_MIGRATOR_USER:-}
+      FLYWAY_PASSWORD: ${APP_DB_MIGRATOR_PASSWORD:-}
+      FLYWAY_LOCATIONS: filesystem:/flyway/sql
+      FLYWAY_PLACEHOLDERS_RUNTIME_ROLE: ${APP_DB_USER:-app_runtime}
+    command: migrate
+    volumes:
+      - ../backend/src/main/resources/db/migration:/flyway/sql:ro
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+
   app:
     build:
       context: ..
@@ -40,9 +63,14 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/${APP_DB_NAME:-consultorio}
       DB_USER: ${APP_DB_USER:-}
       DB_PASSWORD: ${APP_DB_PASSWORD:-}
+      # Flyway corre solo en "migrate" (DDL); la app corre con el runtime (solo SELECT/INSERT).
+      # Este flag vive SOLO aqui: los tests dependen de Flyway a nivel de aplicacion.
+      SPRING_FLYWAY_ENABLED: "false"
     depends_on:
       postgres:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     # El HEALTHCHECK viene definido en la imagen (deploy/Dockerfile).
     security_opt:
       - no-new-privileges:true

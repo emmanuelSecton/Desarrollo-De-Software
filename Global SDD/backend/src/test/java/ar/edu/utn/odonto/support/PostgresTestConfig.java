@@ -15,7 +15,8 @@ public class PostgresTestConfig {
 
     public static final String IMAGEN = "postgres:16.16-alpine";
 
-    public static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(DockerImageName.parse(IMAGEN));
+    public static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(DockerImageName.parse(IMAGEN))
+            .withInitScript("db/init/auditoria-roles.sql");
 
     static {
         POSTGRES.start();
