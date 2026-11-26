@@ -81,7 +81,7 @@ Entra con la imagen única. El campo nuevo de `GET /consultorio` es aditivo; no 
 
 - Design system revision: 1
 - Decision: yes — 2026-11-26
-- Mockups: `openspec/changes/frontend-agenda/mockups/`
+- Mockups: `openspec/changes/archive/2026-11-26-frontend-agenda/mockups/`
 - Approval: approved (2026-11-26, by user)
 - Preview: rendered (2026-11-26) — `mockups/previews/` (10 pantallas a 390x844 y 1440x900)
 - Visual verify: passed con diferencias menores (2026-11-26) — `mockups/verify/` (vista día y semana, día vacío, dar turno, horario ocupado, paciente nuevo, detalle, cancelar, reprogramar y turno modificado, a 390x844 y 1440x900)

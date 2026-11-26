@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{brand} — Dar turno: buscar paciente</title>
-<link rel="stylesheet" href="../../../../design-system/tokens.css">
+<title>{brand} — Dar turno: paciente nuevo</title>
+<link rel="stylesheet" href="../../../../../design-system/tokens.css">
 <link rel="stylesheet" href="mockups.css">
-<script src="../../../../design-system/brand.js"></script>
+<script src="../../../../../design-system/brand.js"></script>
 </head>
 <body>
 <div class="app">
   <header class="barra">
     <div class="marca">
-      <img src="../../../../design-system/assets/logo.svg" alt="">
+      <img src="../../../../../design-system/assets/logo.svg" alt="">
       <span class="nombre" data-brand-name>Nombre del producto (TBD)</span>
     </div>
     <span class="provisorio">Provisorio</span>
@@ -101,16 +101,24 @@
     <div class="cabecera-dialogo"><h2 id="d-titulo">Dar turno</h2>
       <button class="cerrar" type="button" aria-label="Cerrar"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
     <section class="seccion-form" aria-labelledby="s-paciente">
-      <h3 id="s-paciente">Paciente</h3>
-      <div class="campo"><label for="buscar">Buscar por DNI, nombre o teléfono</label>
-        <div class="buscador"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input class="input" id="buscar" type="search" value="Martí" role="combobox" aria-expanded="true" aria-controls="resultados"></div>
+      <h3 id="s-paciente">Paciente nuevo</h3>
+      <div class="fila-campos">
+        <div class="campo"><label for="dni">DNI</label>
+          <input class="input" id="dni" type="text" value="40.555.666"></div>
+        <div class="campo"><label for="nombre">Nombre</label>
+          <input class="input" id="nombre" type="text" value="Valentina"></div>
+        <div class="campo"><label for="apellido">Apellido</label>
+          <input class="input" id="apellido" type="text" value="Quiroga"></div>
       </div>
-      <ul class="resultados" id="resultados" role="listbox" aria-label="Pacientes encontrados">
-        <li role="option" aria-selected="true"><span class="datos-paciente"><strong>Lucía Martínez</strong><small>DNI 30.111.222 · +54 9 11 5555-0101</small></span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></li>
-        <li role="option" aria-selected="false"><span class="datos-paciente"><strong>Martín Sosa</strong><small>DNI 28.444.555 · +54 9 11 5555-0144</small></span></li>
-        <li role="option" aria-selected="false"><span class="datos-paciente"><strong>Martina Ibáñez</strong><small>DNI 41.222.333 · +54 9 11 5555-0177</small></span></li>
-        <li role="option" aria-selected="false" class="nuevo"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>Nuevo paciente</li>
-      </ul>
+      <div class="fila-campos">
+        <div class="campo"><label for="telefono">Teléfono</label>
+          <input class="input" id="telefono" type="tel" value="11 5555 01" aria-invalid="true" aria-describedby="e-telefono"><p class="error-campo" id="e-telefono" role="alert"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>El teléfono no es válido para Argentina</p></div>
+        <div class="campo"><label for="email">Email (opcional)</label>
+          <input class="input" id="email" type="email" value=""></div>
+      </div>
+      <label class="consentimiento"><input type="checkbox" checked>Acepta recibir recordatorios por WhatsApp</label>
+      <label class="consentimiento"><input type="checkbox" checked>El paciente aceptó la política de privacidad y el tratamiento de sus datos de salud</label>
+      <div class="acciones-alerta"><button class="btn btn-secondary btn-sm" type="button">Volver a buscar</button></div>
     </section>
     <section class="seccion-form" aria-labelledby="s-turno">
       <h3 id="s-turno">Turno</h3>
@@ -120,11 +128,11 @@
         <div class="campo"><label for="dia">Día</label>
           <input class="input" id="dia" type="date" value="2026-11-26"></div>
         <div class="campo"><label for="hora">Hora</label>
-          <input class="input" id="hora" type="time" value="12:00" step="300"></div>
+          <input class="input" id="hora" type="time" value="13:30" step="300"></div>
         <div class="campo"><label for="duracion">Duración</label>
           <div class="control-select"><select class="select" id="duracion"><option>30 min</option><option>35 min</option><option>40 min</option><option selected>45 min</option><option>50 min</option><option>55 min</option><option>60 min</option></select><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></div></div>
       </div>
-      
+      <div class="alerta alerta-aviso" role="status"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3z"/><path d="M12 9v4M12 17h.01"/></svg><span>Ese horario está fuera de la atención del día. Podés darlo igual.</span></div>
     </section>
     <div class="acciones">
       <button class="btn btn-secondary" type="button">Cancelar</button>
