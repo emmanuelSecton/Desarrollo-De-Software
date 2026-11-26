@@ -66,6 +66,12 @@ services:
       # Flyway corre solo en "migrate" (DDL); la app corre con el runtime (solo SELECT/INSERT).
       # Este flag vive SOLO aqui: los tests dependen de Flyway a nivel de aplicacion.
       SPRING_FLYWAY_ENABLED: "false"
+      # Odontologo inicial (C-03, D2): solo se usan si la instancia no tiene odontologo.
+      ADMIN_INITIAL_EMAIL: ${ADMIN_INITIAL_EMAIL:-}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:-}
+      # Cupos por IP y por minuto (C-03, D10); vacios toman los valores por defecto (10 y 60).
+      RATE_LIMIT_LOGIN_POR_MINUTO: ${RATE_LIMIT_LOGIN_POR_MINUTO:-10}
+      RATE_LIMIT_PUBLICO_POR_MINUTO: ${RATE_LIMIT_PUBLICO_POR_MINUTO:-60}
     depends_on:
       postgres:
         condition: service_healthy
