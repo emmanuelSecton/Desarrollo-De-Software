@@ -70,6 +70,7 @@ docker compose --env-file .env -f deploy/docker-compose.yml -f deploy/docker-com
 - `deploy/docker-compose.yml` es la base compartida dev/demo y **no publica puertos**. `deploy/docker-compose.override.yml` (solo desarrollo) publica `8080` y `5432` en `127.0.0.1`.
 - La base y el usuario de la instancia los crea `deploy/postgres/init/01-base-consultorio.sh` la primera vez que se crea el volumen `pgdata`. Para empezar de cero: `down -v`.
 - La demo (DD-11: Caddy, `pg_dump`, varios consultorios) la completa C-35.
+- Para mostrar la agenda con datos, `deploy/demo/cargar-datos-demo.mjs` carga pacientes y turnos ficticios por la API: ver [deploy/demo/README.md](deploy/demo/README.md).
 
 ## CI
 
