@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** Franjas de atencion por dia (US-001, C-05). Lee el personal; modifica el odontologo. */
 @RestController
 @RequestMapping(Api.V1 + "/horarios")
-public class HorariosController extends ControladorDeConfiguracion {
+public class HorariosController extends ControladorDeAgenda {
 
     public record Franja(
             @NotNull @Min(1) @Max(7) Integer diaSemana,

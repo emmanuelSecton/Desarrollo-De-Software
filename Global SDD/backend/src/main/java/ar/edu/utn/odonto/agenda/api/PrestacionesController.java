@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** Catalogo de prestaciones (US-001, C-05). Lee el personal; modifica el odontologo. Baja logica (D5). */
 @RestController
 @RequestMapping(Api.V1 + "/prestaciones")
-public class PrestacionesController extends ControladorDeConfiguracion {
+public class PrestacionesController extends ControladorDeAgenda {
 
     public record DatosPrestacion(
             @NotBlank @Size(max = 80) String nombre,
