@@ -1,0 +1,66 @@
+.alerta {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid;
+  font-size: var(--text-sm);
+}
+
+.alerta > svg {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  margin-top: 1px;
+}
+
+.texto {
+  flex: 1;
+}
+
+.texto strong {
+  display: block;
+}
+
+.error {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-fg);
+  border-color: var(--color-danger-border);
+}
+
+.aviso {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-fg);
+  border-color: var(--color-warning-border);
+}
+
+.info {
+  background: var(--color-info-bg);
+  color: var(--color-info-fg);
+  border-color: var(--color-info-border);
+}
+
+.exito {
+  background: var(--color-success-bg);
+  color: var(--color-success-fg);
+  border-color: var(--color-success-border);
+}
+
+.cerrar {
+  display: grid;
+  place-items: center;
+  width: var(--control-height-sm);
+  height: var(--control-height-sm);
+  margin: calc(var(--space-2) * -1) calc(var(--space-2) * -1) 0 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.cerrar svg {
+  width: 18px;
+  height: 18px;
+}

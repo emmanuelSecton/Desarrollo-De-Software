@@ -1,0 +1,36 @@
+.marca {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.logo {
+  height: 36px;
+  width: auto;
+  flex: none;
+}
+
+.nombre {
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.provisorio {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--color-warning-fg);
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  border-radius: var(--radius-pill);
+  padding: 2px var(--space-2);
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .logo {
+    height: 28px;
+  }
+}
