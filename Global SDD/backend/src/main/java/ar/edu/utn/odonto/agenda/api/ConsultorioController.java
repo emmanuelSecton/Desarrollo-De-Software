@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** Datos del consultorio y parametros de notificacion (US-001, C-05). Lee el personal; modifica el odontologo. */
 @RestController
 @RequestMapping(Api.V1 + "/consultorio")
-public class ConsultorioController extends ControladorDeConfiguracion {
+public class ConsultorioController extends ControladorDeAgenda {
 
     /** Entrada y salida: mismos campos; la regla cruzada (confirmacion < recordatorio) la valida el dominio. */
     public record DatosConsultorio(
