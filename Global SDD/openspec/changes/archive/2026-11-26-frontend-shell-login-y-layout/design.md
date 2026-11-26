@@ -73,7 +73,7 @@ Solo frontend: entra con la imagen única. Sin cambios de base ni de variables.
 
 - Design system revision: 1
 - Decision: yes — 2026-11-26
-- Mockups: `openspec/changes/frontend-shell-login-y-layout/mockups/`
+- Mockups: `openspec/changes/archive/2026-11-26-frontend-shell-login-y-layout/mockups/`
 - Approval: approved (2026-11-26, by user)
 - Preview: rendered (2026-11-26) — `mockups/previews/` (9 pantallas a 390x844 y 1440x900)
 - Visual verify: passed con diferencias menores (2026-11-26) — `mockups/verify/` (9 pantallas a 390x844 y 1440x900)
