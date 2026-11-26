@@ -2,3 +2,9 @@
 app:
   base-url: http://localhost:8080
   db-url: jdbc:postgresql://reemplazada-por-service-connection/test
+# Credenciales ficticias del odontologo inicial (D2) y cupos altos para que la suite no choque con el rate limit.
+identidad:
+  email-inicial: odontologo.inicial@consultorio.test
+  clave-inicial: clave-temporal-ficticia-1
+  login-por-minuto: 100000
+  publico-por-minuto: 100000

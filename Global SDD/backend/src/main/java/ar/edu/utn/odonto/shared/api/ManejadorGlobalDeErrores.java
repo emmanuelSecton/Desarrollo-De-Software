@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -83,6 +85,15 @@ public class ManejadorGlobalDeErrores extends ResponseEntityExceptionHandler {
         ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, DETALLE_VALIDACION);
         problema.setProperty("errores", errores);
         return ResponseEntity.badRequest().body(problema);
+    }
+
+    /**
+     * Las excepciones de seguridad (por ejemplo un {@code @PreAuthorize} que rechaza) se relanzan para que
+     * las traduzca la cadena de Spring Security (401/403 RFC 7807) y no terminen como 500 en el handler generico.
+     */
+    @ExceptionHandler({AccessDeniedException.class, AuthenticationException.class})
+    public void relanzarSeguridad(RuntimeException ex) {
+        throw ex;
     }
 
     @ExceptionHandler(Exception.class)

@@ -48,7 +48,24 @@ management:
       show-details: never
       show-components: never
 
+# Identidad y seguridad (C-03). Las credenciales iniciales solo se usan si no hay odontologo (D2).
+identidad:
+  email-inicial: ${ADMIN_INITIAL_EMAIL:}
+  clave-inicial: ${ADMIN_INITIAL_PASSWORD:}
+  inactividad-sesion: 30m
+  login-por-minuto: ${RATE_LIMIT_LOGIN_POR_MINUTO:10}
+  publico-por-minuto: ${RATE_LIMIT_PUBLICO_POR_MINUTO:60}
+
 server:
+  servlet:
+    session:
+      # RN-SEG-04 y DD-08: 30 min de inactividad; cookie HttpOnly, Secure y SameSite=Strict.
+      timeout: 30m
+      tracking-modes: cookie
+      cookie:
+        http-only: true
+        secure: true
+        same-site: strict
   error:
     include-stacktrace: never
     include-message: never
