@@ -6,7 +6,7 @@
 
 **El sistema le permite a un odontólogo independiente gestionar su consultorio (agenda, pacientes, historia clínica y cobros) y reducir los turnos perdidos por ausencias mediante recordatorios y confirmaciones por WhatsApp.**
 
-Hoy el odontólogo independiente argentino maneja turnos por teléfono o WhatsApp personal, la historia clínica en papel o en planillas, y los cobros por separado. Cada ausencia sin aviso es una hora de sillón perdida. El estudio de mercado (`discovery/estudio-de-mercado.md`) mostró que la gestión clínica es un estándar que todos los competidores ofrecen, y que el vacío local está en el **circuito contra ausencias**: confirmación, aviso y reasignación del turno. El sistema cubre el estándar y pone el foco en ese circuito.
+Hoy el odontólogo independiente argentino maneja turnos por teléfono o WhatsApp personal, la historia clínica en papel o en planillas, y los cobros por separado. Cada ausencia sin aviso es una hora de sillón perdida. El estudio de mercado (`discovery/informe-discovery.md`) mostró que la gestión clínica es un estándar que todos los competidores ofrecen, y que el vacío local está en el **circuito contra ausencias**: confirmación, aviso y reasignación del turno. El sistema cubre el estándar y pone el foco en ese circuito.
 
 ## Objetivos por actor
 

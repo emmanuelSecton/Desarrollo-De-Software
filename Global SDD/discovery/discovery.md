@@ -1,7 +1,7 @@
 # Discovery — SaaS de gestión odontológica (Global SDD)
 
 **Fecha**: 2026-11-23
-**Fuentes investigadas**: 20 sistemas (ver `discovery/sources/` y el informe comparativo `discovery/estudio-de-mercado.md`)
+**Fuentes investigadas**: 20 sistemas (ver `discovery/sources/` y el informe comparativo `discovery/informe-discovery.md`)
 **Naturaleza**: producto real a lanzar (no solo un trabajo práctico)
 
 ## 1. Problema que resuelve
