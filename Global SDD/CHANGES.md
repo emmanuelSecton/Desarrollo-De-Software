@@ -246,7 +246,7 @@ Notas del plan:
   - `knowledge-base/10_preguntas_abiertas.md` PA-10
 
 ### [C-05] `configuracion-consultorio-y-prestaciones`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (apply y archivo: 2026-11-26 → `openspec/changes/archive/2026-11-26-configuracion-consultorio-y-prestaciones`; PR #12)
 - **Scope**:
   - Migración: `consultorio` (singleton con constraint de una sola fila, `slug_reserva UNIQUE`, `recordatorio_horas_antes=48`, `confirmacion_limite_horas=24`, `cancelacion_minima_horas=24`), `horario_atencion` (`hora_desde < hora_hasta`), `prestacion` (`duracion_minutos > 0 AND % 5 = 0`, `reservable_online`, `activa`)
   - Seed: consultorio desde la instalación, horarios lunes a viernes 9-13 y 15-19, prestaciones de ejemplo (Consulta 30, Limpieza 45, Obturación 45, Endodoncia 90, Extracción 45, Control 15)
