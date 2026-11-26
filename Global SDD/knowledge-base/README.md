@@ -1,6 +1,6 @@
 # Global SDD — Gestión odontológica: Base de Conocimiento
 
-Base de conocimiento construida en modo interactivo a partir del Discovery (`discovery/discovery.md`) y del estudio de mercado de 20 sistemas (`discovery/estudio-de-mercado.md`).
+Base de conocimiento construida en modo interactivo a partir del Discovery (`discovery/discovery.md`) y del estudio de mercado de 20 sistemas (`discovery/informe-discovery.md`).
 
 ## Índice de Archivos
 

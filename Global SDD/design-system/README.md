@@ -22,7 +22,7 @@ Una única fuente de valores visuales (colores, tipografía, espaciado, estados)
 
 ## Fuentes
 
-- `knowledge-base/` (actores, flujos, reglas RN-TU, RN-NO y RN-HC) y `discovery/estudio-de-mercado.md` (referencias de UX: Dentally, Doctoralia y AgendaPro).
+- `knowledge-base/` (actores, flujos, reglas RN-TU, RN-NO y RN-HC) y `discovery/informe-discovery.md` (referencias de UX: Dentally, Doctoralia y AgendaPro).
 - No había identidad visual previa: es un proyecto nuevo.
 
 ## Decisiones abiertas (TBD)

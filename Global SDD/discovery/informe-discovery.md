@@ -1,3 +1,33 @@
+# Informe de Discovery: software de gestión odontológica para consultorios independientes en Argentina
+
+**Estudio de mercado de sistemas de turnos, agenda e historia clínica (Argentina y Latinoamérica)**
+
+- **Materia:** Desarrollo de Software (Ingeniería en Sistemas de Información - UTN FRM)
+- **Integrantes y legajos:**
+  - Emmanuel Secton (Legajo: 24604)
+  - Tomás González (Legajo: 50040)
+- **Fecha:** 26/11/2026
+
+---
+
+## Resumen ejecutivo
+
+**Qué se investigó.** Relevamos 20 sistemas de gestión odontológica y de turnos: 11 argentinos, 5 latinoamericanos con presencia o vertical para Argentina y 4 internacionales de referencia. Para cada uno buscamos evidencia pública (documentación, centro de ayuda, precios, términos legales) y clasificamos cada funcionalidad como comprobada, declarada o no evidenciada. Con eso armamos una tabla comparativa y una matriz ponderada de siete criterios: turnos y automatización, clínica odontológica, integraciones locales y WhatsApp, administración y cobros, experiencia del paciente, seguridad y exportación, y precio y adopción. Las fuentes se consultaron el 23/11/2026 y cada afirmación tiene su URL en las fichas de `sources/`.
+
+**Principales hallazgos.**
+- **El mercado comunica más de lo que demuestra.** Ningún sistema supera 3 sobre 5 con evidencia pública; el mejor es Órbita, con 2,80, y la diferencia entre los primeros nueve es pequeña, así que el orden debe validarse con demos.
+- **La línea base ya es estándar:** agenda en la nube, historia clínica con odontograma y presupuestos, recordatorios, caja básica, acceso desde el celular y algún enlace de reserva. No diferencia, pero su ausencia descalifica.
+- **Los diferenciales con evidencia son pocos:** facturación ARCA documentada (Órbita), liquidación a obras sociales (Bilog, Órbita y Dentalink) y WhatsApp Cloud API oficial respaldada por un documento legal (Dentia y Dentiqa).
+- **El vacío más claro es el ausentismo.** La lista de espera no está evidenciada en ningún producto argentino y nadie cubre el circuito completo de confirmar, liberar el turno y ofrecerlo a otro paciente; varios recordatorios locales todavía son manuales.
+- **Falta transparencia:** cerca de la mitad no publica precios, los add-ons críticos se cobran aparte y la exportación de datos rara vez está documentada.
+
+**MVP recomendado.** Un producto para el consultorio independiente que cubra la línea base y compita por el anti-ausentismo:
+- **Imprescindibles:** agenda por profesional y por sillón sin solapamientos; reserva online del paciente; recordatorios y confirmaciones automáticos por WhatsApp Cloud API oficial con respaldo por email; ficha del paciente con odontograma y evolución; presupuestos y caja básica; roles, auditoría y exportación de datos; y cumplimiento documentado de las Leyes 25.326 y 26.529.
+- **Diferenciadores:** lista de espera que ofrece por WhatsApp el turno liberado, seña con Mercado Pago configurable por prestación, panel de ausentismo y precio publicado en ARS con prueba sin tarjeta.
+- **Para etapas posteriores:** facturación ARCA, liquidación a obras sociales, imágenes y radiología, multisucursal y asistente con IA.
+
+---
+
 # Estudio de mercado: software odontológico de turnos y agenda (Argentina y LatAm)
 
 - **Fecha de consulta de todas las fuentes**: 2026-11-23
