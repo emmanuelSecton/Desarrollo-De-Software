@@ -3,35 +3,35 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{brand} — Ingresar (sesión vencida)</title>
-<link rel="stylesheet" href="../../../../design-system/tokens.css">
+<title>{brand} — Ingresar (error)</title>
+<link rel="stylesheet" href="../../../../../design-system/tokens.css">
 <link rel="stylesheet" href="mockups.css">
-<script src="../../../../design-system/brand.js"></script>
+<script src="../../../../../design-system/brand.js"></script>
 </head>
 <body>
 <main class="acceso">
   <section class="tarjeta-acceso" aria-labelledby="titulo">
     <div class="encabezado">
       <div class="marca">
-  <img src="../../../../design-system/assets/logo.svg" alt="">
+  <img src="../../../../../design-system/assets/logo.svg" alt="">
   <span class="nombre" data-brand-name>Nombre del producto (TBD)</span>
 </div>
       <h1 id="titulo">Ingresá al consultorio</h1>
       <p class="muted">Usá el email y la contraseña que te dio el consultorio.</p>
     </div>
     <form novalidate>
-      <div class="alerta alerta-info" role="status">
-        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        <span><strong>Tu sesión venció.</strong> Volvé a ingresar para seguir donde estabas.</span>
+      <div class="alerta alerta-error" role="alert" id="alerta-login">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span>El email o la contraseña no son válidos, o la cuenta está bloqueada temporalmente.</span>
       </div>
       <div class="campo">
         <label for="email">Email</label>
-        <input class="input" id="email" name="email" type="email" autocomplete="username" value="">
+        <input class="input" id="email" name="email" type="email" autocomplete="username" value="dra.ficticia@consultorio.test" aria-invalid="true" aria-describedby="alerta-login">
       </div>
       <div class="campo">
         <label for="password">Contraseña</label>
         <div class="control">
-          <input class="input input-con-accion" id="password" name="password" type="password" autocomplete="current-password" value="">
+          <input class="input input-con-accion" id="password" name="password" type="password" autocomplete="current-password" value="••••••••••">
           <button class="accion-input" type="button" aria-label="Mostrar contraseña"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
         </div>
       </div>

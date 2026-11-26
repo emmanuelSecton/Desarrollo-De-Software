@@ -283,7 +283,7 @@ Notas del plan:
   - `knowledge-base/04_modelo_de_datos.md` §usuario
 
 ### [C-07] `frontend-shell-login-y-layout`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (apply y archivo: 2026-11-26 → `openspec/changes/archive/2026-11-26-frontend-shell-login-y-layout`; PR #15)
 - **Scope** (**Requiere mockup HTML aprobado**: login, layout general y navegación, estados de error/sesión expirada, a 390x844 y 1440x900):
   - SPA base: router, `shared/api-client` con CSRF y manejo de 401/403, contexto de sesión, guards por rol (el menú de historia clínica no existe para la secretaria)
   - Importación de `design-system/tokens.css` y componentes base (botón, input, tabla, modal, toast, estados vacíos/carga/error)
@@ -339,7 +339,7 @@ Notas del plan:
   - `knowledge-base/12_cumplimiento_legal.md` §Cómo responde el diseño (consentimiento, minimización)
 
 ### [C-10] `agenda-turnos-core`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (apply y archivo: 2026-11-26 → `openspec/changes/archive/2026-11-26-agenda-turnos-core`; PR #14)
 - **Scope**:
   - Migración: tabla `turno` con `estado`, `origen`, `sobreturno`, `reprogramado_de`, `token_publico` (256 bits), `sin_confirmar_alertado`, `google_event_id`, `cancelado_por`, `motivo_cancelacion`, `version` (optimistic locking)
   - **Exclusion constraint** `EXCLUDE USING gist (tstzrange(inicio, fin) WITH &&) WHERE (estado IN ('RESERVADO','CONFIRMADO') AND NOT sobreturno)` (RN-AG-01); índices `(inicio)`, `(estado, inicio)`
