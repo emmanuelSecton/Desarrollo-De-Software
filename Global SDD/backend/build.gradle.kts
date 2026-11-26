@@ -24,6 +24,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-security")
+	// Envio de email por SMTP, independiente del proveedor (C-04, PA-10).
+	implementation("org.springframework.boot:spring-boot-starter-mail")
 	// Rate limiting por IP (C-03, D10). Caffeine (version del BOM) acota el mapa de buckets.
 	implementation("com.bucket4j:bucket4j_jdk17-core:8.14.0")
 	implementation("com.github.ben-manes.caffeine:caffeine")
@@ -35,6 +37,8 @@ dependencies {
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
+	// Servidor SMTP real en memoria para probar el adaptador de email (C-04, D10).
+	testImplementation("com.icegreen:greenmail-junit5:2.1.2")
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
 	testImplementation("org.testcontainers:postgresql")
 	testImplementation("org.testcontainers:junit-jupiter")

@@ -45,13 +45,13 @@ public class FiltroLimiteDePeticiones extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest peticion) {
-        return !RutasDeSeguridad.esLogin(peticion) && !RutasDeSeguridad.esPublica(peticion);
+        return !RutasDeSeguridad.esAutenticacion(peticion) && !RutasDeSeguridad.esPublica(peticion);
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest peticion, HttpServletResponse respuesta, FilterChain cadena)
             throws ServletException, IOException {
-        boolean login = RutasDeSeguridad.esLogin(peticion);
+        boolean login = RutasDeSeguridad.esAutenticacion(peticion);
         long cupo = login ? loginPorMinuto : publicoPorMinuto;
         String clave = (login ? "login:" : "publico:") + peticion.getRemoteAddr();
         Bucket bucket = buckets.get(clave, k -> nuevoBucket(cupo));

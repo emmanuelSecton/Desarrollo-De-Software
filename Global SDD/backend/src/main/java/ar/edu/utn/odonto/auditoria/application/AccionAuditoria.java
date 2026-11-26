@@ -4,6 +4,7 @@ package ar.edu.utn.odonto.auditoria.application;
 public enum AccionAuditoria {
     LOGIN("LOGIN"),
     LOGIN_FALLIDO("LOGIN_FALLIDO"),
+    SOLICITAR_RECUPERACION("SOLICITAR_RECUPERACION"),
     VER_HISTORIA("VER_HISTORIA"),
     CREAR_TURNO("CREAR_TURNO"),
     EXPORTAR("EXPORTAR"),

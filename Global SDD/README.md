@@ -38,6 +38,7 @@ cd backend
 - Los tests de integración levantan PostgreSQL 16 con Testcontainers: **Docker debe estar corriendo**. No se usa H2.
 - `bootRun` necesita `DB_URL`, `DB_USER`, `DB_PASSWORD` y `APP_BASE_URL` (ver `.env.example`); sin ellas el arranque falla nombrando la variable.
 - En una base sin odontólogo, el primer arranque también necesita `ADMIN_INITIAL_EMAIL` y `ADMIN_INITIAL_PASSWORD` (contraseña temporal: se exige cambiarla en el primer login). Opcionales: `RATE_LIMIT_LOGIN_POR_MINUTO` (10), `RATE_LIMIT_PUBLICO_POR_MINUTO` (60) y `POLITICA_PRIVACIDAD_VERSION` (`v0-provisoria`), la versión de la política de privacidad que se registra con el consentimiento de cada paciente.
+- Email por SMTP: `SMTP_HOST`, `SMTP_PORT` (587), `SMTP_USER`, `SMTP_PASSWORD` y `MAIL_FROM`. Sin `SMTP_HOST` la app arranca igual y no envía emails. En desarrollo, `docker-compose.override.yml` levanta Mailpit: los emails (por ejemplo, la recuperación de contraseña) se ven en http://127.0.0.1:8025.
 - Salud: `GET /actuator/health`. API REST de negocio bajo `/api/v1`. Errores en `application/problem+json`.
 - Toda la API exige sesión salvo `/api/v1/auth/login`, `/api/v1/auth/csrf`, `/api/v1/public/**` y `/api/v1/webhooks/**`. La SPA pide `GET /api/v1/auth/csrf` y reenvía el valor de la cookie `XSRF-TOKEN` en la cabecera `X-XSRF-TOKEN` en cada `POST/PUT/PATCH/DELETE`.
 - El esquema se crea solo con migraciones Flyway (`backend/src/main/resources/db/migration`). Nunca se edita una migración ya aplicada: se agrega `V{n}__descripcion.sql`.

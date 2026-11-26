@@ -91,6 +91,14 @@ public class Usuario {
         this.debeCambiarPassword = false;
     }
 
+    /** Restablecimiento por email (C-04, D6): nueva contraseña, sin cambio obligatorio y sin bloqueo. */
+    public void restablecerPassword(String nuevoHash) {
+        cambiarPassword(nuevoHash);
+        this.intentosFallidos = 0;
+        this.primerFalloAt = null;
+        this.bloqueadoHasta = null;
+    }
+
     public UUID id() {
         return id;
     }

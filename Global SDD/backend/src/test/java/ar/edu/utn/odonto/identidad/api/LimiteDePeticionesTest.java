@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ar.edu.utn.odonto.support.MensajeriaDePrueba;
 import ar.edu.utn.odonto.support.PostgresTestConfig;
 import ar.edu.utn.odonto.support.UsuariosDePrueba;
 import javax.sql.DataSource;
@@ -27,7 +28,7 @@ import org.springframework.test.web.servlet.ResultActions;
 @SpringBootTest(properties = {"identidad.login-por-minuto=3", "identidad.publico-por-minuto=3"})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Import(PostgresTestConfig.class)
+@Import({PostgresTestConfig.class, MensajeriaDePrueba.class})
 class LimiteDePeticionesTest {
 
     @Autowired
@@ -35,6 +36,9 @@ class LimiteDePeticionesTest {
 
     @Autowired
     DataSource dataSource;
+
+    @Autowired
+    MensajeriaDePrueba.Capturados correo;
 
     @Test
     void alAgotarElCupoElLoginDevuelve429SinEvaluarCredenciales() throws Exception {
@@ -77,6 +81,22 @@ class LimiteDePeticionesTest {
 
         mvc.perform(get("/api/v1/public/disponibilidad").with(ip("10.0.0.4")))
                 .andExpect(status().isTooManyRequests());
+    }
+
+    @Test
+    void elPedidoDeRecuperacionExcedidoDevuelve429YNoEnviaEmail() throws Exception {
+        UsuariosDePrueba.Creado secretaria = UsuariosDePrueba.secretaria(new JdbcTemplate(dataSource));
+        for (int i = 0; i < 3; i++) {
+            mvc.perform(post("/api/v1/auth/password/recover").with(ip("10.0.0.6")).with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON).content("{\"email\":\"nadie@consultorio.test\"}"))
+                    .andExpect(status().isAccepted());
+        }
+
+        mvc.perform(post("/api/v1/auth/password/recover").with(ip("10.0.0.6")).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"" + secretaria.email() + "\"}"))
+                .andExpect(status().isTooManyRequests());
+        assertThat(correo.esperar(secretaria.email(), java.time.Duration.ofMillis(500))).isEmpty();
     }
 
     @Test

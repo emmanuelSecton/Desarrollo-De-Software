@@ -12,6 +12,7 @@ final class RutasDeSeguridad {
     static final String ME = AUTH + "/me";
     static final String PASSWORD = AUTH + "/password";
     static final String PASSWORD_RECOVER = AUTH + "/password/recover";
+    static final String PASSWORD_RESET = AUTH + "/password/reset";
     static final String PUBLICO = "/api/v1/public/";
     static final String WEBHOOKS = "/api/v1/webhooks/";
     static final String API = "/api/";
@@ -24,8 +25,11 @@ final class RutasDeSeguridad {
         return contexto != null && !contexto.isEmpty() && uri.startsWith(contexto) ? uri.substring(contexto.length()) : uri;
     }
 
-    static boolean esLogin(HttpServletRequest peticion) {
-        return "POST".equals(peticion.getMethod()) && LOGIN.equals(ruta(peticion));
+    /** Login, pedido y restablecimiento de contraseña: comparten el cupo por IP del login (C-04, D8). */
+    static boolean esAutenticacion(HttpServletRequest peticion) {
+        String ruta = ruta(peticion);
+        return "POST".equals(peticion.getMethod())
+                && (LOGIN.equals(ruta) || PASSWORD_RECOVER.equals(ruta) || PASSWORD_RESET.equals(ruta));
     }
 
     static boolean esPublica(HttpServletRequest peticion) {
@@ -41,6 +45,7 @@ final class RutasDeSeguridad {
                 || ("POST".equals(metodo) && (LOGOUT.equals(ruta) || PASSWORD.equals(ruta) || LOGIN.equals(ruta)))
                 || ruta.startsWith(PUBLICO)
                 || ruta.startsWith(WEBHOOKS)
-                || ruta.equals(PASSWORD_RECOVER);
+                || ruta.equals(PASSWORD_RECOVER)
+                || ruta.equals(PASSWORD_RESET);
     }
 }
