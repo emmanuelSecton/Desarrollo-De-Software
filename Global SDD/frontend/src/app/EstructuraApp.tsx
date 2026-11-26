@@ -1,7 +1,7 @@
 import { CalendarDays, LogOut, SlidersHorizontal, Users, type LucideIcon } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router'
 import { useSesion, type Rol } from '../shared/auth/sesion'
-import { EtiquetaProvisoria, Marca } from '../shared/marca/Marca'
+import { Marca } from '../shared/marca/Marca'
 import { Aviso } from '../shared/ui/Aviso'
 import { Boton } from '../shared/ui/Boton'
 import { AvisoDeInactividad } from './AvisoDeInactividad'
@@ -57,9 +57,6 @@ export function EstructuraApp() {
     <div className={estilos.app}>
       <header className={estilos.barra}>
         <Marca />
-        <span className={estilos.provisorio}>
-          <EtiquetaProvisoria />
-        </span>
         <span className={estilos.espacio} />
         <div className={estilos.usuario}>
           <span className={estilos.avatar} aria-hidden="true">

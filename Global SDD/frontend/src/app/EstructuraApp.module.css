@@ -128,7 +128,6 @@
     font-size: var(--text-sm);
   }
 
-  .provisorio,
   .espacio,
   .datos {
     display: none;

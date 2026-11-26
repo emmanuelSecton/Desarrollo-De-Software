@@ -29,5 +29,5 @@
 | PA-08 | Media | ¿Qué catálogo de estados del odontograma y qué convención de colores usar (por ejemplo, rojo a realizar y azul realizado)? | US-042 | Odontólogo asesor |
 | PA-09 | Media | ¿Dónde se alojan los datos? ¿Hace falta que estén en Argentina, o alcanza con un país con nivel adecuado de protección? | Hosting, Ley 25.326 | Asesor legal |
 | PA-10 | Baja | ¿Qué proveedor de email transaccional? | Notificaciones | Equipo técnico |
-| PA-11 | Baja | ¿Nombre comercial del producto? | Marca, dominios | Product Owner |
+| PA-11 | ✅ Resuelta (2026-11-26) | **Odontogestión.** El isotipo de diente de `design-system/assets/logo.svg` queda como logo definitivo (revisión 2 del sistema de diseño). | — | Product Owner |
 | PA-12 | Baja | ¿Hace falta firma digital del profesional en las entradas de historia clínica (Ley 25.506) o alcanza con usuario autenticado + hash? | Cumplimiento | Asesor legal |

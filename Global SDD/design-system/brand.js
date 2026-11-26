@@ -1,8 +1,8 @@
-// Global SDD — brand binding for local HTML previews (Revision 1).
-// Change BRAND_NAME here once the product name is decided (PA-11); every
-// element with [data-brand-name] in mockups updates automatically.
+// Global SDD — brand binding for local HTML previews (Revision 2).
+// Product name decided on 2026-11-26 (PA-11). Every element with
+// [data-brand-name] in mockups takes it from here.
 (function () {
-  var BRAND_NAME = "Nombre del producto (TBD)";
+  var BRAND_NAME = "Odontogestión";
   window.BRAND_NAME = BRAND_NAME;
   function bind() {
     var nodes = document.querySelectorAll("[data-brand-name]");
