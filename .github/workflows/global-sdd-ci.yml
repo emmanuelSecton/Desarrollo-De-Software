@@ -71,5 +71,15 @@ jobs:
         working-directory: 'Global SDD'
     steps:
       - uses: actions/checkout@v4
+      - name: Calcular tag semántico
+        id: tag
+        run: |
+          tag="$(git describe --tags --match 'v*' --abbrev=0 2>/dev/null || echo '1.0.0')"
+          echo "tag=${tag#v}" >> "$GITHUB_OUTPUT"
       - name: Build de la imagen
-        run: docker build -f deploy/Dockerfile -t odonto:ci .
+        run: docker build -f deploy/Dockerfile -t "odonto:${{ steps.tag.outputs.tag }}" -t odonto:ci .
+      - name: Reportar digest
+        run: |
+          digest="$(docker image inspect odonto:ci --format '{{.Id}}')"
+          echo "digest=${digest}"
+          echo "::notice title=Imagen construida::tag=${{ steps.tag.outputs.tag }} digest=${digest}"

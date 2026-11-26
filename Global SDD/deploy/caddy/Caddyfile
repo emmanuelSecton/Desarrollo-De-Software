@@ -1,0 +1,7 @@
+demo-uno.{$ODONTO_DOMINIO} {
+  reverse_proxy app_demo_uno:8080
+}
+
+demo-dos.{$ODONTO_DOMINIO} {
+  reverse_proxy app_demo_dos:8080
+}

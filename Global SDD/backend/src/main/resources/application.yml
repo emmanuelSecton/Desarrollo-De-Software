@@ -38,6 +38,15 @@ app:
   timezone: ${APP_TIMEZONE:America/Argentina/Buenos_Aires}
   db-url: ${DB_URL:}
 
+consultorio:
+  slug: ${CONSULTORIO_SLUG:}
+
+alertas:
+  webhook-url: ${ALERTAS_WEBHOOK_URL:}
+  salud:
+    url: ${APP_BASE_URL:http://localhost:8080}/actuator/health
+    intervalo-ms: ${ALERTAS_SALUD_INTERVALO_MS:30000}
+
 management:
   endpoints:
     web:
@@ -47,6 +56,12 @@ management:
     health:
       show-details: never
       show-components: never
+
+logging:
+  structured:
+    format:
+      console: logstash
+      file: logstash
 
 server:
   error:

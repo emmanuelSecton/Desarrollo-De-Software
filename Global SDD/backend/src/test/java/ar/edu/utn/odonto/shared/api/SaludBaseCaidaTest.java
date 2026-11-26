@@ -1,9 +1,14 @@
 package ar.edu.utn.odonto.shared.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ar.edu.utn.odonto.operacion.RegistroAlertas;
+import ar.edu.utn.odonto.operacion.TipoAlerta;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -44,11 +49,17 @@ class SaludBaseCaidaTest {
     @Test
     void healthDevuelve503DownCuandoLaBaseDejaDeResponder() throws Exception {
         mvc.perform(get("/actuator/health")).andExpect(status().isOk());
+        List<String> alertas = new ArrayList<>();
+        RegistroAlertas.registrar(alerta -> alertas.add(alerta.mensaje()));
+        try {
+            BASE_DEDICADA.stop();
 
-        BASE_DEDICADA.stop();
-
-        mvc.perform(get("/actuator/health"))
-                .andExpect(status().isServiceUnavailable())
-                .andExpect(content().json("{\"status\":\"DOWN\"}", true));
+            mvc.perform(get("/actuator/health"))
+                    .andExpect(status().isServiceUnavailable())
+                    .andExpect(content().json("{\"status\":\"DOWN\"}", true));
+            assertThat(alertas).anyMatch(mensaje -> mensaje.contains(TipoAlerta.BASE_DOWN.name()));
+        } finally {
+            RegistroAlertas.registrar(null);
+        }
     }
 }

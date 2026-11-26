@@ -1,0 +1,2 @@
+f71904b1c7c2fed46bca7d6d6ef03f6b5b7d8f039732e4def008b4878478fa9f  backend/src/main/resources/db/migration/V1__baseline.sql
+fba9447c52309b138ab381a14df6cb7544900e86d3a26319d48e056997d346da  backend/src/main/resources/db/migration/V2__auditoria.sql
