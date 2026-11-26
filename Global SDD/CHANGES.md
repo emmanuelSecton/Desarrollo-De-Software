@@ -209,7 +209,7 @@ Notas del plan:
   - `knowledge-base/08_arquitectura_propuesta.md` §Patrones (append-only, eventos de dominio)
 
 ### [C-03] `identidad-auth-y-rbac`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (apply y archivo: 2026-11-25 → `openspec/changes/archive/2026-11-25-identidad-auth-y-rbac`; PR #5)
 - **Scope**:
   - Migración: tabla `usuario` (`email CITEXT UNIQUE`, `password_hash`, `rol ENUM('ODONTOLOGO','SECRETARIA')`, `activo`, `ultimo_login`, flag de cambio de contraseña obligatorio) con constraint de exactamente un `ODONTOLOGO` activo
   - Seed del odontólogo inicial desde `ADMIN_INITIAL_EMAIL` con contraseña temporal; forzar cambio en el primer login (US-001, parte de identidad)
