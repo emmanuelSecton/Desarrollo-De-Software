@@ -229,7 +229,7 @@ Notas del plan:
   - `knowledge-base/09_decisiones_y_supuestos.md` DD-08
 
 ### [C-04] `email-adapter-y-recuperacion-password`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (apply y archivo: 2026-11-26 → `openspec/changes/archive/2026-11-26-email-adapter-y-recuperacion-password`; PR #10)
 - **Scope**:
   - `EmailAdapter` SMTP detrás de un puerto (`MensajeriaPort` para email; variables `SMTP_*`, `MAIL_FROM`) con plantillas de texto/HTML simples y envío síncrono con reintento acotado
   - Migración: tabla de tokens de recuperación (hash del token, vencimiento 1 h, un solo uso)
