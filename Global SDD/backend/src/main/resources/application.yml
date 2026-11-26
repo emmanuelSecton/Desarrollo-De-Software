@@ -56,6 +56,10 @@ identidad:
   login-por-minuto: ${RATE_LIMIT_LOGIN_POR_MINUTO:10}
   publico-por-minuto: ${RATE_LIMIT_PUBLICO_POR_MINUTO:60}
 
+# Pacientes (C-09): version de la politica de privacidad que acepta cada paciente (RN-DP-01).
+pacientes:
+  politica-privacidad-version: ${POLITICA_PRIVACIDAD_VERSION:v0-provisoria}
+
 server:
   servlet:
     session:
