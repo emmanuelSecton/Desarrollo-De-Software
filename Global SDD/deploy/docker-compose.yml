@@ -72,6 +72,8 @@ services:
       # Cupos por IP y por minuto (C-03, D10); vacios toman los valores por defecto (10 y 60).
       RATE_LIMIT_LOGIN_POR_MINUTO: ${RATE_LIMIT_LOGIN_POR_MINUTO:-10}
       RATE_LIMIT_PUBLICO_POR_MINUTO: ${RATE_LIMIT_PUBLICO_POR_MINUTO:-60}
+      # Version de la politica de privacidad que aceptan los pacientes (C-09, RN-DP-01).
+      POLITICA_PRIVACIDAD_VERSION: ${POLITICA_PRIVACIDAD_VERSION:-v0-provisoria}
     depends_on:
       postgres:
         condition: service_healthy

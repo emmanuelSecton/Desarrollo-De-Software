@@ -27,6 +27,8 @@ dependencies {
 	// Rate limiting por IP (C-03, D10). Caffeine (version del BOM) acota el mapa de buckets.
 	implementation("com.bucket4j:bucket4j_jdk17-core:8.14.0")
 	implementation("com.github.ben-manes.caffeine:caffeine")
+	// Normalizacion de telefonos a E.164 (C-09, D3); el BOM de Spring Boot no la gestiona.
+	implementation("com.googlecode.libphonenumber:libphonenumber:8.13.50")
 	implementation("org.flywaydb:flyway-core")
 	implementation("org.flywaydb:flyway-database-postgresql")
 	implementation("org.postgresql:postgresql")
