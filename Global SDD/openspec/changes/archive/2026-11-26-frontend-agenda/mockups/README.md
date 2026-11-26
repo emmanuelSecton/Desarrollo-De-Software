@@ -40,4 +40,4 @@ Desde `Global SDD/`:
 python -m http.server 8765 --bind 127.0.0.1
 ```
 
-y abrir `http://127.0.0.1:8765/openspec/changes/frontend-agenda/mockups/index.html`.
+y abrir `http://127.0.0.1:8765/openspec/changes/archive/2026-11-26-frontend-agenda/mockups/index.html`.

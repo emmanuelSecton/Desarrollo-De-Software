@@ -390,7 +390,7 @@ Notas del plan:
   - `knowledge-base/09_decisiones_y_supuestos.md` DD-06
 
 ### [C-13] `frontend-agenda`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (apply y archivo: 2026-11-26 → `openspec/changes/archive/2026-11-26-frontend-agenda`; PR #17)
 - **Scope** (**Requiere mockup HTML aprobado**: vista día, vista semana, alta/reprogramar/cancelar turno, a 390x844 y 1440x900). Recortado el 2026-11-26 para la demo en pantalla:
   - `features/agenda`: vista diaria y semanal con color y texto por estado y marca de sobreturno; franjas de atención visibles (US-010, parcial)
   - Alta de turno con búsqueda de paciente por DNI/nombre/teléfono o alta en el momento; rechazo de solapamiento con mensaje claro y opción de sobreturno (US-011)
