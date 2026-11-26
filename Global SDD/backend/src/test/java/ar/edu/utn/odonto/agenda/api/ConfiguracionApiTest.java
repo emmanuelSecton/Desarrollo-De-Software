@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ar.edu.utn.odonto.agenda.application.ConfiguracionDeAgenda;
+import ar.edu.utn.odonto.shared.application.ZonaHorariaConsultorio;
 import ar.edu.utn.odonto.support.PostgresTestConfig;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -61,6 +62,9 @@ class ConfiguracionApiTest {
     @Autowired
     ConfiguracionDeAgenda configuracion;
 
+    @Autowired
+    ZonaHorariaConsultorio zona;
+
     JdbcTemplate jdbc;
 
     @BeforeEach
@@ -102,7 +106,19 @@ class ConfiguracionApiTest {
                     .andExpect(jsonPath("$.recordatorioHorasAntes").value(48))
                     .andExpect(jsonPath("$.confirmacionLimiteHoras").value(24))
                     .andExpect(jsonPath("$.cancelacionMinimaHoras").value(24))
-                    .andExpect(jsonPath("$.ofertaVencimientoMinutos").value(30));
+                    .andExpect(jsonPath("$.ofertaVencimientoMinutos").value(30))
+                    .andExpect(jsonPath("$.zonaHoraria").value(zona.zona().getId()));
+        }
+
+        @Test
+        void laZonaHorariaEsDeSoloLecturaYElPutLaIgnora() throws Exception {
+            enviar(put("/api/v1/consultorio"), "ODONTOLOGO",
+                    CONSULTORIO_VALIDO.replace("{\"nombre\"", "{\"zonaHoraria\":\"Asia/Tokyo\",\"nombre\""))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.zonaHoraria").value(zona.zona().getId()));
+
+            mvc.perform(get("/api/v1/consultorio").with(como("SECRETARIA")))
+                    .andExpect(jsonPath("$.zonaHoraria").value(zona.zona().getId()));
         }
 
         @Test

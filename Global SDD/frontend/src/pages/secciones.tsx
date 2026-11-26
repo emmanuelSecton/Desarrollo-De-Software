@@ -1,23 +1,10 @@
-import { CalendarDays, SlidersHorizontal, Users } from 'lucide-react'
+import { SlidersHorizontal, Users } from 'lucide-react'
 import { EstadoVacio } from '../shared/ui/EstadoVacio'
 
 // Secciones de la app: muestran "Disponible próximamente" hasta que lleguen
-// C-13 (agenda), C-26 (pacientes) y C-08 (configuración).
+// C-26 (pacientes) y C-08 (configuración). La agenda llegó con C-13 (features/agenda).
 
 const PROXIMAMENTE = 'Disponible próximamente'
-
-export function AgendaPage() {
-  return (
-    <>
-      <h1>Agenda</h1>
-      <EstadoVacio
-        icono={<CalendarDays aria-hidden="true" />}
-        titulo={PROXIMAMENTE}
-        texto="Acá vas a ver los turnos del día y de la semana, y dar turnos nuevos."
-      />
-    </>
-  )
-}
 
 export function PacientesPage() {
   return (

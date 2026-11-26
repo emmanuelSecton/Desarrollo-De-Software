@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{brand} — Dar turno: horario ocupado</title>
+<link rel="stylesheet" href="../../../../design-system/tokens.css">
+<link rel="stylesheet" href="mockups.css">
+<script src="../../../../design-system/brand.js"></script>
+</head>
+<body>
+<div class="app">
+  <header class="barra">
+    <div class="marca">
+      <img src="../../../../design-system/assets/logo.svg" alt="">
+      <span class="nombre" data-brand-name>Nombre del producto (TBD)</span>
+    </div>
+    <span class="provisorio">Provisorio</span>
+    <span class="espacio"></span>
+    <div class="usuario">
+      <span class="avatar" aria-hidden="true">LM</span>
+      <span class="datos"><span>Lucía Martínez</span><span class="rol">Secretaría</span></span>
+      <button class="btn btn-ghost" type="button" aria-label="Salir"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg></button>
+    </div>
+  </header>
+  <div class="cuerpo">
+    <nav class="nav" aria-label="Secciones">
+      <ul>
+          <li><a href="#" aria-current="page"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Agenda</span></a></li>
+          <li><a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Pacientes</span></a></li>
+          <li><a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span>Configuración</span></a></li>
+      </ul>
+    </nav>
+    <main class="contenido agenda">
+      <div class="barra-agenda">
+        <div class="fecha"><h1 class="dia-texto">Jueves 26 de noviembre</h1><span class="sub">Hoy · 6 turnos</span></div>
+        <span class="espacio"></span>
+        <div class="navegacion-fecha">
+          <button class="btn btn-secondary btn-icono" type="button" aria-label="Anterior"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+          <button class="btn btn-secondary" type="button">Hoy</button>
+          <button class="btn btn-secondary btn-icono" type="button" aria-label="Siguiente"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+        </div>
+        <div class="segmentado" role="group" aria-label="Vista">
+          <button type="button" aria-pressed="true">Día</button>
+          <button type="button" aria-pressed="false">Semana</button>
+        </div>
+        <label class="casilla"><input type="checkbox"><span>Cancelados<span class="largo"> visibles</span></span></label>
+        <button class="btn btn-primary dar-turno" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Dar turno</button>
+      </div>
+      <p class="leyenda-franjas"><span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Atención 9:00 a 13:00 y 15:00 a 19:00</span>
+        <span><span class="etiqueta e-sinconf"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Sin confirmar</span> faltan menos de 24 h y no confirmó</span></p>
+      <div class="grilla" role="group" aria-label="Turnos del jueves 26 de noviembre">
+        <div class="hora-col" style="grid-row: 1 / span 4">9:00</div>
+        <div class="linea" style="grid-row: 1 / span 4"></div>
+        <div class="hora-col" style="grid-row: 5 / span 4">10:00</div>
+        <div class="linea" style="grid-row: 5 / span 4"></div>
+        <div class="hora-col" style="grid-row: 9 / span 4">11:00</div>
+        <div class="linea" style="grid-row: 9 / span 4"></div>
+        <div class="hora-col" style="grid-row: 13 / span 4">12:00</div>
+        <div class="linea" style="grid-row: 13 / span 4"></div>
+        <div class="hora-col" style="grid-row: 17 / span 4">13:00</div>
+        <div class="linea" style="grid-row: 17 / span 4"></div>
+        <div class="hora-col" style="grid-row: 21 / span 4">14:00</div>
+        <div class="linea" style="grid-row: 21 / span 4"></div>
+        <div class="hora-col" style="grid-row: 25 / span 4">15:00</div>
+        <div class="linea" style="grid-row: 25 / span 4"></div>
+        <div class="hora-col" style="grid-row: 29 / span 4">16:00</div>
+        <div class="linea" style="grid-row: 29 / span 4"></div>
+        <div class="hora-col" style="grid-row: 33 / span 4">17:00</div>
+        <div class="linea" style="grid-row: 33 / span 4"></div>
+        <div class="hora-col" style="grid-row: 37 / span 4">18:00</div>
+        <div class="linea" style="grid-row: 37 / span 4"></div>
+        <div class="fuera" style="grid-row: 17 / span 8">Fuera del horario de atención · 13:00 a 15:00</div>
+        <div class="hueco" style="grid-row: 13 / span 4"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Libre · Dar turno a las 12:00</div>
+        <div class="carril" style="grid-row: 1 / span 3"><button type="button" class="turno t-confirmado" aria-label="09:00, Lucía Martínez, Limpieza, Confirmado"><span class="hora">09:00 – 09:45</span><span class="paciente">Lucía Martínez</span><span class="prestacion">Limpieza</span><span class="etiquetas"><span class="etiqueta e-confirmado"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Confirmado</span></span></button></div>
+        <div class="carril" style="grid-row: 5 / span 3; --carriles: 2"><button type="button" class="turno t-sinconf" aria-label="10:00, Jorge Pereyra, Control, Sin confirmar"><span class="hora">10:00 – 10:30</span><span class="paciente">Jorge Pereyra</span><span class="prestacion">Control</span><span class="etiquetas"><span class="etiqueta e-sinconf"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Sin confirmar</span></span></button><button type="button" class="turno t-sinconf t-sobreturno" aria-label="10:15, Ana Gómez, Urgencia, Sin confirmar, sobreturno"><span class="hora">10:15 – 10:45</span><span class="paciente">Ana Gómez</span><span class="prestacion">Urgencia</span><span class="etiquetas"><span class="etiqueta e-sinconf"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Sin confirmar</span><span class="etiqueta e-sobreturno"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 10 5-10 5L2 7l10-5z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/></svg>Sobreturno</span></span></button></div>
+        <div class="carril" style="grid-row: 9 / span 4"><button type="button" class="turno t-confirmado" aria-label="11:00, Carla Ruiz, Endodoncia, Confirmado"><span class="hora">11:00 – 12:00</span><span class="paciente">Carla Ruiz</span><span class="prestacion">Endodoncia</span><span class="etiquetas"><span class="etiqueta e-confirmado"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Confirmado</span></span></button></div>
+        <div class="carril" style="grid-row: 27 / span 3"><button type="button" class="turno t-sinconf" aria-label="15:30, Diego Fernández, Limpieza, Sin confirmar"><span class="hora">15:30 – 16:15</span><span class="paciente">Diego Fernández</span><span class="prestacion">Limpieza</span><span class="etiquetas"><span class="etiqueta e-sinconf"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Sin confirmar</span></span></button></div>
+        <div class="carril" style="grid-row: 33 / span 2"><button type="button" class="turno t-confirmado" aria-label="17:00, Sofía Herrera, Control, Confirmado"><span class="hora">17:00 – 17:30</span><span class="paciente">Sofía Herrera</span><span class="prestacion">Control</span><span class="etiquetas"><span class="etiqueta e-confirmado"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Confirmado</span></span></button></div>
+      </div>
+      <div class="lista-dia" role="group" aria-label="Turnos del jueves 26 de noviembre">
+        <p class="franja-titulo"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Atención 9:00 a 13:00</p>
+        <button type="button" class="turno t-confirmado" aria-label="09:00, Lucía Martínez, Limpieza, Confirmado"><span class="hora">09:00 – 09:45</span><span class="paciente">Lucía Martínez</span><span class="prestacion">Limpieza</span><span class="etiquetas"><span class="etiqueta e-confirmado"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Confirmado</span></span></button>
+        <button type="button" class="turno t-sinconf" aria-label="10:00, Jorge Pereyra, Control, Sin confirmar"><span class="hora">10:00 – 10:30</span><span class="paciente">Jorge Pereyra</span><span class="prestacion">Control</span><span class="etiquetas"><span class="etiqueta e-sinconf"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Sin confirmar</span></span></button>
+        <button type="button" class="turno t-sinconf t-sobreturno" aria-label="10:15, Ana Gómez, Urgencia, Sin confirmar, sobreturno"><span class="hora">10:15 – 10:45</span><span class="paciente">Ana Gómez</span><span class="prestacion">Urgencia</span><span class="etiquetas"><span class="etiqueta e-sinconf"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Sin confirmar</span><span class="etiqueta e-sobreturno"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 10 5-10 5L2 7l10-5z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/></svg>Sobreturno</span></span></button>
+        <button type="button" class="turno t-confirmado" aria-label="11:00, Carla Ruiz, Endodoncia, Confirmado"><span class="hora">11:00 – 12:00</span><span class="paciente">Carla Ruiz</span><span class="prestacion">Endodoncia</span><span class="etiquetas"><span class="etiqueta e-confirmado"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Confirmado</span></span></button>
+        <p class="franja-titulo"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Atención 15:00 a 19:00</p>
+        <button type="button" class="turno t-sinconf" aria-label="15:30, Diego Fernández, Limpieza, Sin confirmar"><span class="hora">15:30 – 16:15</span><span class="paciente">Diego Fernández</span><span class="prestacion">Limpieza</span><span class="etiquetas"><span class="etiqueta e-sinconf"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Sin confirmar</span></span></button>
+        <button type="button" class="turno t-confirmado" aria-label="17:00, Sofía Herrera, Control, Confirmado"><span class="hora">17:00 – 17:30</span><span class="paciente">Sofía Herrera</span><span class="prestacion">Control</span><span class="etiquetas"><span class="etiqueta e-confirmado"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Confirmado</span></span></button>
+      </div>
+    </main>
+  </div>
+  <nav class="nav-inferior" aria-label="Secciones (celular)">
+    <a href="#" aria-current="page"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Agenda</span></a>
+    <a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Pacientes</span></a>
+    <a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span>Configuración</span></a>
+  </nav>
+</div>
+<div class="velo">
+  <div class="dialogo ancho" role="dialog" aria-modal="true" aria-labelledby="d-titulo">
+    <div class="cabecera-dialogo"><h2 id="d-titulo">Dar turno</h2>
+      <button class="cerrar" type="button" aria-label="Cerrar"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <section class="seccion-form" aria-labelledby="s-paciente">
+      <h3 id="s-paciente">Paciente</h3>
+      <div class="seleccion-paciente">
+        <span class="datos-paciente"><strong>Lucía Martínez</strong><small>DNI 30.111.222 · +54 9 11 5555-0101</small></span>
+        <button class="btn btn-ghost btn-sm" type="button">Cambiar</button>
+      </div>
+    </section>
+    <section class="seccion-form" aria-labelledby="s-turno">
+      <h3 id="s-turno">Turno</h3>
+      <div class="campo"><label for="prestacion">Prestación</label>
+          <div class="control-select"><select class="select" id="prestacion"><option>Control (30 min)</option><option selected>Limpieza (45 min)</option><option>Endodoncia (60 min)</option><option>Urgencia (30 min)</option></select><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></div></div>
+      <div class="fila-campos">
+        <div class="campo"><label for="dia">Día</label>
+          <input class="input" id="dia" type="date" value="2026-11-26"></div>
+        <div class="campo"><label for="hora">Hora</label>
+          <input class="input" id="hora" type="time" value="10:15" step="300"></div>
+        <div class="campo"><label for="duracion">Duración</label>
+          <div class="control-select"><select class="select" id="duracion"><option>30 min</option><option>35 min</option><option>40 min</option><option selected>45 min</option><option>50 min</option><option>55 min</option><option>60 min</option></select><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></div></div>
+      </div>
+      
+    </section>
+    <div class="alerta alerta-error" role="alert"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      <span><strong>Ese horario se superpone con otro turno</strong>10:00 a 10:30 · Jorge Pereyra (Control). Elegí otro horario o, si hace falta atenderlo igual, dalo como sobreturno.
+        <span class="acciones-alerta"><button class="btn btn-secondary btn-sm" type="button">Elegir otro horario</button>
+        <button class="btn btn-primary btn-sm" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 10 5-10 5L2 7l10-5z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/></svg>Dar como sobreturno</button></span></span>
+    </div>
+    <div class="acciones">
+      <button class="btn btn-secondary" type="button">Cancelar</button>
+      <button class="btn btn-primary" type="button">Dar turno</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
