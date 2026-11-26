@@ -71,7 +71,7 @@ Cargá la skill correspondiente al contexto ANTES de escribir código.
 
 El plan de implementación completo está en [CHANGES.md](CHANGES.md). Resumen:
 
-- **Total**: 37 changes (C-01 a C-37) en 9 fases (0 a 8); **34 en el MVP** — C-30, C-31 y C-34 postergados a post-MVP (DD-13). Equipo de 1-2 personas, ~3 meses, objetivo: demo con datos ficticios. C-37 es el diferencial: oferta de huecos por WhatsApp con un clic (DD-10).
+- **Total**: 38 changes (C-01 a C-38) en 9 fases (0 a 8); **35 en el MVP** — C-30, C-31 y C-34 postergados a post-MVP (DD-13). Equipo de 1-2 personas, ~3 meses, objetivo: demo con datos ficticios. C-37 es el diferencial: oferta de huecos por WhatsApp con un clic (DD-10). C-13 se recortó para la demo en pantalla y sus bloqueos y asistencia pasaron a C-38.
 - **Camino crítico** (11): `C-01 → C-02 → C-03 → C-09 → C-10 → C-14 → C-15 → C-16 → C-17 → C-19 → C-36`.
 - **Primer change**: `C-01` (`scaffolding-monorepo-y-base-tecnica`). C-35 (despliegue) solo depende de C-01 y puede ir en paralelo.
 - Los changes con UI requieren un **mockup HTML aprobado** antes de implementarse.

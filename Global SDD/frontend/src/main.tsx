@@ -1,4 +1,5 @@
 import '@design-system/tokens.css'
+import './estilos-globales.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'

@@ -1,0 +1,11 @@
+.cargando {
+  padding: var(--space-6);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.pantallaCompleta {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+}

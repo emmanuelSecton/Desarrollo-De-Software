@@ -2,6 +2,7 @@
 
 > Índice canónico de todos los changes del proyecto **Global SDD** (gestión de consultorio odontológico con anti-ausentismo por WhatsApp; single-tenant, una instancia por consultorio sobre host y clúster PostgreSQL compartidos).
 > Actualizado el 2026-11-24: resolución de IN-01 (DD-01 revisada) e IN-02 (nuevo change C-37, DD-10); PA-01 a PA-04 resueltas: **1-2 personas, ~3 meses, demo** → C-30, C-31 y C-34 postergados a post-MVP (DD-13); plan replanificado para 2 personas.
+> Actualizado el 2026-11-26: la demo tiene que ser en pantalla → **C-13 se recorta** a la agenda, el alta de turno con búsqueda o alta de paciente, cancelar y reprogramar, y deja de depender de C-11 y C-12; los bloqueos y la asistencia en pantalla pasan al nuevo **C-38**.
 > Cada change es atómico: un agente puede implementarlo en una sesión (~4-6 horas).
 > **Leer este archivo antes de empezar un item.**
 
@@ -54,7 +55,8 @@ C-01 scaffolding-monorepo-y-base-tecnica
                       │     └── C-20 reserva-online-api-publica              (también C-09, C-11)
                       │           └── C-21 gestion-turno-por-enlace
                       │                 └── C-22 frontend-reserva-publica    (también C-07, C-20)
-                      ├── C-13 frontend-agenda                               (también C-07, C-11, C-12)
+                      ├── C-13 frontend-agenda                               (también C-07)
+                      │     ├── C-38 frontend-agenda-bloqueos-y-asistencia (también C-11, C-12)
                       │     └── C-19 frontend-bandeja-y-lista-de-espera    (también C-17, C-18, C-37)
                       ├── C-26 frontend-ficha-paciente-y-evolucion         (también C-07, C-09, C-23)
                       │     └── C-27 frontend-odontograma-y-copia-hc       (también C-24, C-25)
@@ -96,7 +98,8 @@ GATE 4: C-10 ✓                                          ← FORK
   → C-12 asistencia-y-ausencias                        [Agente B]
   → C-18 lista-de-espera-manual                        [Agente B]
   → C-14 notificaciones-outbox-y-email                 [Agente A — si C-04 ✓]
-  → C-13 frontend-agenda                               [Agente C — si C-07 ✓, C-11 ✓, C-12 ✓]
+  → C-13 frontend-agenda (recortado para la demo)      [Agente C — si C-07 ✓]
+  → C-38 frontend-agenda-bloqueos-y-asistencia        [Agente C — si C-11 ✓, C-12 ✓, C-13 ✓]
 
 GATE 5: C-14 ✓
   → C-15 whatsapp-adapter-y-webhooks                   [Agente A]
@@ -134,7 +137,7 @@ Ramas casi críticas (10 pasos, mismo largo ±1): `C-10 → C-11 → C-20 → C-
 
 ### Plan para 2 personas (~3 meses, PA-01)
 
-Recorte aplicado (DD-13): C-30, C-31 y C-34 quedan **postergados a post-MVP** y fuera del plan. Quedan 34 changes en 19 pasos; con ~13 semanas, eso es aproximadamente un paso cada 4-5 días hábiles (riesgo R-07).
+Recorte aplicado (DD-13): C-30, C-31 y C-34 quedan **postergados a post-MVP** y fuera del plan. Quedan 35 changes en 19 pasos (C-38 se sumó el 2026-11-26 al separar parte de C-13); con ~13 semanas, eso es aproximadamente un paso cada 4-5 días hábiles (riesgo R-07).
 
 | Paso | Persona A (Backend) | Persona B (Frontend + backend auxiliar) |
 |------|---------------------|-----------------------------------------|
@@ -142,12 +145,12 @@ Recorte aplicado (DD-13): C-30, C-31 y C-34 quedan **postergados a post-MVP** y 
 | 2 | C-02 | C-35 (entorno de demo, DD-11) |
 | 3 | C-03 | — |
 | 4 | C-09 | C-05 |
-| 5 | C-10 | C-07 |
+| 5 | C-10 | C-07, luego C-13 (recortado para la demo) |
 | 6 | C-04 | C-06 |
 | 7 | C-14 | C-11 |
 | 8 | C-15 | C-12 |
 | 9 | C-16 | C-18 |
-| 10 | C-17 | C-13 |
+| 10 | C-17 | C-38 |
 | 11 | C-37 | C-08 |
 | 12 | C-20 | C-23 |
 | 13 | C-21 | C-19 |
@@ -388,20 +391,36 @@ Notas del plan:
 
 ### [C-13] `frontend-agenda`
 - **Estado**: `[ ]` pendiente
-- **Scope** (**Requiere mockup HTML aprobado**: vista día, vista semana, alta/mover/cancelar turno, bloqueos, marcar asistencia/ausencia, a 390x844 y 1440x900):
-  - `features/agenda`: vista diaria y semanal con color por estado, marca "sin confirmar" y "paciente con ausencias", bloqueos y franjas fuera de horario (US-010)
+- **Scope** (**Requiere mockup HTML aprobado**: vista día, vista semana, alta/reprogramar/cancelar turno, a 390x844 y 1440x900). Recortado el 2026-11-26 para la demo en pantalla:
+  - `features/agenda`: vista diaria y semanal con color y texto por estado y marca de sobreturno; franjas de atención visibles (US-010, parcial)
   - Alta de turno con búsqueda de paciente por DNI/nombre/teléfono o alta en el momento; rechazo de solapamiento con mensaje claro y opción de sobreturno (US-011)
-  - Mover (drag o diálogo) y cancelar con motivo; creación de bloqueos (US-012); marcar atendido/ausente (US-013)
+  - Reprogramar (diálogo) y cancelar con motivo; confirmar manualmente (US-011)
   - Manejo de 409 por concurrencia (optimistic locking)
-  - Tests de componentes y de flujos de alta/mover/cancelar
-- **Dependencias**: `C-07, C-10, C-11, C-12`
+  - Tests de componentes y de flujos de alta/reprogramar/cancelar
+  - **Fuera** (pasan a C-38): bloqueos, marcar atendido/ausente, marca "paciente con ausencias", mover por arrastre
+- **Dependencias**: `C-07, C-10`
 - **Governance**: MEDIO
 - **Leer antes**:
-  - `knowledge-base/06_funcionalidades.md` US-010 a US-013
+  - `knowledge-base/06_funcionalidades.md` US-010, US-011
   - `knowledge-base/05_reglas_de_negocio.md` RN-AG-01, RN-AG-07, RN-TU-01
   - `knowledge-base/08_arquitectura_propuesta.md` §Estructura (frontend features)
   - `design-system/README.md`
 
+---
+
+### [C-38] `frontend-agenda-bloqueos-y-asistencia`
+- **Estado**: `[ ]` pendiente
+- **Scope** (**Requiere mockup HTML aprobado**: bloqueos en la agenda, marcar asistencia/ausencia, a 390x844 y 1440x900). Separado de C-13 el 2026-11-26:
+  - Bloqueos y franjas fuera de horario en la vista de agenda; crear y quitar bloqueos (US-012)
+  - Marcar atendido/ausente y marca "paciente con ausencias" (US-013)
+  - Mover un turno por arrastre (reusa la reprogramación de C-13)
+  - Tests de componentes y de los flujos nuevos
+- **Dependencias**: `C-11, C-12, C-13`
+- **Governance**: MEDIO
+- **Leer antes**:
+  - `knowledge-base/06_funcionalidades.md` US-012, US-013
+  - `knowledge-base/05_reglas_de_negocio.md` RN-AG-03, RN-TU-04, RN-TU-05
+  - `design-system/README.md`
 ---
 
 ## FASE 3 — Notificaciones y anti-ausentismo (diferencial del producto)
@@ -850,7 +869,7 @@ Notas del plan:
 | C-10 | agenda-turnos-core | 2 | US-011 | CRITICO | C-05, C-09 | no |
 | C-11 | bloqueos-y-disponibilidad | 2 | US-012 | MEDIO | C-10 | no |
 | C-12 | asistencia-y-ausencias | 2 | US-013 | MEDIO | C-10 | no |
-| C-13 | frontend-agenda | 2 | US-010..013 | MEDIO | C-07, C-10..C-12 | sí |
+| C-13 | frontend-agenda | 2 | US-010, 011 | MEDIO | C-07, C-10 | sí |
 | C-14 | notificaciones-outbox-y-email | 3 | — | ALTO | C-04, C-10 | no |
 | C-15 | whatsapp-adapter-y-webhooks | 3 | US-030 (parcial) | ALTO | C-14 | no |
 | C-16 | recordatorios-y-confirmacion-whatsapp | 3 | US-030 | ALTO | C-14, C-15 | no |
@@ -875,5 +894,6 @@ Notas del plan:
 | C-35 | despliegue-por-instancia-y-operacion | 8 | — | ALTO | C-01 | no |
 | C-36 | hardening-seguridad-y-cumplimiento-legal | 8 | — | CRITICO | C-12, C-16, C-19, C-22, C-27, C-29, C-32, C-33, C-35 | no |
 | C-37 | oferta-de-huecos-por-whatsapp | 3 | US-032, 033 | ALTO | C-15, C-18 | no |
+| C-38 | frontend-agenda-bloqueos-y-asistencia | 2 | US-012, 013 | MEDIO | C-11, C-12, C-13 | sí |
 
 Primer item elegible: **C-01** (`scaffolding-monorepo-y-base-tecnica`).

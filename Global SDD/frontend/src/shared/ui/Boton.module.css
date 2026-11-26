@@ -1,0 +1,65 @@
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.boton:active {
+  transform: scale(0.98);
+}
+
+.boton:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.boton svg {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+.primario {
+  background: var(--color-brand-600);
+  color: var(--color-text-inverse);
+}
+
+.primario:hover {
+  background: var(--color-brand-700);
+}
+
+.secundario {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border-strong);
+}
+
+.secundario:hover {
+  background: var(--color-surface-alt);
+}
+
+.fantasma {
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.fantasma:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+}
+
+.bloque {
+  width: 100%;
+}

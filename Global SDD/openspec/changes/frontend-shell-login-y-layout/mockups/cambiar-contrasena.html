@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{brand} — Cambiar contraseña</title>
+<link rel="stylesheet" href="../../../../design-system/tokens.css">
+<link rel="stylesheet" href="mockups.css">
+<script src="../../../../design-system/brand.js"></script>
+</head>
+<body>
+<main class="acceso">
+  <section class="tarjeta-acceso" aria-labelledby="titulo">
+    <div class="encabezado">
+      <div class="marca">
+  <img src="../../../../design-system/assets/logo.svg" alt="">
+  <span class="nombre" data-brand-name>Nombre del producto (TBD)</span>
+</div>
+      <h1 id="titulo">Elegí una contraseña nueva</h1>
+      <p class="muted">Es tu primer ingreso: reemplazá la contraseña temporal por una propia.</p>
+    </div>
+    <form novalidate>
+      <div class="campo">
+        <label for="actual">Contraseña actual</label>
+        <input class="input" id="actual" type="password" autocomplete="current-password" value="••••••••••">
+      </div>
+      <div class="campo">
+        <label for="nueva">Contraseña nueva</label>
+        <div class="control">
+          <input class="input input-con-accion" id="nueva" type="password" autocomplete="new-password" value="•••••" aria-invalid="true" aria-describedby="error-nueva requisitos">
+          <button class="accion-input" type="button" aria-label="Mostrar contraseña"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
+        <p class="error-campo" id="error-nueva" role="alert"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>La nueva contraseña debe tener al menos 10 caracteres</p>
+        <ul class="requisitos" id="requisitos">
+          <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/></svg>Al menos 10 caracteres</li>
+          <li class="cumple"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Distinta de la contraseña actual</li>
+        </ul>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Guardar y continuar</button>
+    </form>
+    <div class="pie-acceso">
+      <button class="btn btn-ghost" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>Salir</button><span class="provisorio">Nombre y logo provisorios</span>
+    </div>
+  </section>
+</main>
+</body>
+</html>

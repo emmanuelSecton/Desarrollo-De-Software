@@ -1,0 +1,5 @@
+.cuentaRegresiva {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-semibold);
+  color: var(--color-warning-fg);
+}
