@@ -1,4 +1,4 @@
-# Global SDD — Gestión odontológica
+# Global SDD — Odontogestión
 
 Web app para que un odontólogo independiente gestione agenda, pacientes, historia clínica y cobros. Cada consultorio corre su propia instancia (single-tenant) con su propia base PostgreSQL.
 

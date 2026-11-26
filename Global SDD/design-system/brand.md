@@ -2,8 +2,8 @@
 
 | Elemento | Valor | Fuente / estado |
 |---|---|---|
-| Nombre del producto | **(TBD)** | Pregunta abierta PA-11 (`knowledge-base/10_preguntas_abiertas.md`). Se cambia en `brand.js`. |
-| Logo | Placeholder visiblemente provisorio en `assets/logo.svg` (ícono de diente + caja "LOGO PROVISORIO") | **(TBD)**: reemplazar el archivo manteniendo la ruta. |
+| Nombre del producto | **Odontogestión** | Definido por el usuario el 2026-11-26 (PA-11 resuelta). Vive en `brand.js`; la app lo toma de `frontend/src/shared/marca/Marca.tsx` (un test controla que coincidan). |
+| Logo | Isotipo de diente blanco sobre cuadrado verde azulado (`--color-brand-600`) en `assets/logo.svg`; el nombre se escribe al lado como texto | Definido por el usuario el 2026-11-26: el ícono del placeholder pasa a ser el logo definitivo y se quita la caja "LOGO PROVISORIO". |
 | Tono visual | Clínico, sereno y confiable; poco ornamento, alta legibilidad | Derivado de la KB: datos de salud, usuarios profesionales y pacientes de todas las edades. |
 | Voz | Español rioplatense con voseo ("Reservá tu turno", "¿Confirmás tu asistencia?"), cercano y profesional, sin tecnicismos para el paciente | Público argentino (Discovery). |
 | Color de marca | Verde azulado `--color-brand-600` (#0f766e) | Propuesto: asociado a salud, se diferencia del azul genérico de la mayoría de los competidores relevados. **Suposición:** a validar con el usuario. |

@@ -1,10 +1,10 @@
 <!-- active-stack:agent-instruction -->
-# Global SDD — Gestión odontológica — Instrucciones para Agentes
+# Global SDD — Odontogestión — Instrucciones para Agentes
 
 > Este archivo (y su copia `CLAUDE.md`) es lo PRIMERO que todo agente lee al entrar al proyecto.
 > Generado a partir de `knowledge-base/` y `CHANGES.md`. No editar a mano sin re-sincronizar ambos archivos.
 
-Web app para que un odontólogo independiente gestione agenda, pacientes, historia clínica y cobros. El foco está en reducir ausencias con recordatorios y confirmaciones por WhatsApp oficial. Cada consultorio corre su **propia instancia** (single-tenant) con su propia base, sobre host y clúster PostgreSQL compartidos (DD-01).
+**Odontogestión** es una web app para que un odontólogo independiente gestione agenda, pacientes, historia clínica y cobros. El foco está en reducir ausencias con recordatorios y confirmaciones por WhatsApp oficial. Cada consultorio corre su **propia instancia** (single-tenant) con su propia base, sobre host y clúster PostgreSQL compartidos (DD-01).
 
 ---
 
@@ -46,7 +46,7 @@ La fuente de verdad del dominio vive en `knowledge-base/`. **Leé el archivo rel
 
 > ⚠️ Revisar `10_preguntas_abiertas.md` antes del change que cada pregunta condiciona (ver `CHANGES.md`). PA-01 a PA-04 ya están resueltas; la demo usa **solo datos ficticios** (SU-07).
 
-Sistema de diseño aprobado (revisión 1, política `system-and-mockups`): [design-system/README.md](design-system/README.md).
+Sistema de diseño aprobado (revisión 2, política `system-and-mockups`; nombre **Odontogestión** y logo definitivos): [design-system/README.md](design-system/README.md).
 
 ---
 

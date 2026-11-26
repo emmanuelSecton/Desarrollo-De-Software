@@ -68,7 +68,6 @@ export function LoginPage() {
     <PantallaDeAcceso
       titulo="Ingresá al consultorio"
       bajada="Usá el email y la contraseña que te dio el consultorio."
-      pie={<span />}
     >
       <form className={claseDeFormulario} noValidate onSubmit={enviar}>
         {rechazo ? (
