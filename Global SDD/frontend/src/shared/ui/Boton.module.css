@@ -60,6 +60,15 @@
   color: var(--color-text);
 }
 
+.peligro {
+  background: var(--color-danger-fg);
+  color: var(--color-text-inverse);
+}
+
+.peligro:hover {
+  background: var(--color-text);
+}
+
 .bloque {
   width: 100%;
 }

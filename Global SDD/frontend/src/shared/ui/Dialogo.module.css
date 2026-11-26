@@ -24,3 +24,49 @@
   justify-content: flex-end;
   flex-wrap: wrap;
 }
+
+.cuerpo {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.ancho {
+  max-width: 600px;
+  max-height: calc(100vh - var(--space-8));
+  overflow: auto;
+}
+
+@media (max-width: 760px) {
+  .ancho {
+    width: 100%;
+    max-width: 100%;
+    max-height: 92vh;
+    margin: auto 0 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.cerrar {
+  display: grid;
+  place-items: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  flex: none;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.cerrar svg {
+  width: 20px;
+  height: 20px;
+}

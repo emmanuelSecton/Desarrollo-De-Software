@@ -3,10 +3,14 @@ import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { Alerta } from './Alerta'
+import { AreaDeTexto } from './AreaDeTexto'
 import { Boton } from './Boton'
 import { Campo } from './Campo'
 import { Dialogo } from './Dialogo'
 import { EstadoVacio } from './EstadoVacio'
+import { GrupoDeOpciones } from './GrupoDeOpciones'
+import { Panel } from './Panel'
+import { Selector } from './Selector'
 
 describe('componentes base', () => {
   it('Campo asocia la etiqueta y, con error, marca aria-invalid y lo anuncia', () => {
@@ -84,5 +88,74 @@ describe('componentes base', () => {
 
     dialogo.dispatchEvent(new Event('cancel', { cancelable: true }))
     expect(alCancelar).toHaveBeenCalledTimes(1)
+  })
+
+  it('Selector asocia la etiqueta y marca el error', () => {
+    render(
+      <Selector
+        etiqueta="Prestación"
+        opciones={[{ valor: 'a', texto: 'Limpieza (45 min)' }]}
+        error="Elegí la prestación"
+      />,
+    )
+
+    const selector = screen.getByLabelText('Prestación')
+    expect(selector).toHaveAttribute('aria-invalid', 'true')
+    expect(selector).toHaveAccessibleDescription('Elegí la prestación')
+  })
+
+  it('AreaDeTexto cuenta los caracteres y no deja pasar del maximo', () => {
+    render(<AreaDeTexto etiqueta="Motivo" value="Avisó" maximo={200} onChange={() => {}} />)
+
+    const area = screen.getByLabelText('Motivo')
+    expect(area).toHaveAttribute('maxlength', '200')
+    expect(area).toHaveAccessibleDescription('5/200')
+  })
+
+  it('GrupoDeOpciones es un grupo de radios con leyenda', async () => {
+    const alCambiar = vi.fn()
+    render(
+      <GrupoDeOpciones
+        leyenda="¿Quién cancela?"
+        opciones={[
+          { valor: 'P', texto: 'El paciente' },
+          { valor: 'C', texto: 'El consultorio' },
+        ]}
+        valor="P"
+        alCambiar={alCambiar}
+      />,
+    )
+
+    expect(screen.getByRole('group', { name: '¿Quién cancela?' })).toBeVisible()
+    await userEvent.setup().click(screen.getByRole('radio', { name: 'El consultorio' }))
+    expect(alCambiar).toHaveBeenCalledWith('C')
+  })
+
+  it('Panel abre modal con nombre, pone el foco inicial, cierra con la X y devuelve el foco', async () => {
+    function Prueba() {
+      const [abierto, setAbierto] = useState(false)
+      return (
+        <>
+          <Boton onClick={() => setAbierto(true)}>Ver turno</Boton>
+          <Panel
+            abierto={abierto}
+            titulo="Jorge Pereyra"
+            alCerrar={() => setAbierto(false)}
+            acciones={<Boton data-foco-inicial>Confirmar turno</Boton>}
+          >
+            <p>Detalle</p>
+          </Panel>
+        </>
+      )
+    }
+    render(<Prueba />)
+    const usuario = userEvent.setup()
+
+    await usuario.click(screen.getByRole('button', { name: 'Ver turno' }))
+    expect(screen.getByRole('dialog', { name: 'Jorge Pereyra' })).toHaveAttribute('open')
+    expect(screen.getByRole('button', { name: 'Confirmar turno' })).toHaveFocus()
+
+    await usuario.click(screen.getByRole('button', { name: 'Cerrar' }))
+    expect(screen.getByRole('button', { name: 'Ver turno' })).toHaveFocus()
   })
 })

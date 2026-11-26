@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes } from 'react'
 import estilos from './Boton.module.css'
 
-export type VarianteDeBoton = 'primario' | 'secundario' | 'fantasma'
+export type VarianteDeBoton = 'primario' | 'secundario' | 'fantasma' | 'peligro'
 
 /** Clases del boton, tambien para un enlace que se ve como boton. */
 export function clasesDeBoton(variante: VarianteDeBoton = 'primario', bloque = false): string {

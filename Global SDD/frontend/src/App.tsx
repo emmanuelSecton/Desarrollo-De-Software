@@ -3,7 +3,8 @@ import { EstructuraApp } from './app/EstructuraApp'
 import { CambiarContrasenaPage } from './pages/acceso/CambiarContrasenaPage'
 import { LoginPage } from './pages/acceso/LoginPage'
 import { PaginaAccesoDenegado, PaginaNoEncontrada } from './pages/errores/PaginasDeError'
-import { AgendaPage, ConfiguracionPage, PacientesPage } from './pages/secciones'
+import { AgendaPage } from './features/agenda/AgendaPage'
+import { ConfiguracionPage, PacientesPage } from './pages/secciones'
 import {
   RequiereCambioPendiente,
   RequiereRol,

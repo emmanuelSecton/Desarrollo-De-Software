@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 
-type Manejador = (init: RequestInit | undefined) => Response | Promise<Response>
+type Manejador = (init: RequestInit | undefined, url: string) => Response | Promise<Response>
 
 export function json(status: number, cuerpo: unknown) {
   return new Response(JSON.stringify(cuerpo), {
@@ -35,7 +35,8 @@ export const secretaria = {
 } as const
 
 /**
- * Reemplaza fetch por un mapa "METODO /ruta" → respuesta. Lo no declarado responde 404.
+ * Reemplaza fetch por un mapa "METODO /ruta" → respuesta (la ruta puede ir sin parametros).
+ * Lo no declarado responde 404.
  * Siempre deja una cookie XSRF-TOKEN, asi los POST no piden /auth/csrf.
  */
 export function instalarApiFalsa(rutas: Record<string, Manejador>) {
@@ -43,8 +44,9 @@ export function instalarApiFalsa(rutas: Record<string, Manejador>) {
   const falso = vi.fn<typeof fetch>(async (entrada, init) => {
     const ruta = String(entrada).replace('/api/v1', '')
     const clave = `${init?.method ?? 'GET'} ${ruta}`
-    const manejador = rutas[clave]
-    return manejador ? manejador(init) : problema(404, '/problemas/no-encontrado')
+    // Primero la ruta exacta y, si no, la ruta sin parametros ("GET /turnos" atiende "GET /turnos?desde=...").
+    const manejador = rutas[clave] ?? rutas[clave.split('?')[0]]
+    return manejador ? manejador(init, ruta) : problema(404, '/problemas/no-encontrado')
   })
   vi.stubGlobal('fetch', falso)
   return falso

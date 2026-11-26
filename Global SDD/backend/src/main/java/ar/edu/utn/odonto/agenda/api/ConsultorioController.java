@@ -3,6 +3,7 @@ package ar.edu.utn.odonto.agenda.api;
 import ar.edu.utn.odonto.agenda.application.ServicioDeConfiguracion;
 import ar.edu.utn.odonto.agenda.domain.Consultorio;
 import ar.edu.utn.odonto.identidad.application.Permisos;
+import ar.edu.utn.odonto.shared.application.ZonaHorariaConsultorio;
 import ar.edu.utn.odonto.shared.api.Api;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -26,7 +27,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(Api.V1 + "/consultorio")
 public class ConsultorioController extends ControladorDeAgenda {
 
-    /** Entrada y salida: mismos campos; la regla cruzada (confirmacion < recordatorio) la valida el dominio. */
+    /**
+     * Entrada y salida: mismos campos; la regla cruzada (confirmacion < recordatorio) la valida el dominio.
+     * {@code zonaHoraria} es de solo lectura (APP_TIMEZONE): el PUT la ignora (C-13, D2).
+     */
     public record DatosConsultorio(
             UUID id,
             @NotBlank @Size(max = 120) String nombre,
@@ -41,14 +45,16 @@ public class ConsultorioController extends ControladorDeAgenda {
             @NotNull @Min(1) @Max(168) Integer recordatorioHorasAntes,
             @NotNull @Min(1) @Max(167) Integer confirmacionLimiteHoras,
             @NotNull @Min(0) @Max(168) Integer cancelacionMinimaHoras,
-            @NotNull @Min(5) @Max(1440) Integer ofertaVencimientoMinutos) {
+            @NotNull @Min(5) @Max(1440) Integer ofertaVencimientoMinutos,
+            String zonaHoraria) {
 
-        static DatosConsultorio de(Consultorio consultorio) {
+        static DatosConsultorio de(Consultorio consultorio, ZonaHorariaConsultorio zona) {
             Consultorio.Datos d = consultorio.datos();
             Consultorio.Parametros p = consultorio.parametros();
             return new DatosConsultorio(consultorio.id(), d.nombre(), d.profesionalNombre(), d.matricula(),
                     d.direccion(), d.telefono(), d.email(), d.slugReserva(), p.recordatorioHorasAntes(),
-                    p.confirmacionLimiteHoras(), p.cancelacionMinimaHoras(), p.ofertaVencimientoMinutos());
+                    p.confirmacionLimiteHoras(), p.cancelacionMinimaHoras(), p.ofertaVencimientoMinutos(),
+                    zona.zona().getId());
         }
 
         Consultorio.Datos datos() {
@@ -67,21 +73,23 @@ public class ConsultorioController extends ControladorDeAgenda {
     }
 
     private final ServicioDeConfiguracion servicio;
+    private final ZonaHorariaConsultorio zona;
 
-    public ConsultorioController(ServicioDeConfiguracion servicio) {
+    public ConsultorioController(ServicioDeConfiguracion servicio, ZonaHorariaConsultorio zona) {
         this.servicio = servicio;
+        this.zona = zona;
     }
 
     @GetMapping
     @PreAuthorize(Permisos.PERSONAL)
     public DatosConsultorio obtener() {
-        return DatosConsultorio.de(servicio.consultorio());
+        return DatosConsultorio.de(servicio.consultorio(), zona);
     }
 
     @PutMapping
     @PreAuthorize(Permisos.SOLO_ODONTOLOGO)
     public DatosConsultorio modificar(@Valid @RequestBody DatosConsultorio datos, Authentication autenticacion) {
         return DatosConsultorio.de(
-                servicio.modificarConsultorio(datos.datos(), datos.parametros(), actor(autenticacion)));
+                servicio.modificarConsultorio(datos.datos(), datos.parametros(), actor(autenticacion)), zona);
     }
 }

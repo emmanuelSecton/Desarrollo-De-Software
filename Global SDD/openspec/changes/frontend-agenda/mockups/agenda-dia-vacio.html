@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{brand} — Agenda: día sin turnos</title>
+<link rel="stylesheet" href="../../../../design-system/tokens.css">
+<link rel="stylesheet" href="mockups.css">
+<script src="../../../../design-system/brand.js"></script>
+</head>
+<body>
+<div class="app">
+  <header class="barra">
+    <div class="marca">
+      <img src="../../../../design-system/assets/logo.svg" alt="">
+      <span class="nombre" data-brand-name>Nombre del producto (TBD)</span>
+    </div>
+    <span class="provisorio">Provisorio</span>
+    <span class="espacio"></span>
+    <div class="usuario">
+      <span class="avatar" aria-hidden="true">LM</span>
+      <span class="datos"><span>Lucía Martínez</span><span class="rol">Secretaría</span></span>
+      <button class="btn btn-ghost" type="button" aria-label="Salir"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg></button>
+    </div>
+  </header>
+  <div class="cuerpo">
+    <nav class="nav" aria-label="Secciones">
+      <ul>
+          <li><a href="#" aria-current="page"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Agenda</span></a></li>
+          <li><a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Pacientes</span></a></li>
+          <li><a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span>Configuración</span></a></li>
+      </ul>
+    </nav>
+    <main class="contenido agenda">
+      <div class="barra-agenda">
+        <div class="fecha"><h1 class="dia-texto">Lunes 30 de noviembre</h1><span class="sub">Sin turnos</span></div>
+        <span class="espacio"></span>
+        <div class="navegacion-fecha">
+          <button class="btn btn-secondary btn-icono" type="button" aria-label="Anterior"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+          <button class="btn btn-secondary" type="button">Hoy</button>
+          <button class="btn btn-secondary btn-icono" type="button" aria-label="Siguiente"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+        </div>
+        <div class="segmentado" role="group" aria-label="Vista">
+          <button type="button" aria-pressed="true">Día</button>
+          <button type="button" aria-pressed="false">Semana</button>
+        </div>
+        <label class="casilla"><input type="checkbox"><span>Cancelados<span class="largo"> visibles</span></span></label>
+        <button class="btn btn-primary dar-turno" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Dar turno</button>
+      </div>
+      <p class="leyenda-franjas"><span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Atención 9:00 a 13:00 y 15:00 a 19:00</span></p>
+      <section class="vacio" aria-labelledby="vacio-titulo">
+        <span class="icono-grande"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+        <h2 id="vacio-titulo">No hay turnos para este día</h2>
+        <p class="muted">Todo el horario de atención está libre.</p>
+        <button class="btn btn-primary" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Dar turno</button>
+      </section>
+    </main>
+  </div>
+  <nav class="nav-inferior" aria-label="Secciones (celular)">
+    <a href="#" aria-current="page"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Agenda</span></a>
+    <a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Pacientes</span></a>
+    <a href="#"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span>Configuración</span></a>
+  </nav>
+</div>
+
+</body>
+</html>
