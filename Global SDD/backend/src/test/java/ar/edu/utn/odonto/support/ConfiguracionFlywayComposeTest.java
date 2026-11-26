@@ -6,6 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.core.io.FileSystemResource;
 
 /** Verifica que el compose separe las credenciales Flyway (migrator) de las de la app (runtime). */
 class ConfiguracionFlywayComposeTest {
@@ -28,7 +30,11 @@ class ConfiguracionFlywayComposeTest {
         String test = leer("src", "test", "resources", "application-test.yml");
 
         assertThat(aplicacion).doesNotContain("user: ${SPRING_FLYWAY_USER").doesNotContain("user: ${FLYWAY_USER");
-        assertThat(aplicacion).doesNotContain("SPRING_FLYWAY_ENABLED").doesNotContain("enabled: false");
+        assertThat(aplicacion).doesNotContain("SPRING_FLYWAY_ENABLED");
+        // Solo importa Flyway: otras propiedades (por ejemplo management.health.mail.enabled, C-04) pueden ser false.
+        YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
+        yaml.setResources(new FileSystemResource(BASE.resolve("src/main/resources/application.yml")));
+        assertThat(yaml.getObject().getProperty("spring.flyway.enabled")).isNull();
         assertThat(test).doesNotContain("flyway:").doesNotContain("username:").doesNotContain("password:");
     }
 

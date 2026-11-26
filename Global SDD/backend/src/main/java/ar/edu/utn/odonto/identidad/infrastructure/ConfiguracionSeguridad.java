@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
@@ -34,11 +36,18 @@ public class ConfiguracionSeguridad {
     static final String TITULO_ACCESO_DENEGADO = "Acceso denegado";
     static final String DETALLE_ACCESO_DENEGADO = "No tiene permiso para realizar esta acción";
 
+    /** Avisa al SessionRegistry cuando una sesion se destruye o cambia de id (C-04, D7). */
+    @Bean
+    HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
+    }
+
     @Bean
     SecurityFilterChain cadenaDeSeguridad(
             HttpSecurity http,
             EscritorDeProblemas escritor,
             SecurityContextRepository contextos,
+            SessionRegistry sesiones,
             PropiedadesIdentidad propiedades)
             throws Exception {
         CookieCsrfTokenRepository tokens = CookieCsrfTokenRepository.withHttpOnlyFalse();
@@ -50,7 +59,14 @@ public class ConfiguracionSeguridad {
                         .csrfTokenRequestHandler(manejadorCsrf)
                         .ignoringRequestMatchers(RutasDeSeguridad.WEBHOOKS + "**"))
                 .securityContext(contexto -> contexto.securityContextRepository(contextos))
-                .sessionManagement(sesion -> sesion.sessionFixation(fijacion -> fijacion.changeSessionId()))
+                .sessionManagement(sesion -> sesion
+                        .sessionFixation(fijacion -> fijacion.changeSessionId())
+                        // Sin limite de sesiones: el registro sirve para cerrarlas al restablecer (C-04, D7).
+                        .maximumSessions(-1)
+                        .sessionRegistry(sesiones)
+                        .expiredSessionStrategy(evento -> escritor.escribir(
+                                evento.getRequest(), evento.getResponse(), HttpStatus.UNAUTHORIZED,
+                                Problemas.NO_AUTENTICADO, TITULO_NO_AUTENTICADO, DETALLE_NO_AUTENTICADO)))
                 .requestCache(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -71,6 +87,7 @@ public class ConfiguracionSeguridad {
                         .requestMatchers(HttpMethod.POST, RutasDeSeguridad.LOGIN).permitAll()
                         .requestMatchers(HttpMethod.GET, RutasDeSeguridad.CSRF).permitAll()
                         .requestMatchers(RutasDeSeguridad.PASSWORD_RECOVER).permitAll()
+                        .requestMatchers(RutasDeSeguridad.PASSWORD_RESET).permitAll()
                         .requestMatchers(RutasDeSeguridad.PUBLICO + "**").permitAll()
                         .requestMatchers(RutasDeSeguridad.WEBHOOKS + "**").permitAll()
                         .requestMatchers(RutasDeSeguridad.API + "**").authenticated()

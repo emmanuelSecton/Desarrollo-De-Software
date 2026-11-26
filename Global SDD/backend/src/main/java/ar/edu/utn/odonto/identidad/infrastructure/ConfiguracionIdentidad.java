@@ -3,6 +3,9 @@ package ar.edu.utn.odonto.identidad.infrastructure;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -11,6 +14,7 @@ import org.springframework.security.web.context.SecurityContextRepository;
 /** Beans de identidad que existen tambien fuera del contexto web (por ejemplo, el alta inicial). */
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(PropiedadesIdentidad.class)
+@EnableAsync
 public class ConfiguracionIdentidad {
 
     /** BCrypt cost 12 (08_arquitectura_propuesta.md §Seguridad). */
@@ -24,5 +28,11 @@ public class ConfiguracionIdentidad {
     @Bean
     SecurityContextRepository securityContextRepository() {
         return new HttpSessionSecurityContextRepository();
+    }
+
+    /** Sesiones por usuario, para cerrarlas todas al restablecer la contraseña (C-04, D7). */
+    @Bean
+    SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
     }
 }

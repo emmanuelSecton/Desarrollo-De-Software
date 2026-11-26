@@ -74,6 +74,12 @@ services:
       RATE_LIMIT_PUBLICO_POR_MINUTO: ${RATE_LIMIT_PUBLICO_POR_MINUTO:-60}
       # Version de la politica de privacidad que aceptan los pacientes (C-09, RN-DP-01).
       POLITICA_PRIVACIDAD_VERSION: ${POLITICA_PRIVACIDAD_VERSION:-v0-provisoria}
+      # Email por SMTP (C-04). Sin SMTP_HOST el envio queda deshabilitado.
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-turnos@ejemplo.com.ar}
     depends_on:
       postgres:
         condition: service_healthy

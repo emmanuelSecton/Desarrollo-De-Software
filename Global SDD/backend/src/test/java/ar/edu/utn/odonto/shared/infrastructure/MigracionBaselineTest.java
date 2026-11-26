@@ -42,7 +42,7 @@ class MigracionBaselineTest {
                 String.class);
 
         assertThat(extensiones).contains("btree_gist", "citext", "pgcrypto");
-        assertThat(migraciones).containsExactly("1:baseline", "2:auditoria", "3:identidad", "4:pacientes");
+        assertThat(migraciones).containsExactly("1:baseline", "2:auditoria", "3:identidad", "4:pacientes", "5:recuperacion password");
     }
 
     @Test
@@ -69,7 +69,7 @@ class MigracionBaselineTest {
         }
 
         assertThat(jdbc.queryForObject("select count(*) from flyway_schema_history", Integer.class))
-                .isEqualTo(4);
+                .isEqualTo(5);
         assertThat(jdbc.queryForObject(INSTALADA_EN, Long.class)).isEqualTo(instalacionOriginal);
     }
 }

@@ -6,3 +6,18 @@ services:
   app:
     ports:
       - "127.0.0.1:8080:8080"
+    environment:
+      # Desarrollo: los emails van a Mailpit, que los muestra en http://127.0.0.1:8025 (C-04).
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+    depends_on:
+      mailpit:
+        condition: service_started
+
+  # SMTP de prueba con bandeja web. Nunca entrega emails reales.
+  mailpit:
+    image: axllent/mailpit:v1.21.8
+    ports:
+      - "127.0.0.1:8025:8025"
+    networks:
+      - backend
