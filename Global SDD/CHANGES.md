@@ -318,7 +318,7 @@ Notas del plan:
 > C-10 es el modelo core de turnos: todo lo de notificaciones, reserva y lista de espera depende de él. C-23 (historia clínica) puede avanzar en paralelo apenas termina C-09.
 
 ### [C-09] `pacientes-core`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (apply y archivo: 2026-11-26 → `openspec/changes/archive/2026-11-26-pacientes-core`; PR #7)
 - **Scope**:
   - Migración: tabla `paciente` (`dni UNIQUE`, `telefono_e164`, `acepta_whatsapp`, `consentimiento_datos_at`, `ausencias_count`, `activo`), índices `dni`, `(apellido, nombre)`, `telefono_e164`
   - Endpoints: `GET /api/v1/pacientes?q=` (búsqueda por DNI, nombre o teléfono), `POST`, `GET/PUT /pacientes/{id}`; baja lógica (`activo`), nunca borrado físico (RN-HC-03)
